@@ -1,0 +1,216 @@
+# Docker Compose for Car Rental Platform
+version: '3.8'
+
+services:
+  # API Gateway
+  gateway:
+    build: ./gateway-service
+    container_name: car-rental-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - AGENCY_SERVICE_URL=http://agency-fleet-service:3002
+      - SEARCH_SERVICE_URL=http://search-availability-service:3003
+      - RESERVATION_SERVICE_URL=http://reservation-service:3004
+      - PAYMENT_SERVICE_URL=http://payment-billing-service:3005
+      - REVIEW_SERVICE_URL=http://review-support-service:3006
+    depends_on:
+      - redis
+      - auth-user-service
+      - agency-fleet-service
+      - search-availability-service
+      - reservation-service
+      - payment-billing-service
+      - review-support-service
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Auth & User Service
+  auth-user-service:
+    build: ./auth-user-service
+    container_name: car-rental-auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-auth
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret}
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+    depends_on:
+      - mongo
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Agency & Fleet Service
+  agency-fleet-service:
+    build: ./agency-fleet-service
+    container_name: car-rental-agency-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-fleet
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Search & Availability Service
+  search-availability-service:
+    build: ./search-availability-service
+    container_name: car-rental-search-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-search
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - mongo
+      - elasticsearch
+      - redis
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Reservation Service
+  reservation-service:
+    build: ./reservation-service
+    container_name: car-rental-reservation-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-reservations
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Payment & Billing Service
+  payment-billing-service:
+    build: ./payment-billing-service
+    container_name: car-rental-payment-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-payments
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_dummy}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+    depends_on:
+      - mongo
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Review & Support Service
+  review-support-service:
+    build: ./review-support-service
+    container_name: car-rental-review-service
+    ports:
+      - "3006:3006"
+    environment:
+      - NODE_ENV=development
+      - PORT=3006
+      - MONGODB_URI=mongodb://mongo:27017/car-rental-reviews
+      - SMTP_HOST=${SMTP_HOST:-smtp.mailtrap.io}
+      - SMTP_PORT=${SMTP_PORT:-2525}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+    depends_on:
+      - mongo
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # MongoDB
+  mongo:
+    image: mongo:6
+    container_name: car-rental-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: car-rental-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.0
+    container_name: car-rental-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+  # RabbitMQ (Optional - for event-driven architecture)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: car-rental-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - car-rental-network
+    restart: unless-stopped
+
+networks:
+  car-rental-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:
+  es-data:
+  rabbitmq-data:
