@@ -1,7 +1,7 @@
 {
-  "name": "maintenance-repair-service",
+  "name": "insurance-claims-service",
   "version": "1.0.0",
-  "description": "Maintenance & Repair Service for vehicle maintenance workflows",
+  "description": "Insurance & Claims Service for vehicle insurance policies and claim management",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -25,7 +25,8 @@
     "nodemailer": "^6.9.5",
     "uuid": "^9.0.1",
     "node-cron": "^3.0.3",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "axios": "^1.6.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
@@ -33,7 +34,7 @@
     "supertest": "^6.3.3",
     "mongodb-memory-server": "^8.15.0"
   },
-  "keywords": ["maintenance", "repair", "vehicle", "service", "microservice"],
+  "keywords": ["insurance", "claims", "vehicle", "policy", "microservice"],
   "author": "E-Krini Team",
   "license": "MIT"
 }
