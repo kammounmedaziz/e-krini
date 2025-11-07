@@ -1,7 +1,6 @@
-import { error } from 'console';
 import User from '../models/User.js';
 import {generateAccessToken, generateRefreshToken} from '../utils/tokenUtils.js';
-import crypto, { verify } from 'crypto';
+
 
 
 export const register = async (req, res) => {
@@ -44,8 +43,8 @@ export const register = async (req, res) => {
         });
 
         //store refresh token 
-        user.refreshToken.push({token: refreshToken});
-        await user.save();
+        User.refreshToken.push({token: refreshToken});
+        await User.save();
 
         res.status(201).json({
             success: true,
@@ -162,7 +161,7 @@ export const refreshToken = async (req, res) => {
 
 
         // Verify refresh token
-        const decoded = verifyRefreshToken(refreshToken);
+        const decoded = refreshToken(refreshToken);
 
         // Find user and check if refresh token exists
         const user = await User.findOne({
