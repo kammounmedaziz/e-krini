@@ -1,8 +1,10 @@
 import React from 'react';
 import { Target, Eye, Award, TrendingUp } from 'lucide-react';
 import { Card } from '@ui';
+import { useTheme } from '@context/ThemeContext';
 
 const AboutPage = () => {
+  const { theme } = useTheme();
   const values = [
     {
       icon: Target,
@@ -34,15 +36,36 @@ const AboutPage = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-20">
+    <section id="about" className="min-h-screen pt-24">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-mesh" />
+        {/* Smooth Gradient Overlays with Enhanced Blending */}
+        <div className="absolute -top-32 -left-32 w-[800px] h-[800px] rounded-full blur-[150px] opacity-60 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.08) 40%, rgba(14, 165, 233, 0.02) 70%, transparent 100%'
+            : 'rgba(135, 206, 235, 0.4) 0%, rgba(173, 216, 230, 0.2) 40%, rgba(240, 248, 255, 0.1) 70%, transparent 100%'
+          })`
+        }} />
+        <div className="absolute -bottom-32 -right-32 w-[900px] h-[900px] rounded-full blur-[170px] opacity-60 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.08) 40%, rgba(147, 51, 234, 0.02) 70%, transparent 100%'
+            : 'rgba(255, 182, 193, 0.4) 0%, rgba(255, 218, 221, 0.2) 40%, rgba(255, 245, 245, 0.1) 70%, transparent 100%'
+          })`,
+          animationDelay: '2s'
+        }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-50 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(6, 182, 212, 0.18) 0%, rgba(6, 182, 212, 0.08) 40%, rgba(6, 182, 212, 0.02) 70%, transparent 100%'
+            : 'rgba(144, 238, 144, 0.35) 0%, rgba(240, 255, 240, 0.18) 40%, rgba(255, 255, 255, 0.1) 70%, transparent 100%'
+          })`,
+          animationDelay: '4s'
+        }} />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             About <span className="text-gradient">E-Krini</span>
           </h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             We're on a mission to make car rental simple, accessible, and enjoyable for everyone.
             With cutting-edge technology and a commitment to excellence, we're driving the future of mobility.
           </p>
@@ -54,8 +77,8 @@ const AboutPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-white mb-6">Our Story</h2>
-              <div className="space-y-4 text-gray-400">
+              <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">Our Story</h2>
+              <div className="space-y-4 text-gray-600 dark:text-gray-400">
                 <p>
                   Founded in 2020, E-Krini emerged from a simple idea: car rental should be as easy
                   as ordering a ride. We recognized that traditional car rental was plagued with
@@ -77,19 +100,19 @@ const AboutPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center gap-4">
                   <div className="text-4xl font-bold text-gradient">50K+</div>
-                  <div className="text-gray-400">Happy Customers Worldwide</div>
+                  <div className="text-gray-600 dark:text-gray-400">Happy Customers Worldwide</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-4xl font-bold text-gradient">1000+</div>
-                  <div className="text-gray-400">Premium Vehicles</div>
+                  <div className="text-gray-600 dark:text-gray-400">Premium Vehicles</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-4xl font-bold text-gradient">20+</div>
-                  <div className="text-gray-400">Countries Served</div>
+                  <div className="text-gray-600 dark:text-gray-400">Countries Served</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-4xl font-bold text-gradient">99.9%</div>
-                  <div className="text-gray-400">Customer Satisfaction</div>
+                  <div className="text-gray-600 dark:text-gray-400">Customer Satisfaction</div>
                 </div>
               </div>
             </Card>
@@ -98,20 +121,20 @@ const AboutPage = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-dark-900/50">
+      <section className="py-20 bg-gray-50 dark:bg-dark-900/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Our Core Values</h2>
-            <p className="text-gray-400 text-lg">The principles that drive us forward</p>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Core Values</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">The principles that drive us forward</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
               <Card key={index} className="text-center">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-600 to-primary-500 rounded-full flex items-center justify-center">
-                  <value.icon className="w-8 h-8 text-white" />
+                  <value.icon className="w-8 h-8 text-gray-900 dark:text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3">{value.title}</h3>
-                <p className="text-gray-400">{value.description}</p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{value.title}</h3>
+                <p className="text-gray-600 dark:text-gray-400">{value.description}</p>
               </Card>
             ))}
           </div>
@@ -122,8 +145,8 @@ const AboutPage = () => {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Our Journey</h2>
-            <p className="text-gray-400 text-lg">Key milestones in our growth story</p>
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Journey</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">Key milestones in our growth story</p>
           </div>
           <div className="relative">
             {/* Timeline Line */}
@@ -141,11 +164,11 @@ const AboutPage = () => {
                   <div className={`flex-1 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
                     <Card>
                       <div className="text-3xl font-bold text-gradient mb-2">{milestone.year}</div>
-                      <h3 className="text-xl font-semibold text-white mb-2">{milestone.event}</h3>
-                      <p className="text-gray-400">{milestone.description}</p>
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{milestone.event}</h3>
+                      <p className="text-gray-600 dark:text-gray-400">{milestone.description}</p>
                     </Card>
                   </div>
-                  <div className="relative z-10 w-4 h-4 bg-primary-500 rounded-full border-4 border-dark-900" />
+                  <div className="relative z-10 w-4 h-4 bg-primary-500 rounded-full border-4 border-white dark:border-dark-900" />
                   <div className="flex-1" />
                 </div>
               ))}
@@ -153,7 +176,7 @@ const AboutPage = () => {
           </div>
         </div>
       </section>
-    </div>
+    </section>
   );
 };
 
