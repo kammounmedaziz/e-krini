@@ -1,8 +1,10 @@
 import React from 'react';
 import { Github, Linkedin, Twitter, Mail } from 'lucide-react';
 import { Card } from '@ui';
+import { useTheme } from '@context/ThemeContext';
 
 const TeamPage = () => {
+  const { theme } = useTheme();
   const team = [
     {
       name: 'John Anderson',
@@ -69,15 +71,36 @@ const TeamPage = () => {
   ];
 
   return (
-    <div className="min-h-screen pt-20">
+    <section id="team" className="min-h-screen pt-24">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
         <div className="absolute inset-0 bg-mesh" />
+        {/* Smooth Gradient Overlays with Enhanced Blending */}
+        <div className="absolute -top-32 -left-32 w-[800px] h-[800px] rounded-full blur-[150px] opacity-60 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(14, 165, 233, 0.2) 0%, rgba(14, 165, 233, 0.08) 40%, rgba(14, 165, 233, 0.02) 70%, transparent 100%'
+            : 'rgba(135, 206, 235, 0.4) 0%, rgba(173, 216, 230, 0.2) 40%, rgba(240, 248, 255, 0.1) 70%, transparent 100%'
+          })`
+        }} />
+        <div className="absolute -bottom-32 -right-32 w-[900px] h-[900px] rounded-full blur-[170px] opacity-60 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.08) 40%, rgba(147, 51, 234, 0.02) 70%, transparent 100%'
+            : 'rgba(255, 182, 193, 0.4) 0%, rgba(255, 218, 221, 0.2) 40%, rgba(255, 245, 245, 0.1) 70%, transparent 100%'
+          })`,
+          animationDelay: '2s'
+        }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] opacity-50 animate-pulse" style={{
+          background: `radial-gradient(circle, ${theme === 'dark' 
+            ? 'rgba(6, 182, 212, 0.18) 0%, rgba(6, 182, 212, 0.08) 40%, rgba(6, 182, 212, 0.02) 70%, transparent 100%'
+            : 'rgba(144, 238, 144, 0.35) 0%, rgba(240, 255, 240, 0.18) 40%, rgba(255, 255, 255, 0.1) 70%, transparent 100%'
+          })`,
+          animationDelay: '4s'
+        }} />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
             Meet Our <span className="text-gradient">Team</span>
           </h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
             A diverse group of passionate individuals working together to revolutionize car rental.
             We're united by our commitment to innovation and customer excellence.
           </p>
@@ -105,16 +128,16 @@ const TeamPage = () => {
 
                 {/* Info */}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-white mb-1">{member.name}</h3>
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{member.name}</h3>
                   <p className="text-primary-500 font-medium mb-3">{member.role}</p>
-                  <p className="text-gray-400 text-sm mb-4">{member.bio}</p>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">{member.bio}</p>
 
                   {/* Social Links */}
                   <div className="flex justify-center gap-3">
                     {member.social.linkedin && (
                       <a
                         href={member.social.linkedin}
-                        className="bg-dark-700 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
+                        className="bg-gray-200 dark:bg-dark-700 p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
                       >
                         <Linkedin size={18} />
                       </a>
@@ -122,7 +145,7 @@ const TeamPage = () => {
                     {member.social.twitter && (
                       <a
                         href={member.social.twitter}
-                        className="bg-dark-700 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
+                        className="bg-gray-200 dark:bg-dark-700 p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
                       >
                         <Twitter size={18} />
                       </a>
@@ -130,7 +153,7 @@ const TeamPage = () => {
                     {member.social.github && (
                       <a
                         href={member.social.github}
-                        className="bg-dark-700 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
+                        className="bg-gray-200 dark:bg-dark-700 p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-white hover:bg-primary-500 transition-all duration-300"
                       >
                         <Github size={18} />
                       </a>
@@ -144,10 +167,10 @@ const TeamPage = () => {
       </section>
 
       {/* Join Us Section */}
-      <section className="py-20 bg-dark-900/50">
+      <section className="py-20 bg-gray-50 dark:bg-dark-900/50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Join Our Team</h2>
-          <p className="text-gray-400 text-lg mb-8">
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">Join Our Team</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
             We're always looking for talented individuals who share our passion for innovation
             and customer excellence. If you're ready to make an impact, we'd love to hear from you.
           </p>
@@ -160,7 +183,7 @@ const TeamPage = () => {
           </a>
         </div>
       </section>
-    </div>
+    </section>
   );
 };
 

@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { LoginForm, RegisterForm } from '@components/auth';
+import { LoginForm, RegisterForm, ForgotPassword, ResetPassword } from '@components/auth';
 
-const AuthModal = ({ isOpen, onClose, onLogin, onRegister }) => {
-  const [mode, setMode] = useState('login'); // 'login' or 'register'
+const AuthModal = ({ isOpen, onClose, onLogin, onRegister, resetToken: propResetToken }) => {
+  const [mode, setMode] = useState('login'); // 'login', 'register', 'forgot', 'reset'
+  const [resetToken, setResetToken] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Handle reset token from props
+  useEffect(() => {
+    if (propResetToken) {
+      setResetToken(propResetToken);
+      setMode('reset');
+    }
+  }, [propResetToken]);
 
   if (!isOpen) return null;
 
@@ -32,6 +41,71 @@ const AuthModal = ({ isOpen, onClose, onLogin, onRegister }) => {
     }
   };
 
+  const handleForgotPassword = () => {
+    setMode('forgot');
+  };
+
+  const handleForgotSuccess = () => {
+    // Could show a success message or automatically go back to login
+    setMode('login');
+  };
+
+  const handleResetPassword = (token) => {
+    setResetToken(token);
+    setMode('reset');
+  };
+
+  const handleResetSuccess = () => {
+    setMode('login');
+    if (!propResetToken) {
+      setResetToken('');
+    }
+  };
+
+  const handleBack = () => {
+    setMode('login');
+    if (!propResetToken) {
+      setResetToken('');
+    }
+  };
+
+  const renderForm = () => {
+    switch (mode) {
+      case 'register':
+        return (
+          <RegisterForm
+            onSubmit={handleRegister}
+            onSwitchToLogin={() => setMode('login')}
+            loading={loading}
+          />
+        );
+      case 'forgot':
+        return (
+          <ForgotPassword
+            onBack={handleBack}
+            onSuccess={handleForgotSuccess}
+          />
+        );
+      case 'reset':
+        return (
+          <ResetPassword
+            token={resetToken}
+            onBack={handleBack}
+            onSuccess={handleResetSuccess}
+          />
+        );
+      default:
+        return (
+          <LoginForm
+            onSubmit={handleLogin}
+            onSwitchToRegister={() => setMode('register')}
+            onForgotPassword={handleForgotPassword}
+            loading={loading}
+          />
+        );
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
       {/* Backdrop */}
@@ -45,25 +119,13 @@ const AuthModal = ({ isOpen, onClose, onLogin, onRegister }) => {
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute -top-4 -right-4 bg-dark-800 p-2 rounded-full text-gray-400 hover:text-white hover:bg-red-600 transition-all duration-300 z-20"
+          className="absolute -top-4 -right-4 bg-gray-200 dark:bg-dark-800 p-2 rounded-full text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-red-600 transition-all duration-300 z-20"
         >
           <X size={20} />
         </button>
 
         {/* Form */}
-        {mode === 'login' ? (
-          <LoginForm
-            onSubmit={handleLogin}
-            onSwitchToRegister={() => setMode('register')}
-            loading={loading}
-          />
-        ) : (
-          <RegisterForm
-            onSubmit={handleRegister}
-            onSwitchToLogin={() => setMode('login')}
-            loading={loading}
-          />
-        )}
+        {renderForm()}
       </div>
     </div>
   );

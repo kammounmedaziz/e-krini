@@ -1,21 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Navbar, Footer } from '@components/shared';
 import LandingPage from '@pages/LandingPage';
-import AboutPage from '@pages/AboutPage';
-import TeamPage from '@pages/TeamPage';
 import AuthModal from '@pages/AuthModal';
-import { Loading } from '@ui';
 import { authAPI } from '@api';
 import toast, { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from '@context/ThemeContext';
 
 function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [resetToken, setResetToken] = useState('');
 
-  // Check if user is logged in on mount
+  // Check if user is logged in on mount and handle password reset token
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem('accessToken');
@@ -25,10 +22,21 @@ function App() {
         setIsAuthenticated(true);
         setUser(JSON.parse(userData));
       }
-      setLoading(false);
+    };
+
+    const handlePasswordResetToken = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token) {
+        setResetToken(token);
+        setIsAuthModalOpen(true);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     };
 
     checkAuth();
+    handlePasswordResetToken();
   }, []);
 
   const handleLogin = async (credentials) => {
@@ -108,37 +116,26 @@ function App() {
     }
   };
 
-  if (loading) {
-    return <Loading fullScreen size="lg" text="Loading E-Krini..." />;
-  }
+ 
 
   return (
-    <Router>
-      <div className="min-h-screen bg-dark-900 text-white">
-        <Navbar
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-dark-900 text-gray-900 dark:text-white transition-colors duration-300">
+        <LandingPage 
+          showWelcome={showWelcome} 
+          setShowWelcome={setShowWelcome}
           onAuthClick={() => setIsAuthModalOpen(true)}
           isAuthenticated={isAuthenticated}
           user={user}
           onLogout={handleLogout}
         />
-        
-        <Routes>
-          <Route
-            path="/"
-            element={<LandingPage onGetStarted={() => setIsAuthModalOpen(true)} />}
-          />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/team" element={<TeamPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-
-        <Footer />
 
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
           onLogin={handleLogin}
           onRegister={handleRegister}
+          resetToken={resetToken}
         />
 
         <Toaster
@@ -165,7 +162,7 @@ function App() {
           }}
         />
       </div>
-    </Router>
+    </ThemeProvider>
   );
 }
 

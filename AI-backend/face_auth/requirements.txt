@@ -1,0 +1,7 @@
+opencv-python
+numpy
+pillow
+deepface
+tf-keras
+flask
+flask-cors

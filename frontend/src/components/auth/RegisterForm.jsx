@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Eye, EyeOff, Shield } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Shield, Camera } from 'lucide-react';
 import { Input, Button, Card } from '@ui';
+import FaceAuth from './FaceAuth';
 
 const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [enableFaceAuth, setEnableFaceAuth] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,15 +64,23 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
     e.preventDefault();
     if (validate()) {
       const { confirmPassword, ...submitData } = formData;
-      onSubmit(submitData);
+      onSubmit({
+        ...submitData,
+        enableFaceAuth,
+        faceAuthEnabled: enableFaceAuth
+      });
     }
+  };
+
+  const handleFaceAuthToggle = (enabled) => {
+    setEnableFaceAuth(enabled);
   };
 
   return (
     <Card className="w-full max-w-md">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gradient mb-2">Create Account</h2>
-        <p className="text-gray-400">Join us for an amazing journey</p>
+        <p className="text-gray-600 dark:text-gray-400">Join us for an amazing journey</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -154,7 +164,7 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
                   px-4 py-2 rounded-lg border transition-all duration-300
                   ${formData.role === role 
                     ? 'bg-primary-500 border-primary-500 text-white' 
-                    : 'bg-dark-800 border-dark-600 text-gray-400 hover:border-primary-500'
+                    : 'bg-gray-100 dark:bg-dark-800 border-gray-300 dark:border-dark-600 text-gray-600 dark:text-gray-400 hover:border-primary-500'
                   }
                 `}
                 disabled={loading}
@@ -163,6 +173,39 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Face Authentication Section */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-3 text-gray-300">
+              <Camera className="w-5 h-5" />
+              <span className="text-sm font-medium">Enable Face Authentication</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setEnableFaceAuth(!enableFaceAuth)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                enableFaceAuth ? 'bg-primary-500' : 'bg-gray-600'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  enableFaceAuth ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          {enableFaceAuth && (
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <FaceAuth
+                mode="register"
+                onSuccess={handleFaceAuthToggle}
+                onError={(error) => setErrors({ face: error })}
+              />
+            </div>
+          )}
         </div>
 
         <Button
@@ -175,7 +218,7 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
           Create Account
         </Button>
 
-        <div className="text-center text-gray-400">
+        <div className="text-center text-gray-600 dark:text-gray-400">
           Already have an account?{' '}
           <button
             type="button"
