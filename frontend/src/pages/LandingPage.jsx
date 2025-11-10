@@ -40,7 +40,7 @@ const LandingPage = ({
               user={user}
               onLogout={onLogout}
             />
-            <HomePage />
+            <HomePage onAuthClick={onAuthClick} />
             <AboutPage />
             <TeamPage />
             <ServicePage />
