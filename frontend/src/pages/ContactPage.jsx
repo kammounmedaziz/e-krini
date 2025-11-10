@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import { Button } from '@ui';
 import { useTheme } from '@context/ThemeContext';
 import toast from 'react-hot-toast';
+import FreeMap from '../components/FreeMap';
 
 const ContactPage = () => {
   const { theme } = useTheme();
@@ -32,7 +33,7 @@ const ContactPage = () => {
     {
       icon: Phone,
       title: 'Phone',
-      details: ['+1 (555) 123-4567', '+1 (555) 987-6543'],
+      details: ['+216 71 123 456', '+216 71 987 654'],
       description: 'Call us anytime'
     },
     {
@@ -44,7 +45,7 @@ const ContactPage = () => {
     {
       icon: MapPin,
       title: 'Office',
-      details: ['123 Tech Street', 'Silicon Valley, CA 94043'],
+      details: ['123 Tech Street', 'Tunis, Tunisia'],
       description: 'Visit our headquarters'
     },
     {
@@ -204,7 +205,7 @@ const ContactPage = () => {
         </div>
       </section>
 
-      {/* Map Section (Placeholder) */}
+      {/* Map Section */}
       <section className="py-20 bg-gray-100 dark:bg-dark-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -214,16 +215,24 @@ const ContactPage = () => {
               </span>
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-300">
-              Visit our headquarters in the heart of Silicon Valley
+              Visit our headquarters in the heart of Tunis, Tunisia
             </p>
           </div>
 
-          <div className="card-futuristic h-96 flex items-center justify-center">
-            <div className="text-center">
-              <MapPin className="w-16 h-16 text-primary-500 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">Interactive map would be displayed here</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">123 Tech Street, Silicon Valley, CA 94043</p>
-            </div>
+          <div className="card-futuristic h-96 overflow-hidden">
+            <FreeMap
+              center={[36.8065, 10.1815]} // Tunis, Tunisia coordinates (Leaflet uses array format)
+              zoom={13}
+              markers={[
+                {
+                  position: [36.8065, 10.1815],
+                  title: 'E-Krini Headquarters',
+                  description: '123 Tech Street, Tunis, Tunisia'
+                }
+              ]}
+              className="w-full h-full"
+              enableUserLocation={true} // show 'Locate me' button
+            />
           </div>
         </div>
       </section>

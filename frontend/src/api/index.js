@@ -89,6 +89,15 @@ export const authAPI = {
     const response = await api.post('/auth/reset-password', { token, newPassword });
     return response.data;
   },
+
+  // Social Login
+  googleLogin: () => {
+    window.location.href = `${API_BASE_URL}/auth/google`;
+  },
+
+  facebookLogin: () => {
+    window.location.href = `${API_BASE_URL}/auth/facebook`;
+  },
 };
 
 // User API endpoints
