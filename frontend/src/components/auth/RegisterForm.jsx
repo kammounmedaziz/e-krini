@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Shield, Camera } from 'lucide-react';
 import { Input, Button, Card } from '@ui';
 import FaceAuth from './FaceAuth';
+import SocialLogin from './SocialLogin';
 
 const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
   const [formData, setFormData] = useState({
@@ -217,6 +218,9 @@ const RegisterForm = ({ onSubmit, onSwitchToLogin, loading = false }) => {
         >
           Create Account
         </Button>
+
+        {/* Social Login */}
+        <SocialLogin onSocialLogin={() => {}} loading={loading} />
 
         <div className="text-center text-gray-600 dark:text-gray-400">
           Already have an account?{' '}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Camera } from 'lucide-react';
 import { Input, Button, Card } from '@ui';
 import FaceAuth from './FaceAuth';
+import SocialLogin from './SocialLogin';
 
 const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = false }) => {
   const [formData, setFormData] = useState({
@@ -149,6 +150,9 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
           onError={handleFaceAuthError}
         />
       )}
+
+      {/* Social Login */}
+      <SocialLogin onSocialLogin={() => {}} loading={loading} />
 
       <div className="text-center text-gray-600 dark:text-gray-400 mt-4">
         Don't have an account?{' '}

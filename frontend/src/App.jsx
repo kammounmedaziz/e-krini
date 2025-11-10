@@ -35,8 +35,38 @@ function App() {
       }
     };
 
+    const handleSocialLoginSuccess = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get('accessToken');
+      const refreshToken = urlParams.get('refreshToken');
+      const userData = urlParams.get('user');
+
+      if (accessToken && refreshToken && userData) {
+        try {
+          const user = JSON.parse(decodeURIComponent(userData));
+          
+          // Store tokens and user data
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('user', JSON.stringify(user));
+          
+          setIsAuthenticated(true);
+          setUser(user);
+          
+          // Clean up URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          toast.success('Successfully logged in!');
+        } catch (error) {
+          console.error('Error parsing social login data:', error);
+          toast.error('Login failed. Please try again.');
+        }
+      }
+    };
+
     checkAuth();
     handlePasswordResetToken();
+    handleSocialLoginSuccess();
   }, []);
 
   const handleLogin = async (credentials) => {
