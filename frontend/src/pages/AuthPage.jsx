@@ -1,48 +1,56 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { LoginForm, RegisterForm } from '@components/auth';
+import { authAPI } from '@api';
 import { Car, Zap } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const AuthPage = () => {
+  const navigate = useNavigate();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [loading, setLoading] = useState(false);
+
+  const redirectBasedOnRole = (user) => {
+    if (user?.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user?.role === 'client') {
+      navigate('/client/dashboard');
+    } else {
+      navigate('/');
+    }
+  };
 
   const handleLogin = async (data) => {
     setLoading(true);
     try {
-      let endpoint = '/api/v1/auth/login';
-      let payload = data;
+      const response = await authAPI.login(data);
 
-      // Check if this is face authentication
-      if (data.faceAuth) {
-        endpoint = '/api/v1/auth/login-face';
-        payload = {}; // Face auth doesn't need additional payload
-      }
+      if (response.success) {
+        const { accessToken, refreshToken, user: userData } = response.data;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
+        // Store tokens and user data
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(userData));
 
-      const result = await response.json();
+        // Dispatch custom event to notify other components about auth change
+        window.dispatchEvent(new Event('authChange'));
 
-      if (result.success) {
-        console.log('Authentication successful');
-        // Handle successful authentication (store tokens, redirect, etc.)
-        localStorage.setItem('accessToken', result.data.accessToken);
-        localStorage.setItem('refreshToken', result.data.refreshToken);
-        localStorage.setItem('user', JSON.stringify(result.data.user));
-        // You can add navigation logic here
+        toast.success(response.message || 'Login successful!');
+
+        // Small delay to ensure state updates before redirect
+        setTimeout(() => {
+          redirectBasedOnRole(userData);
+        }, 100);
       } else {
-        throw new Error(result.error?.message || 'Authentication failed');
+        throw new Error(response.error?.message || 'Login failed');
       }
     } catch (error) {
       console.error('Authentication failed:', error);
-      // You can show error messages to the user here
-      alert(`Authentication failed: ${error.message}`);
+      const errorMessage = error.response?.data?.error?.message || 'Login failed. Please try again.';
+      toast.error(errorMessage);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -51,38 +59,39 @@ const AuthPage = () => {
   const handleRegister = async (data) => {
     setLoading(true);
     try {
-      let endpoint = '/api/auth/register';
-      let payload = data;
+      const response = await authAPI.register(data);
 
-      // Check if face auth is enabled
-      if (data.enableFaceAuth) {
-        endpoint = '/api/auth/register-face';
-      }
+      if (response.success) {
+        const { accessToken, refreshToken, user: userData } = response.data;
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
+        // Store tokens and user data
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('user', JSON.stringify(userData));
 
-      const result = await response.json();
+        // Dispatch custom event to notify other components about auth change
+        window.dispatchEvent(new Event('authChange'));
 
-      if (result.success) {
-        console.log('Registration successful');
-        // Handle successful registration (store tokens, redirect, etc.)
-        localStorage.setItem('accessToken', result.data.accessToken);
-        localStorage.setItem('refreshToken', result.data.refreshToken);
-        localStorage.setItem('user', JSON.stringify(result.data.user));
-        // You can add navigation logic here
+        toast.success(response.message || 'Registration successful!');
+
+        // Small delay to ensure state updates before redirect
+        setTimeout(() => {
+          redirectBasedOnRole(userData);
+        }, 100);
       } else {
-        throw new Error(result.error?.message || 'Registration failed');
+        throw new Error(response.error?.message || 'Registration failed');
       }
     } catch (error) {
       console.error('Registration failed:', error);
-      // You can show error messages to the user here
-      alert(`Registration failed: ${error.message}`);
+      const errorMessage = error.response?.data?.error?.message || 'Registration failed. Please try again.';
+      const details = error.response?.data?.error?.details;
+
+      if (details && Array.isArray(details)) {
+        details.forEach(detail => toast.error(detail.msg));
+      } else {
+        toast.error(errorMessage);
+      }
+      throw error;
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,7 @@ import { Car, Shield, Clock, Star, ArrowRight, Zap, Users, Award } from 'lucide-
 import { Button, Card } from '@ui';
 import { useTheme } from '../context/ThemeContext';
 
-const LandingPage = ({ onGetStarted }) => {
+const LandingPage = ({ onGetStarted, onAuthClick }) => {
   const { theme } = useTheme();
   const features = [
     {
@@ -81,7 +81,7 @@ const LandingPage = ({ onGetStarted }) => {
               <Button
                 variant="primary"
                 size="lg"
-                onClick={onGetStarted}
+                onClick={onAuthClick}
                 className="group"
               >
                 Get Started
@@ -152,7 +152,7 @@ const LandingPage = ({ onGetStarted }) => {
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
             Join thousands of satisfied customers and experience the future of car rental
           </p>
-          <Button variant="primary" size="lg" onClick={onGetStarted}>
+          <Button variant="primary" size="lg" onClick={onAuthClick}>
             Create Your Account
           </Button>
         </div>

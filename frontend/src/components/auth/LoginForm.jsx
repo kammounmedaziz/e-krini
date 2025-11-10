@@ -25,7 +25,7 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
   const validate = () => {
     const newErrors = {};
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = 'Username or email is required';
     }
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -87,10 +87,10 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
       {authMode === 'password' ? (
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Username"
+            label="Username or Email"
             name="username"
             type="text"
-            placeholder="Enter your username"
+            placeholder="Enter your username or email"
             icon={User}
             value={formData.username}
             onChange={handleChange}
