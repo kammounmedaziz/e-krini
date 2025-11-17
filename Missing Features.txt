@@ -1,0 +1,26 @@
+Missing Features
+❌ Social login (Google, Facebook) - dependencies installed but not implemented
+❌ Two-factor authentication (2FA) - dependencies installed but not implemented
+❌ Role-based authorization middleware (incomplete)
+❌ KYC document upload handling
+❌ User management for admins (list, update, delete users)
+
+
+
+
+❌ AI feachers
+❌ think about gateway
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌
+❌

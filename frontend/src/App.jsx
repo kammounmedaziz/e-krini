@@ -59,7 +59,16 @@ function AppContent() {
 
   const handleLogin = async (credentials) => {
     try {
-      const response = await authAPI.login(credentials);
+      let response;
+      
+      // Check if it's face authentication
+      if (credentials.faceAuth) {
+        // Face authentication - extract username/email from the success data
+        response = credentials; // This comes from FaceAuth component
+      } else {
+        // Regular password login
+        response = await authAPI.login(credentials);
+      }
 
       if (response.success) {
         const { accessToken, refreshToken, user: userData } = response.data;

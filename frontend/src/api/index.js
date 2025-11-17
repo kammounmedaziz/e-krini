@@ -110,6 +110,28 @@ export const authAPI = {
     return response.data;
   },
 
+  // Face Authentication
+  enableFaceAuth: async (userId) => {
+    const response = await api.post('/auth/enable-face-auth', { userId });
+    return response.data;
+  },
+
+  loginWithFace: async (imageData) => {
+    const response = await api.post('/auth/login-face', { imageData });
+    return response.data;
+  },
+
+  // Face Image Management
+  getFaceImages: async () => {
+    const response = await api.get('/auth/face-images');
+    return response.data;
+  },
+
+  deleteFaceImage: async (imageId) => {
+    const response = await api.delete(`/auth/face-images/${imageId}`);
+    return response.data;
+  },
+
   // Social Login
   googleLogin: () => {
     window.location.href = `${API_BASE_URL}/auth/google`;
@@ -128,6 +150,11 @@ export const userAPI = {
   },
 
   updateProfile: async (data) => {
+    const response = await api.put('/users/profile', data);
+    return response.data;
+  },
+
+  updateSettings: async (data) => {
     const response = await api.put('/users/profile', data);
     return response.data;
   },

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Button } from '@ui';
+import FaceCaptureModal from '../../components/FaceCaptureModal';
 import {
   Shield,
   Smartphone,
@@ -13,6 +14,7 @@ import {
   Fingerprint
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { authAPI, userAPI } from '@api';
 
 const ClientSettings = () => {
   const [settings, setSettings] = useState({
@@ -23,24 +25,116 @@ const ClientSettings = () => {
     biometricEnabled: false
   });
 
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFaceAuthLoading, setIsFaceAuthLoading] = useState(false);
+  const [showFaceCaptureModal, setShowFaceCaptureModal] = useState(false);
+
+  // Load user data and settings on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const refreshToken = localStorage.getItem('refreshToken');
+        const userData = localStorage.getItem('user');
+
+        console.log('ClientSettings - Tokens check:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          hasUserData: !!userData
+        });
+
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          console.log('ClientSettings - Parsed user data:', parsedUser);
+          setUser(parsedUser);
+          setSettings(prev => ({
+            ...prev,
+            faceAuthEnabled: parsedUser.faceAuthEnabled || false,
+            // You can add more settings here as they become available in the user model
+          }));
+        }
+
+        // Also fetch fresh user data from API
+        console.log('ClientSettings - Fetching fresh user data from API...');
+        const response = await userAPI.getProfile();
+        console.log('ClientSettings - API response:', response);
+
+        if (response.success) {
+          console.log('ClientSettings - Fresh user data:', response.data);
+          setUser(response.data);
+          setSettings(prev => ({
+            ...prev,
+            faceAuthEnabled: response.data.faceAuthEnabled || false,
+          }));
+
+          // Update localStorage with fresh data
+          localStorage.setItem('user', JSON.stringify(response.data));
+        }
+      } catch (error) {
+        console.error('ClientSettings - Failed to load user data:', error);
+        console.error('ClientSettings - Error details:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        toast.error('Failed to load user settings');
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const handleSettingChange = async (settingKey, value) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      setSettings(prev => ({
-        ...prev,
-        [settingKey]: value
-      }));
-
-      toast.success('Settings updated successfully!');
+      // For face authentication, we need to call the API
+      if (settingKey === 'faceAuthEnabled') {
+        if (value) {
+          // Show face capture modal for first-time setup
+          setShowFaceCaptureModal(true);
+          setIsLoading(false);
+          return;
+        } else {
+          // For disabling face auth, update the user profile
+          const response = await userAPI.updateSettings({ faceAuthEnabled: false });
+          if (response.success) {
+            setSettings(prev => ({ ...prev, [settingKey]: value }));
+            // Update user data
+            const updatedUser = { ...user, faceAuthEnabled: false };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            toast.success('Face authentication disabled successfully!');
+          }
+        }
+      } else {
+        // For other settings, just update locally for now
+        // In a real app, you'd call an API to save these preferences
+        setSettings(prev => ({ ...prev, [settingKey]: value }));
+        toast.success('Settings updated successfully!');
+      }
     } catch (error) {
-      toast.error('Failed to update settings');
+      console.error('Failed to update settings:', error);
+      const errorMessage = error.response?.data?.error?.message || 'Failed to update settings';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
+      setIsFaceAuthLoading(false);
+    }
+  };
+
+  const handleFaceRegistrationComplete = async () => {
+    try {
+      // The face auth is already enabled by the FaceCaptureModal API call
+      // Just update the local state and localStorage
+      setSettings(prev => ({ ...prev, faceAuthEnabled: true }));
+      const updatedUser = { ...user, faceAuthEnabled: true };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast.success('Face authentication enabled successfully!');
+    } catch (error) {
+      console.error('Failed to update local state:', error);
+      toast.error('Face authentication setup completed, but failed to update settings locally.');
     }
   };
 
@@ -63,7 +157,8 @@ const ClientSettings = () => {
       enabled: settings.faceAuthEnabled,
       onToggle: () => handleSettingChange('faceAuthEnabled', !settings.faceAuthEnabled),
       color: 'text-purple-600',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/20'
+      bgColor: 'bg-purple-100 dark:bg-purple-900/20',
+      loading: isFaceAuthLoading
     },
     {
       id: 'biometric',
@@ -145,7 +240,7 @@ const ClientSettings = () => {
                 )}
                 <button
                   onClick={option.onToggle}
-                  disabled={isLoading}
+                  disabled={isLoading || option.loading}
                   className={`
                     relative inline-flex h-6 w-11 items-center rounded-full transition-colors
                     ${option.enabled ? 'bg-green-600' : 'bg-gray-200 dark:bg-dark-600'}
@@ -158,6 +253,11 @@ const ClientSettings = () => {
                       ${option.enabled ? 'translate-x-6' : 'translate-x-1'}
                     `}
                   />
+                  {(isLoading || option.loading) && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                  )}
                 </button>
               </div>
             </div>
@@ -179,10 +279,32 @@ const ClientSettings = () => {
             <Button
               variant="outline"
               size="sm"
-              className="border-purple-300 text-purple-700 hover:bg-purple-100 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/20"
+              disabled={isFaceAuthLoading}
+              className="border-purple-300 text-purple-700 hover:bg-purple-100 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/20 disabled:opacity-50"
+              onClick={async () => {
+                try {
+                  setIsFaceAuthLoading(true);
+                  // This would typically open a camera interface for face registration
+                  // For now, we'll just show a success message
+                  toast.success('Face authentication setup completed!');
+                } catch (error) {
+                  toast.error('Failed to setup face authentication');
+                } finally {
+                  setIsFaceAuthLoading(false);
+                }
+              }}
             >
-              <Camera className="w-4 h-4 mr-2" />
-              Setup Face ID
+              {isFaceAuthLoading ? (
+                <>
+                  <div className="w-4 h-4 border border-purple-700 border-t-transparent rounded-full animate-spin mr-2"></div>
+                  Setting up...
+                </>
+              ) : (
+                <>
+                  <Camera className="w-4 h-4 mr-2" />
+                  Setup Face ID
+                </>
+              )}
             </Button>
           </div>
         )}
@@ -355,6 +477,13 @@ const ClientSettings = () => {
           </div>
         </div>
       </Card>
+
+      {/* Face Capture Modal */}
+      <FaceCaptureModal
+        isOpen={showFaceCaptureModal}
+        onClose={() => setShowFaceCaptureModal(false)}
+        onComplete={handleFaceRegistrationComplete}
+      />
     </div>
   );
 };
