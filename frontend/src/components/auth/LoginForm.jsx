@@ -8,14 +8,18 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
   const [formData, setFormData] = useState({
     username: '',
     password: '',
+    rememberMe: false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [authMode, setAuthMode] = useState('password'); // 'password' or 'face'
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
     // Clear error when user types
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -121,7 +125,13 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
 
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-              <input type="checkbox" className="rounded" />
+              <input 
+                type="checkbox" 
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
+                className="rounded" 
+              />
               Remember me
             </label>
             <button

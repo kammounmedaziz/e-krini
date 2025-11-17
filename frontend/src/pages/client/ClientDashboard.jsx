@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ClientSidebar from '../../components/client/ClientSidebar';
+import ClientSettings from './ClientSettings';
 import { Card } from '@ui';
 import {
   Car,
@@ -300,14 +301,7 @@ const ClientDashboard = ({ user, onLogout }) => {
           </div>
         );
       case 'settings':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Settings</h1>
-            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
-              <p className="text-gray-300">User settings and preferences will be managed here.</p>
-            </Card>
-          </div>
-        );
+        return <ClientSettings />;
       default:
         return <div>Not found</div>;
     }
