@@ -4,11 +4,12 @@ import pickle
 import numpy as np
 import sys
 import time
-# Add parent directory to path to import from project root
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from deepface import DeepFace
 
+# Simple face detection without DeepFace
 DB_FILE = "face_db.pkl"
+
+# Load Haar cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # ------------------ Database Utils ------------------
 def load_db():
@@ -17,34 +18,40 @@ def load_db():
             return pickle.load(f)
     return {}
 
-# ------------------ Enhanced Face Matching ------------------
-def verify_face(embedding, embeddings, threshold=0.6):
+# ------------------ Simple Face Matching ------------------
+def verify_face(embedding, embeddings, threshold=0.8):
     """
-    Enhanced face verification with multiple similarity checks
+    Simple face verification using Euclidean distance
     """
-    similarities = []
+    if embedding is None or len(embeddings) == 0:
+        return 0.0
+
+    min_distance = float('inf')
     for stored_embedding in embeddings:
-        # Cosine similarity
-        cos_sim = np.dot(embedding, stored_embedding) / (np.linalg.norm(embedding) * np.linalg.norm(stored_embedding))
-        similarities.append(cos_sim)
+        # Euclidean distance
+        distance = np.linalg.norm(embedding - stored_embedding)
+        min_distance = min(min_distance, distance)
 
-    # Use multiple metrics for better accuracy
-    avg_similarity = np.mean(similarities)
-    max_similarity = np.max(similarities)
-    min_similarity = np.min(similarities)
+    # Convert distance to similarity score (higher is better)
+    # Normalize distance (assuming max reasonable distance is around 1000)
+    similarity = max(0, 1 - (min_distance / 1000))
+    return similarity
 
-    # Weighted score: favor higher similarities
-    weighted_score = (avg_similarity * 0.5) + (max_similarity * 0.3) + (min_similarity * 0.2)
-
-    return weighted_score
-
-# ------------------ Enhanced Face Detection ------------------
+# ------------------ Simple Face Detection ------------------
 def detect_face(frame):
-    """Enhanced face detection with preprocessing"""
+    """Simple face detection using Haar cascades"""
     try:
-        # Use DeepFace for face detection and embedding
-        embedding = DeepFace.represent(frame, model_name="Facenet", enforce_detection=False)
-        return embedding[0]["embedding"]
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+        if len(faces) > 0:
+            # Return a simple feature vector based on face position and size
+            x, y, w, h = faces[0]  # Use first detected face
+            # Create a simple embedding based on face characteristics
+            embedding = np.array([x, y, w, h, w/h, gray[y:y+h, x:x+w].mean(), gray[y:y+h, x:x+w].std()])
+            return embedding
+        else:
+            return None
     except Exception as e:
         print(f"[WARNING] Face detection failed: {e}")
         return None
