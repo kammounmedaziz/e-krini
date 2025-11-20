@@ -192,4 +192,4 @@ if __name__ == '__main__':
     print("POST /api/face/verify-frame - Verify single frame")
     print("GET /api/face/status - Check system status")
 
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='127.0.0.1', port=5002, debug=False)

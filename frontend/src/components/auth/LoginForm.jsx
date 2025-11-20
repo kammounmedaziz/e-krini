@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, Eye, EyeOff, Camera } from 'lucide-react';
 import { Input, Button, Card } from '@ui';
+import toast from 'react-hot-toast';
 import FaceAuth from './FaceAuth';
 import SocialLogin from './SocialLogin';
 
@@ -47,11 +48,14 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
 
   const handleFaceAuthSuccess = (faceData) => {
     // Handle successful face authentication
+    toast.success('✅ Face authentication successful!');
     onSubmit({ faceAuth: true, ...faceData });
   };
 
   const handleFaceAuthError = (error) => {
+    console.error('Face auth error in LoginForm:', error);
     setErrors({ face: error });
+    toast.error(error || '❌ Face authentication failed. Please try again.');
   };
 
   return (
@@ -154,11 +158,20 @@ const LoginForm = ({ onSubmit, onSwitchToRegister, onForgotPassword, loading = f
           </Button>
         </form>
       ) : (
-        <FaceAuth
-          mode="login"
-          onSuccess={handleFaceAuthSuccess}
-          onError={handleFaceAuthError}
-        />
+        <div className="space-y-4">
+          <FaceAuth
+            mode="login"
+            onSuccess={handleFaceAuthSuccess}
+            onError={handleFaceAuthError}
+          />
+          {errors.face && (
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {errors.face}
+              </p>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Social Login */}

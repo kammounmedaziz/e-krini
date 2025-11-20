@@ -116,8 +116,12 @@ export const authAPI = {
     return response.data;
   },
 
-  loginWithFace: async (imageData) => {
-    const response = await api.post('/auth/login-face', { imageData });
+  loginWithFace: async (imageData, username = null) => {
+    const payload = { imageData };
+    if (username) {
+      payload.username = username;
+    }
+    const response = await api.post('/auth/login-face', payload);
     return response.data;
   },
 

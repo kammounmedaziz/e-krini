@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, CameraOff, CheckCircle, XCircle, Loader } from 'lucide-react';
 import { Button } from '@ui';
 import { authAPI } from '@api';
+import toast from 'react-hot-toast';
 
 const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
   const [isActive, setIsActive] = useState(false);
@@ -40,6 +41,10 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
     setIsProcessing(true);
     setStatus('Position your face in the circle');
     setCountdown(10);
+    toast('🔍 Analyzing your face... Please stay still.', { 
+      duration: 2500,
+      icon: '🔍'
+    });
 
     // Start countdown
     intervalRef.current = setInterval(() => {
@@ -77,28 +82,66 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
 
         setStatus('Verifying face...');
 
+        // Get username from localStorage if available
+        let username = null;
+        try {
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            username = user.username;
+            console.log('Using username from localStorage:', username);
+          }
+        } catch (e) {
+          console.log('No username in localStorage, will try without it');
+        }
+
         // Call face login with captured image
-        const response = await authAPI.loginWithFace(imageData);
+        const response = await authAPI.loginWithFace(imageData, username);
         console.log('Face login response:', response);
 
         if (response.success) {
-          setStatus('Face authenticated successfully!');
+          setStatus('✅ Face authenticated successfully!');
           setFaceDetected(true);
+          toast.success('Face authenticated successfully!', { 
+            icon: '✅',
+            duration: 3000 
+          });
+          
+          // Store user data and tokens
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('accessToken', response.data.accessToken);
+            localStorage.setItem('refreshToken', response.data.refreshToken);
+            console.log('User data and tokens stored successfully');
+          }
+          
           stopCamera();
           onSuccess(response);
         } else {
-          setStatus('Face not recognized. Please try again.');
+          const errorMsg = response.error?.message || 'Face not recognized. Please try again.';
+          console.error('Face login failed:', errorMsg);
+          setStatus('❌ ' + errorMsg);
+          toast.error(errorMsg, { 
+            icon: '❌',
+            duration: 4000 
+          });
           setFaceDetected(false);
           setCountdown(10);
           setIsProcessing(false);
-          onError(response.error || 'Face authentication failed');
+          onError(errorMsg);
         }
       } catch (err) {
         console.error('Face verification error:', err);
-        setStatus('Error during face verification.');
+        const errorMsg = err.response?.data?.error?.message || err.message || 'Face verification failed. Please try again.';
+        console.error('Error details:', err.response?.data);
+        setStatus('❌ ' + errorMsg);
+        toast.error(errorMsg, { 
+          icon: '❌',
+          duration: 4000 
+        });
         setCountdown(10);
         setIsProcessing(false);
-        onError(err.message || 'Face verification failed. Please try again.');
+        onError(errorMsg);
       }
     }, 10000);
   }, [onSuccess, onError]);  const startCamera = useCallback(async () => {
@@ -110,12 +153,25 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
       });
       console.log('Camera access granted, stream:', stream);
 
-      if (videoRef.current) {
+      // Function to initialize video with stream
+      const initializeVideo = () => {
+        if (!videoRef.current) {
+          console.error('Video element not found');
+          const errorMsg = 'Video element initialization failed';
+          toast.error(errorMsg, { duration: 4000 });
+          onError(errorMsg);
+          stream.getTracks().forEach(track => track.stop());
+          return false;
+        }
+
         console.log('Setting video source...');
         videoRef.current.srcObject = stream;
         streamRef.current = stream;
-        setIsActive(true);
         setStatus('Camera started. Please look at the camera.');
+        toast('📷 Camera started. Position your face in the circle.', { 
+          duration: 3000,
+          icon: '📷'
+        });
 
         // Wait for video to be ready before starting scan
         const videoElement = videoRef.current;
@@ -148,21 +204,38 @@ const FaceAuth = ({ onSuccess, onError, mode = 'login' }) => {
             }
           }, 2000);
         }
-      } else {
-        console.error('Video element not found');
+        return true;
+      };
+
+      // Try to initialize video, if element not ready wait a bit
+      if (!initializeVideo()) {
+        console.log('Video element not ready, waiting 200ms...');
+        setTimeout(() => {
+          initializeVideo();
+        }, 200);
       }
     } catch (err) {
       console.error('Error accessing camera:', err);
-      onError('Unable to access camera. Please check permissions.');
+      const errorMsg = 'Unable to access camera. Please check permissions.';
+      toast.error(errorMsg, { 
+        icon: '📷',
+        duration: 4000 
+      });
+      onError(errorMsg);
     }
-  }, [onError, startAutoScan]);  const handleStartFaceAuth = () => {
+  }, [onError, startAutoScan, isProcessing]);  const handleStartFaceAuth = () => {
     console.log('handleStartFaceAuth called, mode:', mode);
     if (mode === 'register') {
       // For registration, we'll handle this differently
       onSuccess({ faceAuthEnabled: true });
     } else {
-      console.log('Calling startCamera...');
-      startCamera();
+      console.log('Setting isActive to true first...');
+      setIsActive(true);
+      // Wait for next render cycle so video element is mounted
+      setTimeout(() => {
+        console.log('Calling startCamera after render...');
+        startCamera();
+      }, 100);
     }
   };
 

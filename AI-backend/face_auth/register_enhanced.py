@@ -4,11 +4,12 @@ import pickle
 import numpy as np
 import sys
 import time
-# Add parent directory to path to import from project root
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from deepface import DeepFace
 
+# Simple face detection without DeepFace
 DB_FILE = "face_db.pkl"
+
+# Load Haar cascade for face detection
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # ------------------ Database Utils ------------------
 def load_db():
@@ -21,13 +22,21 @@ def save_db(db):
     with open(DB_FILE, "wb") as f:
         pickle.dump(db, f)
 
-# ------------------ Enhanced Face Detection ------------------
+# ------------------ Simple Face Detection ------------------
 def detect_face(frame):
-    """Enhanced face detection with better preprocessing"""
+    """Simple face detection using Haar cascades"""
     try:
-        # Use DeepFace for face detection and embedding
-        embedding = DeepFace.represent(frame, model_name="Facenet", enforce_detection=False)
-        return embedding[0]["embedding"]
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+
+        if len(faces) > 0:
+            # Return a simple feature vector based on face position and size
+            x, y, w, h = faces[0]  # Use first detected face
+            # Create a simple embedding based on face characteristics
+            embedding = np.array([x, y, w, h, w/h, gray[y:y+h, x:x+w].mean(), gray[y:y+h, x:x+w].std()])
+            return embedding
+        else:
+            return None
     except Exception as e:
         print(f"[WARNING] Face detection failed: {e}")
         return None
