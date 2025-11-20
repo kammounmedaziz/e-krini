@@ -179,4 +179,74 @@ export const userAPI = {
   },
 };
 
+// Admin API endpoints
+export const adminAPI = {
+  // User Management
+  getAllUsers: async (params = {}) => {
+    const response = await api.get('/admin/users', { params });
+    return response.data;
+  },
+
+  getUserById: async (userId) => {
+    const response = await api.get(`/admin/users/${userId}`);
+    return response.data;
+  },
+
+  updateUser: async (userId, data) => {
+    const response = await api.put(`/admin/users/${userId}`, data);
+    return response.data;
+  },
+
+  deleteUser: async (userId) => {
+    const response = await api.delete(`/admin/users/${userId}`);
+    return response.data;
+  },
+
+  // User Status Management
+  banUser: async (userId, reason) => {
+    const response = await api.post(`/admin/users/${userId}/ban`, { reason });
+    return response.data;
+  },
+
+  unbanUser: async (userId) => {
+    const response = await api.post(`/admin/users/${userId}/unban`);
+    return response.data;
+  },
+
+  changeUserRole: async (userId, role) => {
+    const response = await api.put(`/admin/users/${userId}/role`, { role });
+    return response.data;
+  },
+
+  // Statistics & Reports
+  getUserStatistics: async () => {
+    const response = await api.get('/admin/users/statistics');
+    return response.data;
+  },
+
+  exportUsersToCSV: async (params = {}) => {
+    const response = await api.get('/admin/users/export', {
+      params,
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Bulk Operations
+  bulkDeleteUsers: async (userIds) => {
+    const response = await api.post('/admin/users/bulk/delete', { userIds });
+    return response.data;
+  },
+
+  bulkUpdateRole: async (userIds, role) => {
+    const response = await api.post('/admin/users/bulk/role', { userIds, role });
+    return response.data;
+  },
+
+  bulkBanUsers: async (userIds, reason) => {
+    const response = await api.post('/admin/users/bulk/ban', { userIds, reason });
+    return response.data;
+  },
+};
+
 export default api;
