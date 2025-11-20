@@ -316,6 +316,7 @@ const ClientDashboard = ({ user, onLogout }) => {
           isExpanded={isSidebarExpanded}
           toggleExpanded={() => setIsSidebarExpanded(!isSidebarExpanded)}
           onLogout={onLogout}
+          user={user}
         />
         <main className={`flex-1 min-h-screen overflow-y-auto ${isSidebarExpanded ? 'ml-64' : 'ml-24'} transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}>
           <div className="p-6">

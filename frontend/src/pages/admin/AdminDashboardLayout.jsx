@@ -3,47 +3,56 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from '../../components/shared/DashboardLayout';
 import AdminDashboard from './AdminDashboard';
 import AdminSettings from './AdminSettings';
+import {
+  LayoutDashboard,
+  Users,
+  Car,
+  Calendar,
+  BarChart3,
+  Settings
+} from 'lucide-react';
 
-const AdminDashboardLayout = () => {
+const AdminDashboardLayout = ({ user, onLogout }) => {
   const adminNavItems = [
     {
       path: '/admin/dashboard',
-      label: 'Dashboard',
-      icon: 'LayoutDashboard'
+      name: 'Dashboard',
+      icon: LayoutDashboard
     },
     {
       path: '/admin/users',
-      label: 'User Management',
-      icon: 'Users'
+      name: 'User Management',
+      icon: Users
     },
     {
       path: '/admin/cars',
-      label: 'Car Inventory',
-      icon: 'Car'
+      name: 'Car Inventory',
+      icon: Car
     },
     {
       path: '/admin/reservations',
-      label: 'Reservations',
-      icon: 'Calendar'
+      name: 'Reservations',
+      icon: Calendar
     },
     {
       path: '/admin/reports',
-      label: 'Reports',
-      icon: 'BarChart3'
+      name: 'Reports',
+      icon: BarChart3
     },
     {
       path: '/admin/settings',
-      label: 'System Settings',
-      icon: 'Settings'
+      name: 'System Settings',
+      icon: Settings
     }
   ];
 
   return (
     <DashboardLayout
-      navItems={adminNavItems}
-      userRole="admin"
-      userName="Admin User"
-      userEmail="admin@ekrini.com"
+      navigation={adminNavItems}
+      user={user}
+      onLogout={onLogout}
+      theme="admin"
+      title="Admin Dashboard"
     >
       <Routes>
         <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />

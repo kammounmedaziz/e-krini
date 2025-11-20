@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button } from '@ui';
 import FaceCaptureModal from '../../components/FaceCaptureModal';
+import ProfileSettings from '../../components/profile/ProfileSettings';
 import {
   Shield,
   Smartphone,
@@ -11,12 +12,14 @@ import {
   CheckCircle,
   AlertTriangle,
   Camera,
-  Fingerprint
+  Fingerprint,
+  User as UserIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { authAPI, userAPI } from '@api';
 
 const ClientSettings = () => {
+  const [activeTab, setActiveTab] = useState('profile');
   const [settings, setSettings] = useState({
     twoFactorEnabled: false,
     faceAuthEnabled: false,
@@ -190,32 +193,80 @@ const ClientSettings = () => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Security & Preferences
+          Settings & Preferences
         </h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Manage your account security and notification preferences
+          Manage your profile, security and notification preferences
         </p>
       </div>
 
-      {/* Security Settings */}
-      <Card>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
-            <Shield className="w-6 h-6 text-red-600" />
+      {/* Tabs */}
+      <div className="flex gap-2 border-b border-gray-200 dark:border-dark-700">
+        <button
+          onClick={() => setActiveTab('profile')}
+          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+            activeTab === 'profile'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <UserIcon className="w-4 h-4" />
+            <span>Profile</span>
           </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Security Settings
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Enhance your account protection
-            </p>
+        </button>
+        <button
+          onClick={() => setActiveTab('security')}
+          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+            activeTab === 'security'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4" />
+            <span>Security</span>
           </div>
-        </div>
+        </button>
+        <button
+          onClick={() => setActiveTab('notifications')}
+          className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+            activeTab === 'notifications'
+              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+              : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Bell className="w-4 h-4" />
+            <span>Notifications</span>
+          </div>
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'profile' && <ProfileSettings />}
+
+      {activeTab === 'security' && (
+        <>
+          {/* Security Settings */}
+          <Card>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+                <Shield className="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Security Settings
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Enhance your account protection
+                </p>
+              </div>
+            </div>
 
         <div className="space-y-6">
           {securityOptions.map((option) => (
@@ -341,22 +392,26 @@ const ClientSettings = () => {
           </div>
         )}
       </Card>
+        </>
+      )}
 
-      {/* Notification Preferences */}
-      <Card>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
-            <Bell className="w-6 h-6 text-green-600" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Notification Preferences
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Choose how you want to be notified
-            </p>
-          </div>
-        </div>
+      {activeTab === 'notifications' && (
+        <>
+          {/* Notification Preferences */}
+          <Card>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                <Bell className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Notification Preferences
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Choose how you want to be notified
+                </p>
+              </div>
+            </div>
 
         <div className="space-y-4">
           {notificationOptions.map((option) => (
@@ -477,6 +532,8 @@ const ClientSettings = () => {
           </div>
         </div>
       </Card>
+        </>
+      )}
 
       {/* Face Capture Modal */}
       <FaceCaptureModal

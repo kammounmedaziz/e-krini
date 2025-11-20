@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, X, Car, User, LogOut, Zap, Sun, Moon } from 'lucide-react';
 import { Button } from '@ui';
 import { motion } from 'framer-motion';
 import { useTheme } from '@context/ThemeContext';
 
 const Navbar = ({ onAuthClick, isAuthenticated = false, user = null, onLogout }) => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -136,10 +138,21 @@ const Navbar = ({ onAuthClick, isAuthenticated = false, user = null, onLogout })
 
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
+                {/* Dashboard Link */}
+                <button
+                  onClick={() => navigate(user?.role === 'admin' ? '/admin/dashboard' : '/client/dashboard')}
+                  className="px-4 py-2 rounded-full bg-gradient-to-r from-primary-600 to-accent-cyan text-white font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
+                >
+                  Dashboard
+                </button>
                 <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-900/50 rounded-full border border-gray-200 dark:border-dark-700/50">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-cyan flex items-center justify-center">
-                    <User size={16} className="text-gray-900 dark:text-white" />
-                  </div>
+                  {user?.profilePicture ? (
+                    <img src={user.profilePicture} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-cyan flex items-center justify-center">
+                      <User size={16} className="text-gray-900 dark:text-white" />
+                    </div>
+                  )}
                   <span className="text-gray-700 dark:text-gray-300 text-sm font-medium">{user?.username}</span>
                 </div>
                 <button
@@ -221,10 +234,23 @@ const Navbar = ({ onAuthClick, isAuthenticated = false, user = null, onLogout })
 
               {isAuthenticated ? (
                 <div className="space-y-2">
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate(user?.role === 'admin' ? '/admin/dashboard' : '/client/dashboard');
+                    }}
+                    className="block w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-primary-600 to-accent-cyan text-white text-center font-medium"
+                  >
+                    Go to Dashboard
+                  </button>
                   <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-900/50 rounded-2xl border border-gray-200 dark:border-dark-700/50">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-cyan flex items-center justify-center">
-                      <User size={16} className="text-gray-900 dark:text-white" />
-                    </div>
+                    {user?.profilePicture ? (
+                      <img src={user.profilePicture} alt={user.username} className="w-8 h-8 rounded-full object-cover" />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-accent-cyan flex items-center justify-center">
+                        <User size={16} className="text-gray-900 dark:text-white" />
+                      </div>
+                    )}
                     <span className="text-gray-700 dark:text-gray-300 text-sm">Welcome, {user?.username}</span>
                   </div>
                   <Button
