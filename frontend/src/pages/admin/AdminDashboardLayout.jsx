@@ -1,70 +1,76 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import DashboardLayout from '../../components/shared/DashboardLayout';
+import React, { useState } from 'react';
+import AdminSidebar from '../../components/admin/AdminSidebar';
 import AdminDashboard from './AdminDashboard';
 import AdminSettings from './AdminSettings';
-import {
-  LayoutDashboard,
-  Users,
-  Car,
-  Calendar,
-  BarChart3,
-  Settings
-} from 'lucide-react';
+import UserManagement from './UserManagement';
+import AdminStatistics from './AdminStatistics';
 
 const AdminDashboardLayout = ({ user, onLogout }) => {
-  const adminNavItems = [
-    {
-      path: '/admin/dashboard',
-      name: 'Dashboard',
-      icon: LayoutDashboard
-    },
-    {
-      path: '/admin/users',
-      name: 'User Management',
-      icon: Users
-    },
-    {
-      path: '/admin/cars',
-      name: 'Car Inventory',
-      icon: Car
-    },
-    {
-      path: '/admin/reservations',
-      name: 'Reservations',
-      icon: Calendar
-    },
-    {
-      path: '/admin/reports',
-      name: 'Reports',
-      icon: BarChart3
-    },
-    {
-      path: '/admin/settings',
-      name: 'System Settings',
-      icon: Settings
+  const [current, setCurrent] = useState('dashboard');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+
+  const renderContent = () => {
+    switch (current) {
+      case 'dashboard':
+        return <AdminDashboard />;
+      case 'statistics':
+        return <AdminStatistics />;
+      case 'users':
+        return <UserManagement />;
+      case 'settings':
+        return <AdminSettings />;
+      case 'cars':
+        return (
+          <div>
+            <h1 className="text-2xl font-semibold mb-6 text-white">Car Inventory</h1>
+            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
+              <p className="text-gray-300">Car inventory management will be implemented here.</p>
+            </div>
+          </div>
+        );
+      case 'reservations':
+        return (
+          <div>
+            <h1 className="text-2xl font-semibold mb-6 text-white">Reservations</h1>
+            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
+              <p className="text-gray-300">Reservation management will be implemented here.</p>
+            </div>
+          </div>
+        );
+      case 'reports':
+        return (
+          <div>
+            <h1 className="text-2xl font-semibold mb-6 text-white">Reports</h1>
+            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
+              <p className="text-gray-300">Reports and analytics will be displayed here.</p>
+            </div>
+          </div>
+        );
+      default:
+        return <AdminDashboard />;
     }
-  ];
+  };
 
   return (
-    <DashboardLayout
-      navigation={adminNavItems}
-      user={user}
-      onLogout={onLogout}
-      theme="admin"
-      title="Admin Dashboard"
-    >
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/settings" element={<AdminSettings />} />
-        {/* Placeholder routes for future pages */}
-        <Route path="/users" element={<div className="p-8 text-center text-gray-500">User Management - Coming Soon</div>} />
-        <Route path="/cars" element={<div className="p-8 text-center text-gray-500">Car Inventory - Coming Soon</div>} />
-        <Route path="/reservations" element={<div className="p-8 text-center text-gray-500">Reservations - Coming Soon</div>} />
-        <Route path="/reports" element={<div className="p-8 text-center text-gray-500">Reports - Coming Soon</div>} />
-      </Routes>
-    </DashboardLayout>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 text-white">
+      <div className="flex">
+        <AdminSidebar
+          current={current}
+          setCurrent={setCurrent}
+          isExpanded={isSidebarExpanded}
+          toggleExpanded={() => setIsSidebarExpanded(!isSidebarExpanded)}
+          onLogout={onLogout}
+          user={user}
+        />
+        <main className={`flex-1 min-h-screen overflow-y-auto ${isSidebarExpanded ? 'ml-64' : 'ml-24'} transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}>
+          <div className="p-6">
+            <div className="backdrop-blur-lg bg-gray-900/30 rounded-2xl border border-gray-700 p-6">
+              {renderContent()}
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
   );
 };
 
