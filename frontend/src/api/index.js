@@ -48,6 +48,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
+        console.log('🔄 Attempting to refresh token...');
         const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
           refreshToken,
         });
@@ -55,9 +56,11 @@ api.interceptors.response.use(
         const { accessToken } = response.data.data;
         localStorage.setItem('accessToken', accessToken);
 
+        console.log('✅ Token refreshed successfully, retrying original request');
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        console.error('❌ Token refresh failed:', refreshError);
         // Refresh failed, logout user silently
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
@@ -66,8 +69,10 @@ api.interceptors.response.use(
         // Dispatch auth change event
         window.dispatchEvent(new Event('authChange'));
         
-        // Only redirect if not already on home page
-        if (window.location.pathname !== '/') {
+        // Only redirect if not already on home page or auth page
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && !currentPath.startsWith('/auth')) {
+          console.log('🔄 Redirecting to home page due to auth failure');
           window.location.href = '/';
         }
         return Promise.reject(refreshError);
@@ -160,6 +165,16 @@ export const userAPI = {
 
   updateSettings: async (data) => {
     const response = await api.put('/users/profile', data);
+    return response.data;
+  },
+
+  uploadProfilePicture: async (imageData) => {
+    const response = await api.post('/users/profile/picture', { imageData });
+    return response.data;
+  },
+
+  deleteProfilePicture: async () => {
+    const response = await api.delete('/users/profile/picture');
     return response.data;
   },
 };

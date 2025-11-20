@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ProfilePicture from '../shared/ProfilePicture';
 import {
   Home,
   Car,
@@ -13,7 +14,7 @@ import {
   Menu
 } from 'lucide-react';
 
-const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout }) => {
+const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
   const items = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'cars', label: 'My Cars', icon: Car },
@@ -49,6 +50,40 @@ const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogo
           <Menu className={`stroke-current origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${iconSize} ${isExpanded ? 'rotate-0' : 'rotate-180'}`} />
         </button>
       </div>
+
+      {/* User Profile Section */}
+      {user && (
+        <div className={`mb-4 ${isExpanded ? 'p-3 bg-white/10 rounded-lg backdrop-blur-sm' : 'flex justify-center'}`}>
+          {isExpanded ? (
+            <div className="flex items-center gap-3">
+              <ProfilePicture user={user} size="md" editable={false} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-white truncate">
+                  {user?.username || user?.name || 'User'}
+                </p>
+                <p className="text-xs text-cyan-300 truncate">
+                  {user?.email || 'user@example.com'}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="p-1">
+              <ProfilePicture user={user} size="md" editable={false} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Back to Home Link */}
+      {isExpanded && (
+        <a
+          href="/"
+          className="mb-4 flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200 text-white"
+        >
+          <Car className="w-4 h-4" />
+          <span className="text-sm font-medium">Back to Home</span>
+        </a>
+      )}
 
       <nav className="space-y-2 flex-1">
         {mainItems.map(it => {
@@ -87,6 +122,7 @@ ClientSidebar.propTypes = {
   isExpanded: PropTypes.bool.isRequired,
   toggleExpanded: PropTypes.func.isRequired,
   onLogout: PropTypes.func.isRequired,
+  user: PropTypes.object,
 };
 
 export default ClientSidebar;

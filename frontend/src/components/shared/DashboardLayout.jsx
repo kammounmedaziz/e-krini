@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import ProfilePicture from './ProfilePicture';
 import { Button } from '@ui';
-import { Menu, Bell, User } from 'lucide-react';
+import { Menu, Bell } from 'lucide-react';
 import { useTheme } from '@context/ThemeContext';
 
 const DashboardLayout = ({
@@ -73,17 +74,15 @@ const DashboardLayout = ({
 
                 {/* User menu */}
                 <div className="flex items-center gap-3">
-                  <div className="hidden sm:block text-right">
+                  <div className="hidden md:block text-right">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      {user?.name || 'User'}
+                      {user?.username || user?.name || 'User'}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {user?.email || 'user@example.com'}
                     </p>
                   </div>
-                  <div className={`p-2 bg-gradient-to-r ${colors.primary} rounded-full`}>
-                    <User className="w-5 h-5 text-white" />
-                  </div>
+                  <ProfilePicture user={user} size="md" editable={false} />
                 </div>
               </div>
             </div>
