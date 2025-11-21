@@ -1,12 +1,10 @@
 import User from '../models/User.js';
-import {generateAccessToken, generateRefreshToken} from '../utils/tokenUtils.js';
-
-
+import {generateAccessToken, generateRefreshToken, verifyRefreshToken} from '../utils/jwt.js';
 
 export const register = async (req, res) => {
     try {
-        const {username, password, email, role= 'client'} = req.body;
-        const existingUser = await User.findOne({username, email});
+        const {username, password, email, role = 'client'} = req.body;
+        const existingUser = await User.findOne({ $or: [{username}, {email}] });
         if (existingUser) {
             return res.status(409).json({
                 success: false,
@@ -15,24 +13,22 @@ export const register = async (req, res) => {
                     message: 'User with the given username or email already exists.'
                 }
             });
-        
-                
-            }
+        }
 
-            // create new user
+        // create new user
         const newUser = new User({
             username,
             password,
             email,
             role
-        });   
+        });
 
         await newUser.save();
 
         //generate tokens
         const accessToken = generateAccessToken({
             id: newUser._id,
-            username: newUser.username, 
+            username: newUser.username,
             role: newUser.role
         });
 
@@ -42,9 +38,9 @@ export const register = async (req, res) => {
             role: newUser.role
         });
 
-        //store refresh token 
-        User.refreshToken.push({token: refreshToken});
-        await User.save();
+        //store refresh token
+        newUser.refreshTokens.push({token: refreshToken});
+        await newUser.save();
 
         res.status(201).json({
             success: true,
@@ -60,9 +56,6 @@ export const register = async (req, res) => {
                 }
             },
             message: 'User registered successfully.'
-
-
-        
         });
     } catch (err) {
         console.error('Error during user registration:', err);
@@ -79,13 +72,13 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const {username, password} = req.body;
-        const user = await User.findOne({username});
+        const user = await User.findOne({ $or: [{username}, {email: username}] }); // allow login with username or email
         if (!user) {
             return res.status(401).json({
                 success: false,
                 error:{
                     code: 'INVALID_CREDENTIALS',
-                    message: 'invalid mail or password.'
+                    message: 'Invalid username or password.'
                 }
             });
         }
@@ -115,7 +108,7 @@ export const login = async (req, res) => {
         });
 
         // Store refresh token
-        user.refreshToken.push({token: refreshToken});
+        user.refreshTokens.push({token: refreshToken});
         await user.save();
 
         res.json({
@@ -131,7 +124,7 @@ export const login = async (req, res) => {
                     role: user.role
                 }
             },
-            message: 'welcome.'
+            message: 'Login successful.'
         });
     } catch (err) {
         console.error('Error during user login:', err);
@@ -144,7 +137,6 @@ export const login = async (req, res) => {
         });
     }
 };
-
 
 export const refreshToken = async (req, res) => {
     try {
@@ -159,14 +151,13 @@ export const refreshToken = async (req, res) => {
             });
         }
 
-
         // Verify refresh token
-        const decoded = refreshToken(refreshToken);
+        const decoded = verifyRefreshToken(refreshToken);
 
         // Find user and check if refresh token exists
         const user = await User.findOne({
             _id: decoded.id,
-            'refreshToken.token': refreshToken
+            'refreshTokens.token': refreshToken
         });
 
         if (!user) {
@@ -179,46 +170,40 @@ export const refreshToken = async (req, res) => {
             });
         }
 
-
         // Generate new access token
-    const accessToken = generateAccessToken({ 
-      id: user._id, 
-      email: user.email, 
-      role: user.role 
-    });
+        const accessToken = generateAccessToken({
+            id: user._id,
+            username: user.username,
+            role: user.role
+        });
 
-    res.json({
-      success: true,
-      data: {
-        accessToken,
-        expiresIn: 900
-      },
-      message: 'Token refreshed successfully'
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      error: {
-        code: 'TOKEN_REFRESH_FAILED',
-        message: 'Failed to refresh token'
-      }
-    });
-  }
+        res.json({
+            success: true,
+            data: {
+                accessToken,
+                expiresIn: 3600
+            },
+            message: 'Token refreshed successfully'
+        });
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            error: {
+                code: 'TOKEN_REFRESH_FAILED',
+                message: 'Failed to refresh token'
+            }
+        });
+    }
 };
 
 export const logout = async (req, res) => {
     try {
         const {refreshToken} = req.body;
 
-        if (!refreshToken) {
-
+        if (refreshToken) {
             await User.updateOne(
-                {
-                    'refreshToken.token': refreshToken
-                },
-                {
-                    $pull: {refreshToken: {token: refreshToken}}
-                }
+                {'refreshTokens.token': refreshToken},
+                {$pull: {refreshTokens: {token: refreshToken}}}
             );
         }
 

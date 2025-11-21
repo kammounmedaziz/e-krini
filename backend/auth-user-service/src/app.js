@@ -24,10 +24,18 @@ app.use(morgan('dev'));
 // Database connection
 connectDB();
 
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    service: 'auth-user-service',
+    timestamp: new Date().toISOString()
+  });
+});
 
-// API routes (placeholder)
+// API routes
 app.get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Auth & User Service API',
     version: '1.0.0',
     endpoints: [
@@ -46,6 +54,15 @@ app.get('/', (req, res) => {
     ]
   });
 });
+
+// Import routes
+import authRoutes from './routes/auth.js';
+import userRoutes from './routes/user.js';
+import adminRoutes from './routes/admin.js';
+
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, _next) => {

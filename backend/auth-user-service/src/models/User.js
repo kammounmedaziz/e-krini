@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
+        unique: true
     },
     email: {
         type: String,
@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ["client", "admin", "agency"],
+        default: "client"
     },
     kycStatus: {
         type: String,
@@ -26,17 +27,17 @@ const userSchema = new mongoose.Schema({
         default: "pending",
     },
     kycDocuments: [{
-        Type: Boolean,
+        type: String,
         url: String,
         uploadedAt: {
             type: Date,
             default: Date.now,
         }
     }],
-    mdaEnabled: {
+    mfaEnabled: {
         type: Boolean,
         default: false,
-}, 
+    },
     emailVerificationToken: String,
     emailVerificationTokenExpires: Date,
     passwordResetToken: String,
@@ -52,8 +53,7 @@ const userSchema = new mongoose.Schema({
     ],
 }, { timestamps: true });
 
-
-// Hash password 
+// Hash password
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) {
         return next();
@@ -72,15 +72,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };
 
-
-
-
 const User = mongoose.model("User", userSchema);
-
-
-
-
-
-
 
 export default User;

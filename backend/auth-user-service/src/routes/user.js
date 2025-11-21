@@ -1,9 +1,10 @@
 import express from 'express';
 import { getUserProfile, updateUserProfile } from '../controllers/userController.js';
-import { authenticate } from '../middlewares/authMiddleware.js';]
-//protected routes
+import { authMiddleware as authenticate } from '../middlewares/auth.js';
+
 const router = express.Router();
 
+// Protected routes
 router.use(authenticate);
 
 router.get('/profile', getUserProfile);

@@ -1,8 +1,8 @@
 import User from '../models/User.js';
 
-export const getProfile = async (req, res) => {
+export const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id).select('-password -refreshTokens');
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -14,29 +14,28 @@ export const getProfile = async (req, res) => {
         }
         return res.json({
             success: true,
-            data: {user}
+            data: { user }
         });
     } catch (err) {
         console.error(err);
         return res.status(500).json({
             success: false,
             error: {
-                code: 'profile_fetch_error',
-                message: 'failed to fetch profile.'
+                code: 'PROFILE_FETCH_ERROR',
+                message: 'Failed to fetch profile.'
             }
         });
     }
 };
 
-
-export const updateProfile = async (req, res) => {
+export const updateUserProfile = async (req, res) => {
     try {
-        const {username, email} = req.body;
+        const { username, email } = req.body;
         const user = await User.findByIdAndUpdate(
-            req.user.id, 
-            {username, email}, 
-            {new: true}
-        );
+            req.user.id,
+            { username, email },
+            { new: true }
+        ).select('-password -refreshTokens');
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -48,15 +47,16 @@ export const updateProfile = async (req, res) => {
         }
         return res.json({
             success: true,
-            data: {user}
+            data: { user },
+            message: 'Profile updated successfully.'
         });
     } catch (err) {
         console.error(err);
         return res.status(500).json({
             success: false,
             error: {
-                code: 'profile_update_error',
-                message: 'failed to update profile.'
+                code: 'PROFILE_UPDATE_ERROR',
+                message: 'Failed to update profile.'
             }
         });
     }

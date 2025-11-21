@@ -8,8 +8,6 @@ const connectDB = async () => {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-user-db';
 
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       // Additional options for better performance and reliability
       maxPoolSize: 10, // Maintain up to 10 socket connections
       serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds

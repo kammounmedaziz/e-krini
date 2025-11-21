@@ -1,12 +1,11 @@
 import {body, validationResult} from 'express-validator';
 
-export const validateUserRegistration = (validation) => {
-    return async (req,res,next) => {
-        
-        await Promise.all(validation.map(validation => validation.run(req)));
+export const validate = (validations) => {
+    return async (req, res, next) => {
+        await Promise.all(validations.map(validation => validation.run(req)));
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
                 error: {
                     code: 'VALIDATION_ERROR',
@@ -19,7 +18,7 @@ export const validateUserRegistration = (validation) => {
     };
 };
 
-export const registrationValidation = [
+export const registerValidation = [
     body('username')
         .trim()
         .isLength({min:3, max:20})
@@ -33,17 +32,15 @@ export const registrationValidation = [
         .matches(/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/)
         .withMessage('Password must be at least 8 characters long and contain at least one letter, one number, and one special character'),
     body('role')
-        .trim()
-        .isIn(['user', 'agency', 'admin'])
-        .withMessage('Role must be either user, agency, or admin')
-
+        .optional()
+        .isIn(['client', 'agency', 'admin'])
+        .withMessage('Role must be client, agency, or admin')
 ];
 
-export const validateLogin = [
-    body('email')
-        .isEmail()
-        .normalizeEmail()
-        .withMessage('Invalid email address'),
+export const loginValidation = [
+    body('username')
+        .notEmpty()
+        .withMessage('Username is required'),
     body('password')
         .notEmpty()
         .withMessage('Password is required')
