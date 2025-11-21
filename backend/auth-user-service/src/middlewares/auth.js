@@ -4,7 +4,7 @@ export const authMiddleware = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ 
+            return res.status(401).json({
                 success: false,
                 error:{
                     code: 'AUTH_NO_TOKEN',
@@ -17,7 +17,7 @@ export const authMiddleware = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ 
+        return res.status(401).json({
             success: false,
             error:{
                 code: 'AUTH_INVALID_TOKEN',
@@ -38,7 +38,17 @@ export const authorize = (...roles) => {
                 }
             });
         }
-        
+
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({
+                success: false,
+                error:{
+                    code: 'FORBIDDEN',
+                    message: 'Access denied'
+                }
+            });
+        }
+
         next();
     };
 };
