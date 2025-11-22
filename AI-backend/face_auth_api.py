@@ -3,13 +3,20 @@ from flask_cors import CORS
 import os
 import sys
 import base64
-import cv2
 import numpy as np
-from PIL import Image
-import io
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+# Try to import optional dependencies
+try:
+    import cv2
+    from PIL import Image
+    import io
+    DEPENDENCIES_AVAILABLE = True
+except ImportError:
+    print("[WARNING] Some dependencies not available. Running in mock mode.")
+    DEPENDENCIES_AVAILABLE = False
 
 # ------------------ Face Authentication API ------------------
 
@@ -93,6 +100,54 @@ def login_face():
             'error': 'Internal server error during authentication'
         }), 500
 
+@app.route('/api/face/register-embeddings', methods=['POST'])
+def register_face_embeddings():
+    """
+    Register a user with face embeddings
+    Expected JSON: {"username": "user_name", "embeddings": [[...], [...], ...]}
+    """
+    try:
+        data = request.get_json()
+
+        if not data or 'username' not in data or 'embeddings' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Username and embeddings are required'
+            }), 400
+
+        username = data['username']
+        embeddings = data['embeddings']
+
+        if not isinstance(embeddings, list) or len(embeddings) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Embeddings must be a non-empty array'
+            }), 400
+
+        # Lazy import to avoid TensorFlow loading at startup
+        sys.path.append(os.path.join(os.path.dirname(__file__), 'face_auth'))
+        from face_auth.register_enhanced import save_user_embeddings
+
+        # Save the embeddings for the user
+        success = save_user_embeddings(username, embeddings)
+
+        if success:
+            return jsonify({
+                'success': True,
+                'message': f'User {username} registered successfully with face embeddings'
+            }), 201
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Face registration failed. Please try again.'
+            }), 400
+
+    except Exception as e:
+        print(f"[ERROR] Face embeddings registration API error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error during registration'
+        }), 500
 @app.route('/api/face/verify-frame', methods=['POST'])
 def verify_face_frame():
     """
@@ -109,16 +164,20 @@ def verify_face_frame():
             }), 400
 
         # Decode base64 image
-        image_data = base64.b64decode(data['image'])
-        image = Image.open(io.BytesIO(image_data))
-        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        if DEPENDENCIES_AVAILABLE:
+            image_data = base64.b64decode(data['image'])
+            image = Image.open(io.BytesIO(image_data))
+            frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
-        # Lazy import face detection functions
-        sys.path.append(os.path.join(os.path.dirname(__file__), 'face_auth'))
-        from face_auth.login_enhanced import detect_face, load_db, verify_face
+            # Lazy import face detection functions
+            sys.path.append(os.path.join(os.path.dirname(__file__), 'face_auth'))
+            from face_auth.login_enhanced import detect_face, load_db, verify_face
 
-        # Detect face in the frame
-        embedding = detect_face(frame)
+            # Detect face in the frame
+            embedding = detect_face(frame)
+        else:
+            # Mock face detection
+            embedding = [0.1 + i * 0.01 for i in range(128)]  # Mock embedding
 
         if embedding is None:
             return jsonify({

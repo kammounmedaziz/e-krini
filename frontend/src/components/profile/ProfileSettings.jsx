@@ -5,8 +5,8 @@ import { User, Mail, Shield, Save } from 'lucide-react';
 import { userAPI } from '@api';
 import toast from 'react-hot-toast';
 
-const ProfileSettings = () => {
-  const [user, setUser] = useState(null);
+const ProfileSettings = ({ user: initialUser }) => {
+  const [user, setUser] = useState(initialUser);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -14,19 +14,45 @@ const ProfileSettings = () => {
   });
 
   useEffect(() => {
+    // Update user state when initialUser prop changes
+    if (initialUser) {
+      setUser(initialUser);
+      setFormData({
+        username: initialUser.username || '',
+        email: initialUser.email || ''
+      });
+    }
+    
+    // Also load fresh data from API
     loadUserData();
     
-    // Listen for profile picture updates
-    const handleStorageChange = () => {
+    // Listen for profile picture and auth updates
+    const handleAuthChange = () => {
       loadUserData();
     };
     
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+    window.addEventListener('storage', handleAuthChange);
+    window.addEventListener('authChange', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleAuthChange);
+      window.removeEventListener('authChange', handleAuthChange);
+    };
+  }, [initialUser]);
 
   const loadUserData = async () => {
     try {
+      // If we have user data from props, use it
+      if (initialUser) {
+        setUser(initialUser);
+        setFormData({
+          username: initialUser.username || '',
+          email: initialUser.email || ''
+        });
+        return;
+      }
+      
+      // Otherwise, load from localStorage and API
       const userData = JSON.parse(localStorage.getItem('user') || '{}');
       setUser(userData);
       setFormData({
@@ -62,8 +88,9 @@ const ProfileSettings = () => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
         
-        // Trigger storage event
+        // Trigger events to update other components
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('authChange'));
       }
     } catch (error) {
       console.error('Update error:', error);
@@ -103,6 +130,7 @@ const ProfileSettings = () => {
 
         <div className="flex flex-col sm:flex-row items-center gap-6 p-6 bg-gray-50 dark:bg-dark-700/50 rounded-lg">
           <ProfilePicture 
+            key={`profile-settings-${user?.id || user?._id}-${user?.profilePicture ? 'has-pic' : 'no-pic'}`}
             user={user} 
             size="2xl" 
             editable={true}

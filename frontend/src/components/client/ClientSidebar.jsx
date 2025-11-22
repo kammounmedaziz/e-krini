@@ -56,7 +56,12 @@ const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogo
         <div className={`mb-4 ${isExpanded ? 'p-3 bg-white/10 rounded-lg backdrop-blur-sm' : 'flex justify-center'}`}>
           {isExpanded ? (
             <div className="flex items-center gap-3">
-              <ProfilePicture user={user} size="md" editable={false} />
+              <ProfilePicture 
+                key={`profile-pic-${user?.id || user?._id}-${user?.profilePicture ? 'has-pic' : 'no-pic'}`}
+                user={user} 
+                size="md" 
+                editable={false} 
+              />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
                   {user?.username || user?.name || 'User'}
@@ -68,7 +73,12 @@ const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogo
             </div>
           ) : (
             <div className="p-1">
-              <ProfilePicture user={user} size="md" editable={false} />
+              <ProfilePicture 
+                key={`profile-pic-collapsed-${user?.id || user?._id}-${user?.profilePicture ? 'has-pic' : 'no-pic'}`}
+                user={user} 
+                size="md" 
+                editable={false} 
+              />
             </div>
           )}
         </div>

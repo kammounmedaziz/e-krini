@@ -38,6 +38,18 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    profilePicture: {
+        type: String,
+        default: null,
+    },
+    faceAuthEnabled: {
+        type: Boolean,
+        default: false,
+    },
+    faceEncoding: {
+        type: [Number], // Array of numbers representing face embedding
+        default: null,
+    },
     emailVerificationToken: String,
     emailVerificationTokenExpires: Date,
     passwordResetToken: String,
