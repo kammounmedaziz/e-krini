@@ -114,6 +114,12 @@ app.use('/api/support', createProxyMiddleware({
   pathRewrite: { '^/api/support': '' }
 }));
 
+app.use('/api/users', createProxyMiddleware({
+  target: services.auth,
+  changeOrigin: true,
+  pathRewrite: { '^/api/users': '' }
+}));
+
 // Error handling
 app.use((err, req, res, next) => {
   console.error(err.stack);

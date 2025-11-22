@@ -75,11 +75,6 @@ const ProfilePicture = ({ user, size = 'md', editable = false, onUpdate }) => {
           console.error('❌ Upload error:', error);
           const errorMsg = error.response?.data?.error?.message || error.message || 'Failed to upload profile picture';
           toast.error(errorMsg);
-          
-          // If it's an auth error, the interceptor will handle redirect
-          if (error.response?.status === 401) {
-            console.log('⚠️ Authentication error during upload');
-          }
         } finally {
           setIsUploading(false);
         }
@@ -116,8 +111,9 @@ const ProfilePicture = ({ user, size = 'md', editable = false, onUpdate }) => {
           onUpdate(null);
         }
 
-        // Trigger a storage event to update other components
+        // Trigger events to update other components
         window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('authChange'));
       }
     } catch (error) {
       console.error('Delete error:', error);

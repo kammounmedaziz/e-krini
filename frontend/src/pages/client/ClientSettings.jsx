@@ -19,7 +19,11 @@ import toast from 'react-hot-toast';
 import { authAPI, userAPI } from '@api';
 
 const ClientSettings = () => {
+  console.log('🔄 ClientSettings - Component rendered/re-rendered');
+  console.log('🔄 ClientSettings - Current timestamp:', new Date().toISOString());
+
   const [activeTab, setActiveTab] = useState('profile');
+  console.log('ClientSettings - Active tab:', activeTab);
   const [settings, setSettings] = useState({
     twoFactorEnabled: false,
     faceAuthEnabled: false,
@@ -35,11 +39,17 @@ const ClientSettings = () => {
 
   // Load user data and settings on component mount
   useEffect(() => {
+    console.log('🔄 ClientSettings - useEffect running for data loading');
     const loadUserData = async () => {
       try {
         const accessToken = localStorage.getItem('accessToken');
         const refreshToken = localStorage.getItem('refreshToken');
         const userData = localStorage.getItem('user');
+
+        console.log('ClientSettings - localStorage contents:');
+        console.log('  accessToken:', accessToken ? `${accessToken.substring(0, 20)}...` : 'null');
+        console.log('  refreshToken:', refreshToken ? `${refreshToken.substring(0, 20)}...` : 'null');
+        console.log('  userData:', userData ? 'present' : 'null');
 
         console.log('ClientSettings - Tokens check:', {
           hasAccessToken: !!accessToken,
@@ -60,19 +70,22 @@ const ClientSettings = () => {
 
         // Also fetch fresh user data from API
         console.log('ClientSettings - Fetching fresh user data from API...');
+        console.log('ClientSettings - API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1');
         const response = await userAPI.getProfile();
         console.log('ClientSettings - API response:', response);
+        console.log('ClientSettings - Response status:', response?.status);
+        console.log('ClientSettings - Response data:', response?.data);
 
         if (response.success) {
           console.log('ClientSettings - Fresh user data:', response.data);
-          setUser(response.data);
+          setUser(response.data.user);
           setSettings(prev => ({
             ...prev,
-            faceAuthEnabled: response.data.faceAuthEnabled || false,
+            faceAuthEnabled: response.data.user.faceAuthEnabled || false,
           }));
 
           // Update localStorage with fresh data
-          localStorage.setItem('user', JSON.stringify(response.data));
+          localStorage.setItem('user', JSON.stringify(response.data.user));
         }
       } catch (error) {
         console.error('ClientSettings - Failed to load user data:', error);
@@ -86,6 +99,19 @@ const ClientSettings = () => {
     };
 
     loadUserData();
+
+    // Listen for user data changes
+    const handleAuthChange = () => {
+      loadUserData();
+    };
+
+    window.addEventListener('authChange', handleAuthChange);
+    window.addEventListener('storage', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+      window.removeEventListener('storage', handleAuthChange);
+    };
   }, []);
 
   const handleSettingChange = async (settingKey, value) => {
@@ -134,6 +160,10 @@ const ClientSettings = () => {
       const updatedUser = { ...user, faceAuthEnabled: true };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('authChange'));
+      
       toast.success('Face authentication enabled successfully!');
     } catch (error) {
       console.error('Failed to update local state:', error);
@@ -248,7 +278,7 @@ const ClientSettings = () => {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'profile' && <ProfileSettings />}
+      {activeTab === 'profile' && <ProfileSettings key={`profile-tab-${user?.id || user?._id}`} user={user} />}
 
       {activeTab === 'security' && (
         <>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ClientSidebar from '../../components/client/ClientSidebar';
 import ClientSettings from './ClientSettings';
 import { Card } from '@ui';
@@ -103,9 +103,31 @@ const ManualPayment = () => (
   </div>
 );
 
-const ClientDashboard = ({ user, onLogout }) => {
+const ClientDashboard = ({ user: initialUser, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [user, setUser] = useState(initialUser);
+
+  // Listen for user data changes (profile picture, face auth, etc.)
+  useEffect(() => {
+    const handleAuthChange = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      }
+    };
+
+    // Update when initialUser changes
+    setUser(initialUser);
+
+    // Listen for auth changes
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+    };
+  }, [initialUser]);
 
   const stats = [
     {
@@ -301,7 +323,7 @@ const ClientDashboard = ({ user, onLogout }) => {
           </div>
         );
       case 'settings':
-        return <ClientSettings />;
+        return <ClientSettings key={current} />;
       default:
         return <div>Not found</div>;
     }

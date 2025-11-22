@@ -14,8 +14,14 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
+    console.log('API Request - URL:', config.url);
+    console.log('API Request - Method:', config.method);
+    console.log('API Request - Token present:', !!token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('API Request - Authorization header set');
+    } else {
+      console.log('API Request - No token found in localStorage');
     }
     return config;
   },
@@ -112,12 +118,6 @@ export const authAPI = {
 
   resetPassword: async (token, newPassword) => {
     const response = await api.post('/auth/reset-password', { token, newPassword });
-    return response.data;
-  },
-
-  // Face Authentication
-  enableFaceAuth: async (userId) => {
-    const response = await api.post('/auth/enable-face-auth', { userId });
     return response.data;
   },
 
