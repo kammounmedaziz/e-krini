@@ -41,7 +41,7 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 3003;
 
 app.listen(PORT, () => {
   console.log(`Promotion & Coupon Service running on port ${PORT}`);
