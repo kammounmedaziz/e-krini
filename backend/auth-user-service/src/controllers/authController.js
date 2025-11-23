@@ -42,12 +42,31 @@ export const register = async (req, res) => {
         newUser.refreshTokens.push({token: refreshToken});
         await newUser.save();
 
+        // Determine redirect URL based on role
+        let redirectUrl = '/';
+        switch (newUser.role) {
+            case 'admin':
+                redirectUrl = '/admin/dashboard';
+                break;
+            case 'agency':
+                redirectUrl = '/agency/dashboard';
+                break;
+            case 'insurance':
+                redirectUrl = '/insurance/dashboard';
+                break;
+            case 'client':
+            default:
+                redirectUrl = '/client/dashboard';
+                break;
+        }
+
         res.status(201).json({
             success: true,
             data: {
                 accessToken,
                 refreshToken,
                 expiresIn: 3600,
+                redirectUrl,
                 user: {
                     id: newUser._id,
                     username: newUser.username,
@@ -113,12 +132,31 @@ export const login = async (req, res) => {
         user.refreshTokens.push({token: refreshToken});
         await user.save();
 
+        // Determine redirect URL based on role
+        let redirectUrl = '/';
+        switch (user.role) {
+            case 'admin':
+                redirectUrl = '/admin/dashboard';
+                break;
+            case 'agency':
+                redirectUrl = '/agency/dashboard';
+                break;
+            case 'insurance':
+                redirectUrl = '/insurance/dashboard';
+                break;
+            case 'client':
+            default:
+                redirectUrl = '/client/dashboard';
+                break;
+        }
+
         res.json({
             success: true,
             data: {
                 accessToken,
                 refreshToken,
                 expiresIn: 3600,
+                redirectUrl,
                 user: {
                     id: user._id,
                     username: user.username,
@@ -338,13 +376,46 @@ export const loginWithFace = async (req, res) => {
             // Try AI backend for face recognition
             try {
                 const axios = (await import('axios')).default;
-                const aiResponse = await axios.post('http://127.0.0.1:5002/api/face/verify-frame', {
-                    image: imageData
-                });
+                
+                // Check if AI backend is running, if not, try to start it
+                let aiBackendRunning = false;
+                try {
+                    await axios.get('http://127.0.0.1:5002/api/face/status', { timeout: 1000 });
+                    aiBackendRunning = true;
+                } catch (e) {
+                    console.log('AI backend not running, attempting to start...');
+                    // Try to start AI backend
+                    const { spawn } = await import('child_process');
+                    const path = await import('path');
+                    const aiBackendPath = path.join(process.cwd(), '..', '..', 'AI-backend');
+                    
+                    spawn('python3', ['face_auth_api.py'], {
+                        cwd: aiBackendPath,
+                        detached: true,
+                        stdio: 'ignore'
+                    }).unref();
+                    
+                    // Wait 3 seconds for it to start
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    try {
+                        await axios.get('http://127.0.0.1:5002/api/face/status', { timeout: 2000 });
+                        aiBackendRunning = true;
+                        console.log('AI backend started successfully');
+                    } catch (e2) {
+                        console.log('Failed to start AI backend automatically');
+                    }
+                }
+                
+                if (aiBackendRunning) {
+                    const aiResponse = await axios.post('http://127.0.0.1:5002/api/face/verify-frame', {
+                        image: imageData
+                    });
 
-                if (aiResponse.data.success && aiResponse.data.threshold_met && aiResponse.data.best_match) {
-                    user = await User.findOne({ username: aiResponse.data.best_match });
-                    console.log('Face recognized via AI backend as:', aiResponse.data.best_match);
+                    if (aiResponse.data.success && aiResponse.data.threshold_met && aiResponse.data.best_match) {
+                        user = await User.findOne({ username: aiResponse.data.best_match });
+                        console.log('Face recognized via AI backend as:', aiResponse.data.best_match);
+                    }
                 }
             } catch (aiError) {
                 console.error('AI backend error:', aiError.message);
@@ -393,12 +464,31 @@ export const loginWithFace = async (req, res) => {
         user.refreshTokens.push({ token: refreshToken });
         await user.save();
 
+        // Determine redirect URL based on role
+        let redirectUrl = '/';
+        switch (user.role) {
+            case 'admin':
+                redirectUrl = '/admin/dashboard';
+                break;
+            case 'agency':
+                redirectUrl = '/agency/dashboard';
+                break;
+            case 'insurance':
+                redirectUrl = '/insurance/dashboard';
+                break;
+            case 'client':
+            default:
+                redirectUrl = '/client/dashboard';
+                break;
+        }
+
         res.json({
             success: true,
             data: {
                 accessToken,
                 refreshToken,
                 expiresIn: 3600,
+                redirectUrl,
                 user: {
                     id: user._id,
                     username: user.username,

@@ -33,8 +33,8 @@ export const registerValidation = [
         .withMessage('Password must be at least 8 characters long and contain at least one letter, one number, and one special character'),
     body('role')
         .optional()
-        .isIn(['client', 'agency', 'admin'])
-        .withMessage('Role must be client, agency, or admin')
+        .isIn(['client', 'agency', 'admin', 'insurance'])
+        .withMessage('Role must be client, agency, admin, or insurance')
 ];
 
 export const loginValidation = [

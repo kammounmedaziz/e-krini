@@ -165,7 +165,12 @@ def verify_face_frame():
 
         # Decode base64 image
         if DEPENDENCIES_AVAILABLE:
-            image_data = base64.b64decode(data['image'])
+            # Strip data URL prefix if present (e.g., 'data:image/jpeg;base64,')
+            image_str = data['image']
+            if ',' in image_str:
+                image_str = image_str.split(',', 1)[1]
+            
+            image_data = base64.b64decode(image_str)
             image = Image.open(io.BytesIO(image_data))
             frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
 
@@ -217,23 +222,30 @@ def get_face_auth_status():
     Get the status of face authentication system
     """
     try:
-        db_path = os.path.join(os.path.dirname(__file__), 'face_auth', 'face_db.pkl')
-        db_exists = os.path.exists(db_path)
+        # Check for database in both possible locations
+        db_path_root = os.path.join(os.path.dirname(__file__), 'face_db.pkl')
+        db_path_subdir = os.path.join(os.path.dirname(__file__), 'face_auth', 'face_db.pkl')
+        
+        db_exists = os.path.exists(db_path_root) or os.path.exists(db_path_subdir)
+        db_path = db_path_root if os.path.exists(db_path_root) else db_path_subdir
 
         if db_exists:
-            # Lazy import to load db
-            sys.path.append(os.path.join(os.path.dirname(__file__), 'face_auth'))
-            from face_auth.login_enhanced import load_db
-            db = load_db()
+            # Load database directly
+            import pickle
+            with open(db_path, 'rb') as f:
+                db = pickle.load(f)
             user_count = len(db)
+            print(f"[INFO] Database found at {db_path} with {user_count} users: {list(db.keys())}")
         else:
             user_count = 0
+            print(f"[INFO] No database found. Checked: {db_path_root} and {db_path_subdir}")
 
         return jsonify({
             'success': True,
             'database_exists': db_exists,
             'registered_users': user_count,
-            'status': 'ready' if db_exists else 'no_database'
+            'status': 'ready' if db_exists else 'no_database',
+            'users': list(db.keys()) if db_exists else []
         }), 200
 
     except Exception as e:

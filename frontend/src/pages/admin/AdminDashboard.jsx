@@ -91,7 +91,7 @@ const AdminDashboard = () => {
     {
       title: 'Admin Users',
       value: statistics.overview?.totalAdmins || 0,
-      change: `${statistics.overview?.totalAgencies || 0} agencies`,
+      change: `${statistics.overview?.totalAgencies || 0} agencies, ${statistics.overview?.totalInsurance || 0} insurance`,
       icon: Shield,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100 dark:bg-purple-900/20',

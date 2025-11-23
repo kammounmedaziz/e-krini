@@ -4,6 +4,8 @@ import AdminDashboard from './AdminDashboard';
 import AdminSettings from './AdminSettings';
 import UserManagement from './UserManagement';
 import AdminStatistics from './AdminStatistics';
+import AgencyManagement from './AgencyManagement';
+import InsuranceManagement from './InsuranceManagement';
 
 const AdminDashboardLayout = ({ user, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -17,6 +19,10 @@ const AdminDashboardLayout = ({ user, onLogout }) => {
         return <AdminStatistics />;
       case 'users':
         return <UserManagement />;
+      case 'agencies':
+        return <AgencyManagement />;
+      case 'insurance':
+        return <InsuranceManagement />;
       case 'settings':
         return <AdminSettings />;
       case 'cars':

@@ -59,10 +59,14 @@ app.get('/', (req, res) => {
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 import adminRoutes from './routes/admin.js';
+import agencyRoutes from './routes/agencyRoutes.js';
+import insuranceRoutes from './routes/insuranceRoutes.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/agency', agencyRoutes);
+app.use('/api/v1/insurance', insuranceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, _next) => {

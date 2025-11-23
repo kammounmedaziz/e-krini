@@ -247,6 +247,78 @@ export const adminAPI = {
     const response = await api.post('/admin/users/bulk/ban', { userIds, reason });
     return response.data;
   },
+
+  // Agency Management
+  getAllAgencies: async (params = {}) => {
+    const response = await api.get('/admin/agencies', { params });
+    return response.data;
+  },
+
+  getAgencyById: async (agencyId) => {
+    const response = await api.get(`/admin/agencies/${agencyId}`);
+    return response.data;
+  },
+
+  approveAgency: async (agencyId, notes) => {
+    const response = await api.post(`/admin/agencies/${agencyId}/approve`, { notes });
+    return response.data;
+  },
+
+  rejectAgency: async (agencyId, reason) => {
+    const response = await api.post(`/admin/agencies/${agencyId}/reject`, { reason });
+    return response.data;
+  },
+
+  suspendAgency: async (agencyId, reason) => {
+    const response = await api.post(`/admin/agencies/${agencyId}/suspend`, { reason });
+    return response.data;
+  },
+
+  deleteAgency: async (agencyId) => {
+    const response = await api.delete(`/admin/agencies/${agencyId}`);
+    return response.data;
+  },
+
+  getAgencyStatistics: async () => {
+    const response = await api.get('/admin/agencies/statistics');
+    return response.data;
+  },
+
+  // Insurance Management
+  getAllInsurance: async (params = {}) => {
+    const response = await api.get('/admin/insurance', { params });
+    return response.data;
+  },
+
+  getInsuranceById: async (insuranceId) => {
+    const response = await api.get(`/admin/insurance/${insuranceId}`);
+    return response.data;
+  },
+
+  approveInsurance: async (insuranceId, notes) => {
+    const response = await api.post(`/admin/insurance/${insuranceId}/approve`, { notes });
+    return response.data;
+  },
+
+  rejectInsurance: async (insuranceId, reason) => {
+    const response = await api.post(`/admin/insurance/${insuranceId}/reject`, { reason });
+    return response.data;
+  },
+
+  suspendInsurance: async (insuranceId, reason) => {
+    const response = await api.post(`/admin/insurance/${insuranceId}/suspend`, { reason });
+    return response.data;
+  },
+
+  deleteInsurance: async (insuranceId) => {
+    const response = await api.delete(`/admin/insurance/${insuranceId}`);
+    return response.data;
+  },
+
+  getInsuranceStatistics: async () => {
+    const response = await api.get('/admin/insurance/statistics');
+    return response.data;
+  },
 };
 
 export default api;
