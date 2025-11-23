@@ -6,7 +6,8 @@ import sys
 import time
 
 # Simple face detection without DeepFace
-DB_FILE = "face_db.pkl"
+# Use absolute path to ensure database is in AI-backend root directory
+DB_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "face_db.pkl")
 
 # Load Haar cascade for face detection
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')

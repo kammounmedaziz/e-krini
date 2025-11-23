@@ -21,10 +21,9 @@ const AuthModal = ({ isOpen, onClose, onLogin, onRegister, resetToken: propReset
     setLoading(true);
     try {
       await onLogin(data);
-      onClose();
+      // Don't close here - let App.jsx handle it after redirect
     } catch (error) {
       console.error('Login failed:', error);
-    } finally {
       setLoading(false);
     }
   };
@@ -33,10 +32,9 @@ const AuthModal = ({ isOpen, onClose, onLogin, onRegister, resetToken: propReset
     setLoading(true);
     try {
       await onRegister(data);
-      onClose();
+      // Don't close here - let App.jsx handle it after redirect
     } catch (error) {
       console.error('Registration failed:', error);
-    } finally {
       setLoading(false);
     }
   };

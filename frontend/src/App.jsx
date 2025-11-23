@@ -4,6 +4,8 @@ import LandingPage from '@pages/LandingPage';
 import AuthModal from '@pages/AuthModal';
 import ClientDashboardLayout from '@pages/client/ClientDashboardLayout';
 import AdminDashboardLayout from '@pages/admin/AdminDashboardLayout';
+import AgencyDashboardLayout from '@pages/agency/AgencyDashboardLayout';
+import InsuranceDashboardLayout from '@pages/insurance/InsuranceDashboardLayout';
 import { authAPI } from '@api';
 import toast, { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from '@context/ThemeContext';
@@ -48,14 +50,36 @@ function AppContent() {
   }, []);
 
   const redirectBasedOnRole = (user) => {
+    console.log('redirectBasedOnRole called with user:', user);
+    
     if (user?.role === 'admin') {
+      console.log('Navigating to admin dashboard');
       navigate('/admin/dashboard');
     } else if (user?.role === 'client') {
+      console.log('Navigating to client dashboard');
       navigate('/client/dashboard');
+    } else if (user?.role === 'agency') {
+      console.log('Navigating to agency dashboard');
+      navigate('/agency/dashboard');
+    } else if (user?.role === 'insurance') {
+      console.log('Navigating to insurance dashboard');
+      navigate('/insurance/dashboard');
     } else {
+      console.log('No specific role, navigating to home');
       navigate('/');
     }
   };
+
+  // Auto-redirect authenticated users on mount
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // Only redirect if we're on the landing page
+      if (window.location.pathname === '/') {
+        console.log('Auto-redirecting authenticated user from landing page');
+        redirectBasedOnRole(user);
+      }
+    }
+  }, [isAuthenticated, user]);
 
   const handleLogin = async (credentials) => {
     try {
@@ -70,21 +94,31 @@ function AppContent() {
         response = await authAPI.login(credentials);
       }
 
+      console.log('Login response:', response);
+
       if (response.success) {
         const { accessToken, refreshToken, user: userData } = response.data;
 
-        // Store tokens and user data
+        console.log('User data from response:', userData);
+
+        // Store tokens and user data FIRST
         localStorage.setItem('accessToken', accessToken);
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(userData));
 
+        // Update state
         setIsAuthenticated(true);
         setUser(userData);
         setIsAuthModalOpen(false);
 
+        // Dispatch auth change event
+        window.dispatchEvent(new Event('authChange'));
+
         toast.success(response.message || 'Login successful!');
 
-        // Redirect based on role
+        console.log('About to redirect, user role:', userData.role);
+
+        // Redirect based on role - removed setTimeout, no delay needed since localStorage is already set
         redirectBasedOnRole(userData);
       }
     } catch (error) {
@@ -129,6 +163,7 @@ function AppContent() {
   };
 
   const handleLogout = async () => {
+    console.log('handleLogout called in App.jsx');
     try {
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
@@ -190,6 +225,28 @@ function AppContent() {
           element={
             isAuthenticated && user?.role === 'admin' ? (
               <AdminDashboardLayout user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/agency/dashboard"
+          element={
+            isAuthenticated && user?.role === 'agency' ? (
+              <AgencyDashboardLayout user={user} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+
+        <Route
+          path="/insurance/dashboard"
+          element={
+            isAuthenticated && user?.role === 'insurance' ? (
+              <InsuranceDashboardLayout user={user} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" replace />
             )

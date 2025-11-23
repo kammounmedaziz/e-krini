@@ -3,30 +3,28 @@ import PropTypes from 'prop-types';
 import ProfilePicture from '../shared/ProfilePicture';
 import {
   LayoutDashboard,
-  Users,
-  Car,
-  Calendar,
+  FileText,
+  AlertCircle,
   BarChart3,
   Settings,
   LogOut,
   Menu,
-  PieChart,
-  Shield,
-  Building2,
-  HeartPulse
+  HeartPulse,
+  Users,
+  DollarSign,
+  Shield
 } from 'lucide-react';
 
-const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
+const InsuranceSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
   const items = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'statistics', label: 'Statistics', icon: PieChart },
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'agencies', label: 'Agencies', icon: Building2 },
-    { id: 'insurance', label: 'Insurance', icon: HeartPulse },
-    { id: 'cars', label: 'Car Inventory', icon: Car },
-    { id: 'reservations', label: 'Reservations', icon: Calendar },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
-    { id: 'settings', label: 'System Settings', icon: Settings },
+    { id: 'policies', label: 'Policies', icon: FileText },
+    { id: 'claims', label: 'Claims', icon: AlertCircle },
+    { id: 'coverage', label: 'Coverage Types', icon: Shield },
+    { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'revenue', label: 'Revenue', icon: DollarSign },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'logout', label: 'Log out', icon: LogOut },
   ];
 
@@ -37,7 +35,12 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
 
   const handleItemClick = (itemId) => {
     if (itemId === 'logout') {
-      onLogout();
+      console.log('Insurance logout clicked');
+      if (onLogout) {
+        onLogout();
+      } else {
+        console.error('onLogout function not provided');
+      }
     } else {
       setCurrent(itemId);
     }
@@ -47,7 +50,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
     <div className={`fixed left-0 top-0 backdrop-blur-md bg-black/20 border-r border-white/10 ${isExpanded ? 'p-4 w-64' : 'p-2 w-24'} h-screen flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] z-50`} style={{ willChange: 'width, padding' }}>
       <div className={`mb-6 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}>
         <div className={isExpanded ? '' : 'hidden'}>
-          <h2 className="text-xl font-bold text-white">Admin Panel</h2>
+          <h2 className="text-xl font-bold text-white">Insurance Panel</h2>
         </div>
         <button onClick={toggleExpanded} className="text-white hover:text-gray-300 p-1">
           <Menu className={`stroke-current origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${iconSize} ${isExpanded ? 'rotate-0' : 'rotate-180'}`} />
@@ -62,22 +65,22 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
               <ProfilePicture user={user} size="md" editable={false} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
-                  {user?.username || user?.name || 'Admin'}
+                  {user?.companyName || user?.username || 'Insurance'}
                 </p>
-                <p className="text-xs text-purple-300 truncate">
-                  {user?.email || 'admin@example.com'}
+                <p className="text-xs text-emerald-300 truncate">
+                  {user?.email || 'insurance@example.com'}
                 </p>
-                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-xs font-semibold bg-purple-500/20 text-purple-300 rounded-full">
-                  <Shield className="w-3 h-3" />
-                  Admin
+                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-xs font-semibold bg-emerald-500/20 text-emerald-300 rounded-full">
+                  <HeartPulse className="w-3 h-3" />
+                  Insurance
                 </span>
               </div>
             </div>
           ) : (
             <div className="p-1 relative">
               <ProfilePicture user={user} size="md" editable={false} />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full border-2 border-gray-900 flex items-center justify-center">
-                <Shield className="w-2.5 h-2.5 text-white" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-gray-900 flex items-center justify-center">
+                <HeartPulse className="w-2.5 h-2.5 text-white" />
               </div>
             </div>
           )}
@@ -90,7 +93,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
           href="/"
           className="mb-4 flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-200 text-white"
         >
-          <Car className="w-4 h-4" />
+          <HeartPulse className="w-4 h-4" />
           <span className="text-sm font-medium">Back to Home</span>
         </a>
       )}
@@ -103,7 +106,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
               key={it.id}
               onClick={() => handleItemClick(it.id)}
               title={isExpanded ? '' : it.label}
-              className={`w-full flex items-center ${isExpanded ? 'gap-3' : ''} p-3 rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${current === it.id ? 'bg-purple-600/20 text-white' : 'text-white hover:bg-white/5'} ${isExpanded ? 'justify-start' : 'justify-center'}`}
+              className={`w-full flex items-center ${isExpanded ? 'gap-3' : ''} p-3 rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${current === it.id ? 'bg-emerald-600/20 text-white' : 'text-white hover:bg-white/5'} ${isExpanded ? 'justify-start' : 'justify-center'}`}
             >
               <Icon className={`${iconSize} stroke-current transform-gpu transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`} />
               <span className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>{it.label}</span>
@@ -127,7 +130,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
   );
 };
 
-AdminSidebar.propTypes = {
+InsuranceSidebar.propTypes = {
   current: PropTypes.string.isRequired,
   setCurrent: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
@@ -136,4 +139,4 @@ AdminSidebar.propTypes = {
   user: PropTypes.object,
 };
 
-export default AdminSidebar;
+export default InsuranceSidebar;

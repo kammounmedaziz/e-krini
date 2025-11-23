@@ -34,7 +34,7 @@ export const getAllUsers = async (req, res) => {
         }
 
         // Filter by role
-        if (role && ['client', 'admin', 'agency'].includes(role)) {
+        if (role && ['client', 'admin', 'agency', 'insurance'].includes(role)) {
             query.role = role;
         }
 
@@ -434,6 +434,7 @@ export const getUserStatistics = async (req, res) => {
         const totalClients = await User.countDocuments({ role: 'client' });
         const totalAdmins = await User.countDocuments({ role: 'admin' });
         const totalAgencies = await User.countDocuments({ role: 'agency' });
+        const totalInsurance = await User.countDocuments({ role: 'insurance' });
         const bannedUsers = await User.countDocuments({ isBanned: true });
         const activeUsers = await User.countDocuments({ isActive: true });
         const pendingKYC = await User.countDocuments({ kycStatus: 'pending' });
@@ -478,6 +479,7 @@ export const getUserStatistics = async (req, res) => {
                     totalClients,
                     totalAdmins,
                     totalAgencies,
+                    totalInsurance,
                     bannedUsers,
                     activeUsers,
                     newUsersLast30Days
@@ -514,7 +516,7 @@ export const exportUsersToCSV = async (req, res) => {
 
         // Build query
         const query = {};
-        if (role && ['client', 'admin', 'agency'].includes(role)) {
+        if (role && ['client', 'admin', 'agency', 'insurance'].includes(role)) {
             query.role = role;
         }
         if (kycStatus && ['pending', 'approved', 'rejected'].includes(kycStatus)) {

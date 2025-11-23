@@ -13,6 +13,24 @@ import {
     bulkUpdateRole,
     bulkBanUsers
 } from '../controllers/adminController.js';
+import {
+    getAllAgencies,
+    getAgencyById,
+    approveAgency,
+    rejectAgency,
+    suspendAgency,
+    deleteAgency,
+    getAgencyStatistics
+} from '../controllers/adminAgencyController.js';
+import {
+    getAllInsuranceCompanies,
+    getInsuranceById,
+    approveInsurance,
+    rejectInsurance,
+    suspendInsurance,
+    deleteInsurance,
+    getInsuranceStatistics
+} from '../controllers/adminInsuranceController.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { adminMiddleware } from '../middlewares/admin.js';
 
@@ -39,5 +57,23 @@ router.put('/users/:userId/role', changeUserRole);
 router.post('/users/bulk/delete', bulkDeleteUsers);
 router.post('/users/bulk/role', bulkUpdateRole);
 router.post('/users/bulk/ban', bulkBanUsers);
+
+// Agency management routes
+router.get('/agencies', getAllAgencies);
+router.get('/agencies/statistics', getAgencyStatistics);
+router.get('/agencies/:agencyId', getAgencyById);
+router.post('/agencies/:agencyId/approve', approveAgency);
+router.post('/agencies/:agencyId/reject', rejectAgency);
+router.post('/agencies/:agencyId/suspend', suspendAgency);
+router.delete('/agencies/:agencyId', deleteAgency);
+
+// Insurance management routes
+router.get('/insurance', getAllInsuranceCompanies);
+router.get('/insurance/statistics', getInsuranceStatistics);
+router.get('/insurance/:insuranceId', getInsuranceById);
+router.post('/insurance/:insuranceId/approve', approveInsurance);
+router.post('/insurance/:insuranceId/reject', rejectInsurance);
+router.post('/insurance/:insuranceId/suspend', suspendInsurance);
+router.delete('/insurance/:insuranceId', deleteInsurance);
 
 export default router;

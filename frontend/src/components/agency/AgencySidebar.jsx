@@ -3,30 +3,28 @@ import PropTypes from 'prop-types';
 import ProfilePicture from '../shared/ProfilePicture';
 import {
   LayoutDashboard,
-  Users,
   Car,
   Calendar,
   BarChart3,
   Settings,
   LogOut,
   Menu,
-  PieChart,
-  Shield,
   Building2,
-  HeartPulse
+  Users,
+  DollarSign,
+  Star
 } from 'lucide-react';
 
-const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
+const AgencySidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
   const items = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'statistics', label: 'Statistics', icon: PieChart },
-    { id: 'users', label: 'User Management', icon: Users },
-    { id: 'agencies', label: 'Agencies', icon: Building2 },
-    { id: 'insurance', label: 'Insurance', icon: HeartPulse },
-    { id: 'cars', label: 'Car Inventory', icon: Car },
-    { id: 'reservations', label: 'Reservations', icon: Calendar },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
-    { id: 'settings', label: 'System Settings', icon: Settings },
+    { id: 'vehicles', label: 'My Vehicles', icon: Car },
+    { id: 'bookings', label: 'Bookings', icon: Calendar },
+    { id: 'drivers', label: 'Drivers', icon: Users },
+    { id: 'revenue', label: 'Revenue', icon: DollarSign },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'logout', label: 'Log out', icon: LogOut },
   ];
 
@@ -37,7 +35,12 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
 
   const handleItemClick = (itemId) => {
     if (itemId === 'logout') {
-      onLogout();
+      console.log('Agency logout clicked');
+      if (onLogout) {
+        onLogout();
+      } else {
+        console.error('onLogout function not provided');
+      }
     } else {
       setCurrent(itemId);
     }
@@ -47,7 +50,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
     <div className={`fixed left-0 top-0 backdrop-blur-md bg-black/20 border-r border-white/10 ${isExpanded ? 'p-4 w-64' : 'p-2 w-24'} h-screen flex flex-col overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] z-50`} style={{ willChange: 'width, padding' }}>
       <div className={`mb-6 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'} transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`}>
         <div className={isExpanded ? '' : 'hidden'}>
-          <h2 className="text-xl font-bold text-white">Admin Panel</h2>
+          <h2 className="text-xl font-bold text-white">Agency Panel</h2>
         </div>
         <button onClick={toggleExpanded} className="text-white hover:text-gray-300 p-1">
           <Menu className={`stroke-current origin-center transform-gpu transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${iconSize} ${isExpanded ? 'rotate-0' : 'rotate-180'}`} />
@@ -62,22 +65,22 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
               <ProfilePicture user={user} size="md" editable={false} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">
-                  {user?.username || user?.name || 'Admin'}
+                  {user?.companyName || user?.username || 'Agency'}
                 </p>
-                <p className="text-xs text-purple-300 truncate">
-                  {user?.email || 'admin@example.com'}
+                <p className="text-xs text-blue-300 truncate">
+                  {user?.email || 'agency@example.com'}
                 </p>
-                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-xs font-semibold bg-purple-500/20 text-purple-300 rounded-full">
-                  <Shield className="w-3 h-3" />
-                  Admin
+                <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 text-xs font-semibold bg-blue-500/20 text-blue-300 rounded-full">
+                  <Building2 className="w-3 h-3" />
+                  Agency
                 </span>
               </div>
             </div>
           ) : (
             <div className="p-1 relative">
               <ProfilePicture user={user} size="md" editable={false} />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-purple-500 rounded-full border-2 border-gray-900 flex items-center justify-center">
-                <Shield className="w-2.5 h-2.5 text-white" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-blue-500 rounded-full border-2 border-gray-900 flex items-center justify-center">
+                <Building2 className="w-2.5 h-2.5 text-white" />
               </div>
             </div>
           )}
@@ -103,7 +106,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
               key={it.id}
               onClick={() => handleItemClick(it.id)}
               title={isExpanded ? '' : it.label}
-              className={`w-full flex items-center ${isExpanded ? 'gap-3' : ''} p-3 rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${current === it.id ? 'bg-purple-600/20 text-white' : 'text-white hover:bg-white/5'} ${isExpanded ? 'justify-start' : 'justify-center'}`}
+              className={`w-full flex items-center ${isExpanded ? 'gap-3' : ''} p-3 rounded transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${current === it.id ? 'bg-blue-600/20 text-white' : 'text-white hover:bg-white/5'} ${isExpanded ? 'justify-start' : 'justify-center'}`}
             >
               <Icon className={`${iconSize} stroke-current transform-gpu transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]`} />
               <span className={`overflow-hidden whitespace-nowrap transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${isExpanded ? 'opacity-100 max-w-[160px]' : 'opacity-0 max-w-0'}`}>{it.label}</span>
@@ -127,7 +130,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
   );
 };
 
-AdminSidebar.propTypes = {
+AgencySidebar.propTypes = {
   current: PropTypes.string.isRequired,
   setCurrent: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
@@ -136,4 +139,4 @@ AdminSidebar.propTypes = {
   user: PropTypes.object,
 };
 
-export default AdminSidebar;
+export default AgencySidebar;

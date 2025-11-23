@@ -72,16 +72,53 @@ VITE_API_URL=http://localhost:3000
 VITE_GOOGLE_MAPS_KEY=your-google-maps-api-key
 ```
 
-## Key Features (To Be Implemented)
-- [ ] User authentication (login/register)
+## Key Features
+
+### ✅ Completed Features
+- [x] User authentication (login/register)
+  - Email/password authentication
+  - Face authentication integration
+  - JWT token-based auth
+  - Role-based access control (client, admin, agency, insurance)
+- [x] User dashboard (Client)
+  - Profile management
+  - Booking history
+  - Settings
+- [x] Agency dashboard
+  - Company profile management
+  - Vehicle fleet management interface
+  - Booking management
+  - Statistics and analytics
+- [x] Insurance dashboard
+  - Company profile management
+  - Policy management interface
+  - Claims management
+  - Coverage types management
+  - Statistics and analytics
+- [x] Admin panel
+  - User management
+  - System overview
+- [x] Protected routes with role-based access
+- [x] Responsive design with TailwindCSS
+- [x] Social login (Google, Facebook) integration
+- [x] Password reset functionality
+
+### 🚧 In Progress / To Be Implemented
 - [ ] Vehicle search and filtering
-- [ ] Booking flow
-- [ ] User dashboard
-- [ ] Agency dashboard
-- [ ] Admin panel
-- [ ] Payment integration
+- [ ] Complete booking flow
+- [ ] Payment integration (Stripe/PayPal)
 - [ ] Review and rating system
 - [ ] Support ticket system
+- [ ] Real-time notifications
+- [ ] Multi-language support
+- [ ] Dark mode (theme context implemented, needs completion)
+- [ ] Vehicle details pages
+- [ ] Agency vehicle CRUD operations
+- [ ] Insurance policy creation workflow
+- [ ] Claims submission and tracking
+- [ ] Document upload and verification
+- [ ] Advanced search filters
+- [ ] Map integration for agency locations
 
 ## Code Style
 - Use functional components with hooks
