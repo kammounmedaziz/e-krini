@@ -9,10 +9,12 @@ import {
   XCircle,
   Pause,
   Trash2,
+  Eye,
   RefreshCw,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import InsuranceDetailsModal from '@components/admin/InsuranceDetailsModal';
 
 const InsuranceManagement = () => {
   const [companies, setCompanies] = useState([]);
@@ -29,6 +31,8 @@ const InsuranceManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState('');
   const [actionReason, setActionReason] = useState('');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
 
   const fetchCompanies = async (page = 1) => {
     try {
@@ -39,11 +43,20 @@ const InsuranceManagement = () => {
         search: searchTerm,
         status: statusFilter
       });
-      setCompanies(response.data.companies);
-      setPagination(response.data.pagination);
+      console.log('Insurance Management - API Response:', response);
+      console.log('Insurance Management - Companies:', response.data?.companies);
+      console.log('Insurance Management - Pagination:', response.data?.pagination);
+      setCompanies(response.data.companies || []);
+      setPagination(response.data.pagination || { currentPage: 1, totalPages: 1, totalCompanies: 0, limit: 10 });
     } catch (error) {
-      toast.error('Failed to fetch insurance companies');
-      console.error(error);
+      console.error('Insurance Management - Error:', error);
+      console.error('Insurance Management - Error Response:', error.response?.data);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please login again.');
+      } else {
+        toast.error(error.response?.data?.error?.message || 'Failed to fetch insurance companies');
+      }
+      setCompanies([]);
     } finally {
       setLoading(false);
     }
@@ -88,6 +101,11 @@ const InsuranceManagement = () => {
     setSelectedCompany(company);
     setActionType(action);
     setShowModal(true);
+  };
+
+  const openDetailsModal = (companyId) => {
+    setSelectedCompanyId(companyId);
+    setShowDetailsModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -192,12 +210,17 @@ const InsuranceManagement = () => {
                         <div>
                           <p className="text-white font-medium">{company.companyName}</p>
                           <p className="text-sm text-gray-400">{company.companyRegistrationNumber}</p>
+                          {!company.hasProfile && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400 mt-1">
+                              No Profile
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-white text-sm">{company.email}</p>
-                      <p className="text-gray-400 text-sm">{company.phone}</p>
+                      <p className="text-white text-sm">{company.userId?.email || company.email}</p>
+                      <p className="text-gray-400 text-sm">{company.phone || 'N/A'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-white text-sm">{company.licenseNumber}</p>
@@ -214,6 +237,13 @@ const InsuranceManagement = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openDetailsModal(company._id)}
+                          className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all"
+                          title="View Details"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
                         {company.status === 'pending' && (
                           <>
                             <button
@@ -285,6 +315,14 @@ const InsuranceManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Details Modal */}
+      <InsuranceDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        insuranceId={selectedCompanyId}
+        onActionComplete={() => fetchCompanies(pagination.currentPage)}
+      />
 
       {/* Action Modal */}
       {showModal && (

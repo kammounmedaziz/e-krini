@@ -2,6 +2,7 @@ import Agency from '../models/Agency.js';
 import User from '../models/User.js';
 
 // Get all agencies with pagination and filtering
+// This fetches users with role='agency' and includes their profile if it exists
 export const getAllAgencies = async (req, res) => {
     try {
         const {
@@ -13,17 +14,15 @@ export const getAllAgencies = async (req, res) => {
             sortOrder = 'desc'
         } = req.query;
 
-        // Build query
-        const query = {};
+        // Build query for users with agency role
+        const userQuery = { role: 'agency' };
         
-        // Search by company name
+        // Search by username or email
         if (search) {
-            query.companyName = { $regex: search, $options: 'i' };
-        }
-
-        // Filter by status
-        if (status && ['pending', 'approved', 'suspended', 'rejected'].includes(status)) {
-            query.status = status;
+            userQuery.$or = [
+                { username: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ];
         }
 
         // Calculate pagination
@@ -31,14 +30,73 @@ export const getAllAgencies = async (req, res) => {
         const sortOptions = {};
         sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
-        // Execute query
-        const agencies = await Agency.find(query)
-            .populate('userId', 'username email')
+        // Get users with agency role
+        const users = await User.find(userQuery)
+            .select('-password -refreshTokens -faceEncoding')
             .sort(sortOptions)
             .skip(skip)
             .limit(parseInt(limit));
 
-        const totalAgencies = await Agency.countDocuments(query);
+        // For each user, get their agency profile if exists
+        const agenciesWithUsers = await Promise.all(
+            users.map(async (user) => {
+                const agency = await Agency.findOne({ userId: user._id });
+                
+                // If filtering by status and no profile, skip
+                if (status && !agency) {
+                    return null;
+                }
+                
+                // If filtering by status and profile status doesn't match, skip
+                if (status && agency && agency.status !== status) {
+                    return null;
+                }
+                
+                // Return combined data
+                return {
+                    _id: agency?._id || user._id,
+                    userId: {
+                        _id: user._id,
+                        username: user.username,
+                        email: user.email,
+                        kycStatus: user.kycStatus,
+                        createdAt: user.createdAt
+                    },
+                    hasProfile: !!agency,
+                    companyName: agency?.companyName || user.username,
+                    companyRegistrationNumber: agency?.companyRegistrationNumber || 'N/A',
+                    description: agency?.description || '',
+                    address: agency?.address || {},
+                    phone: agency?.phone || user.phone || '',
+                    email: agency?.email || user.email,
+                    logo: agency?.logo || user.profilePicture,
+                    operatingHours: agency?.operatingHours || {},
+                    status: agency?.status || 'pending',
+                    statusNotes: agency?.statusNotes || '',
+                    reviewedBy: agency?.reviewedBy || null,
+                    reviewedAt: agency?.reviewedAt || null,
+                    rating: agency?.rating || { average: 0, count: 0 },
+                    services: agency?.services || [],
+                    documents: agency?.documents || [],
+                    bankDetails: agency?.bankDetails || {},
+                    statistics: agency?.statistics || {
+                        totalBookings: 0,
+                        totalRevenue: 0,
+                        activeVehicles: 0,
+                        completedBookings: 0
+                    },
+                    isVerified: agency?.isVerified || false,
+                    createdAt: agency?.createdAt || user.createdAt,
+                    updatedAt: agency?.updatedAt || user.updatedAt
+                };
+            })
+        );
+
+        // Filter out nulls (from status filtering)
+        const agencies = agenciesWithUsers.filter(a => a !== null);
+
+        const totalUsers = await User.countDocuments(userQuery);
+        const totalAgencies = status ? agencies.length : totalUsers;
         const totalPages = Math.ceil(totalAgencies / parseInt(limit));
 
         res.json({

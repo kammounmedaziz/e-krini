@@ -6,21 +6,11 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import rateLimit from 'express-rate-limit';
-import RedisStore from 'rate-limit-redis';
-import { createClient } from 'redis';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Redis client for rate limiting
-const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379'
-});
-
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
-await redisClient.connect();
 
 // Middleware
 app.use(helmet());
@@ -33,12 +23,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined'));
 
-// Rate limiting
+// Rate limiting (in-memory store)
 const limiter = rateLimit({
-  store: new RedisStore({
-    client: redisClient,
-    prefix: 'rl:gateway:'
-  }),
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.'
@@ -69,7 +55,7 @@ const services = {
 app.use('/api/auth', createProxyMiddleware({
   target: services.auth,
   changeOrigin: true,
-  pathRewrite: { '^/api/auth': '' }
+  pathRewrite: { '^/api/auth': '/api/v1/auth' }
 }));
 
 app.use('/api/agencies', createProxyMiddleware({
@@ -117,7 +103,13 @@ app.use('/api/support', createProxyMiddleware({
 app.use('/api/users', createProxyMiddleware({
   target: services.auth,
   changeOrigin: true,
-  pathRewrite: { '^/api/users': '' }
+  pathRewrite: { '^/api/users': '/api/v1/users' }
+}));
+
+app.use('/api/admin', createProxyMiddleware({
+  target: services.auth,
+  changeOrigin: true,
+  pathRewrite: { '^/api/admin': '/api/v1/admin' }
 }));
 
 // Error handling
@@ -144,8 +136,7 @@ app.listen(PORT, () => {
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', () => {
   console.log('SIGTERM received, closing server gracefully...');
-  await redisClient.quit();
   process.exit(0);
 });
