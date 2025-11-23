@@ -15,6 +15,18 @@ const AuthModal = ({ isOpen, onClose, onLogin, onRegister, resetToken: propReset
     }
   }, [propResetToken]);
 
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset all state when modal closes
+      setLoading(false);
+      setMode('login');
+      if (!propResetToken) {
+        setResetToken('');
+      }
+    }
+  }, [isOpen, propResetToken]);
+
   if (!isOpen) return null;
 
   const handleLogin = async (data) => {

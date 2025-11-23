@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
+import AgencyDetailsModal from '@components/admin/AgencyDetailsModal';
 
 const AgencyManagement = () => {
   const [agencies, setAgencies] = useState([]);
@@ -30,6 +31,8 @@ const AgencyManagement = () => {
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState('');
   const [actionReason, setActionReason] = useState('');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedAgencyId, setSelectedAgencyId] = useState(null);
 
   const fetchAgencies = async (page = 1) => {
     try {
@@ -40,11 +43,20 @@ const AgencyManagement = () => {
         search: searchTerm,
         status: statusFilter
       });
-      setAgencies(response.data.agencies);
-      setPagination(response.data.pagination);
+      console.log('Agency Management - API Response:', response);
+      console.log('Agency Management - Agencies:', response.data?.agencies);
+      console.log('Agency Management - Pagination:', response.data?.pagination);
+      setAgencies(response.data.agencies || []);
+      setPagination(response.data.pagination || { currentPage: 1, totalPages: 1, totalAgencies: 0, limit: 10 });
     } catch (error) {
-      toast.error('Failed to fetch agencies');
-      console.error(error);
+      console.error('Agency Management - Error:', error);
+      console.error('Agency Management - Error Response:', error.response?.data);
+      if (error.response?.status === 401) {
+        toast.error('Authentication failed. Please login again.');
+      } else {
+        toast.error(error.response?.data?.error?.message || 'Failed to fetch agencies');
+      }
+      setAgencies([]);
     } finally {
       setLoading(false);
     }
@@ -89,6 +101,11 @@ const AgencyManagement = () => {
     setSelectedAgency(agency);
     setActionType(action);
     setShowModal(true);
+  };
+
+  const openDetailsModal = (agencyId) => {
+    setSelectedAgencyId(agencyId);
+    setShowDetailsModal(true);
   };
 
   const getStatusBadge = (status) => {
@@ -192,12 +209,17 @@ const AgencyManagement = () => {
                         <div>
                           <p className="text-white font-medium">{agency.companyName}</p>
                           <p className="text-sm text-gray-400">{agency.companyRegistrationNumber}</p>
+                          {!agency.hasProfile && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-500/20 text-yellow-400 mt-1">
+                              No Profile
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-white text-sm">{agency.email}</p>
-                      <p className="text-gray-400 text-sm">{agency.phone}</p>
+                      <p className="text-white text-sm">{agency.userId?.email || agency.email}</p>
+                      <p className="text-gray-400 text-sm">{agency.phone || 'N/A'}</p>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-white text-sm">{agency.address?.city || 'N/A'}</p>
@@ -211,6 +233,13 @@ const AgencyManagement = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => openDetailsModal(agency._id)}
+                          className="p-2 hover:bg-blue-500/20 text-blue-400 rounded-lg transition-all"
+                          title="View Details"
+                        >
+                          <Eye className="w-5 h-5" />
+                        </button>
                         {agency.status === 'pending' && (
                           <>
                             <button
@@ -282,6 +311,14 @@ const AgencyManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Details Modal */}
+      <AgencyDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        agencyId={selectedAgencyId}
+        onActionComplete={() => fetchAgencies(pagination.currentPage)}
+      />
 
       {/* Action Modal */}
       {showModal && (

@@ -1,0 +1,719 @@
+========================================
+AUTH & USER SERVICE - API TESTING GUIDE
+========================================
+Base URL: http://localhost:3001/api/v1
+
+========================================
+1. AUTHENTICATION ENDPOINTS
+========================================
+
+1.1 Register User
+-----------------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/register
+Headers: Content-Type: application/json
+Body:
+{
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "Password123!",
+  "role": "client"
+}
+
+1.2 Login
+---------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/login
+Headers: Content-Type: application/json
+Body:
+{
+  "email": "testuser@example.com",
+  "password": "Password123!"
+}
+
+1.3 Login with Face
+-------------------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/login-face
+Headers: Content-Type: application/json
+Body:
+{
+  "imageData": "base64_encoded_image_string",
+  "username": "testuser"
+}
+
+1.4 Refresh Token
+-----------------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/refresh-token
+Headers: Content-Type: application/json
+Body:
+{
+  "refreshToken": "your_refresh_token_here"
+}
+
+1.5 Logout
+----------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/logout
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ACCESS_TOKEN
+Body:
+{
+  "refreshToken": "your_refresh_token_here"
+}
+
+1.6 Forgot Password
+-------------------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/forgot-password
+Headers: Content-Type: application/json
+Body:
+{
+  "email": "testuser@example.com"
+}
+
+1.7 Reset Password
+------------------
+Method: POST
+URL: http://localhost:3001/api/v1/auth/reset-password
+Headers: Content-Type: application/json
+Body:
+{
+  "token": "reset_token_from_email",
+  "newPassword": "NewPassword123!"
+}
+
+========================================
+2. USER PROFILE ENDPOINTS
+========================================
+Note: All require Authorization: Bearer YOUR_ACCESS_TOKEN
+
+2.1 Get User Profile
+--------------------
+Method: GET
+URL: http://localhost:3001/api/v1/users/profile
+Headers: Authorization: Bearer YOUR_ACCESS_TOKEN
+
+2.2 Update User Profile
+-----------------------
+Method: PUT
+URL: http://localhost:3001/api/v1/users/profile
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ACCESS_TOKEN
+Body:
+{
+  "username": "newusername",
+  "phone": "+1234567890",
+  "address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "USA"
+  }
+}
+
+2.3 Upload Profile Picture
+---------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/users/profile/picture
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ACCESS_TOKEN
+Body:
+{
+  "imageData": "base64_encoded_image_string"
+}
+
+2.4 Delete Profile Picture
+---------------------------
+Method: DELETE
+URL: http://localhost:3001/api/v1/users/profile/picture
+Headers: Authorization: Bearer YOUR_ACCESS_TOKEN
+
+2.5 Change Password
+-------------------
+Method: PUT
+URL: http://localhost:3001/api/v1/users/password
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ACCESS_TOKEN
+Body:
+{
+  "currentPassword": "CurrentPassword123!",
+  "newPassword": "NewPassword123!"
+}
+
+2.6 Get Face Images
+-------------------
+Method: GET
+URL: http://localhost:3001/api/v1/auth/face-images
+Headers: Authorization: Bearer YOUR_ACCESS_TOKEN
+
+2.7 Delete Face Image
+---------------------
+Method: DELETE
+URL: http://localhost:3001/api/v1/auth/face-images/IMAGE_ID
+Headers: Authorization: Bearer YOUR_ACCESS_TOKEN
+
+========================================
+3. ADMIN - USER MANAGEMENT
+========================================
+Note: All require admin role + Authorization: Bearer YOUR_ADMIN_TOKEN
+
+3.1 Get All Users
+-----------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/users?page=1&limit=10&role=client&kycStatus=approved&sortBy=createdAt&sortOrder=desc
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+Query Parameters:
+  - page: 1 (default)
+  - limit: 10 (default)
+  - role: client|admin|agency|insurance (optional)
+  - kycStatus: pending|approved|rejected (optional)
+  - isBanned: true|false (optional)
+  - search: search term (optional)
+  - sortBy: createdAt|username|email (default: createdAt)
+  - sortOrder: asc|desc (default: desc)
+
+3.2 Get User Statistics
+-----------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/users/statistics
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+3.3 Get User by ID
+------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/users/USER_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+3.4 Update User
+---------------
+Method: PUT
+URL: http://localhost:3001/api/v1/admin/users/USER_ID
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "username": "updatedname",
+  "email": "newemail@example.com",
+  "kycStatus": "approved",
+  "isActive": true
+}
+
+3.5 Delete User
+---------------
+Method: DELETE
+URL: http://localhost:3001/api/v1/admin/users/USER_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+3.6 Ban User
+------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/users/USER_ID/ban
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "reason": "Violation of terms of service"
+}
+
+3.7 Unban User
+--------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/users/USER_ID/unban
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+3.8 Change User Role
+--------------------
+Method: PUT
+URL: http://localhost:3001/api/v1/admin/users/USER_ID/role
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "role": "admin"
+}
+
+3.9 Export Users to CSV
+-----------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/users/export?role=client&kycStatus=approved
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+Query Parameters: Same as Get All Users
+
+3.10 Bulk Delete Users
+----------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/users/bulk/delete
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "userIds": ["USER_ID_1", "USER_ID_2", "USER_ID_3"]
+}
+
+3.11 Bulk Update Role
+---------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/users/bulk/role
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "userIds": ["USER_ID_1", "USER_ID_2"],
+  "role": "admin"
+}
+
+3.12 Bulk Ban Users
+-------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/users/bulk/ban
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "userIds": ["USER_ID_1", "USER_ID_2"],
+  "reason": "Spam activity"
+}
+
+========================================
+4. ADMIN - AGENCY MANAGEMENT
+========================================
+Note: All require admin role + Authorization: Bearer YOUR_ADMIN_TOKEN
+
+4.1 Get All Agencies
+--------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/agencies?page=1&limit=10&status=pending&search=company
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+Query Parameters:
+  - page: 1 (default)
+  - limit: 10 (default)
+  - status: pending|approved|suspended|rejected (optional)
+  - search: company name search (optional)
+  - sortBy: createdAt|companyName (default: createdAt)
+  - sortOrder: asc|desc (default: desc)
+
+4.2 Get Agency Statistics
+--------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/agencies/statistics
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+4.3 Get Agency by ID
+--------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/agencies/AGENCY_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+4.4 Approve Agency
+------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/agencies/AGENCY_ID/approve
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "notes": "All documents verified"
+}
+
+4.5 Reject Agency
+-----------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/agencies/AGENCY_ID/reject
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "reason": "Invalid business license"
+}
+
+4.6 Suspend Agency
+------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/agencies/AGENCY_ID/suspend
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "reason": "Pending investigation"
+}
+
+4.7 Delete Agency
+-----------------
+Method: DELETE
+URL: http://localhost:3001/api/v1/admin/agencies/AGENCY_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+========================================
+5. ADMIN - INSURANCE MANAGEMENT
+========================================
+Note: All require admin role + Authorization: Bearer YOUR_ADMIN_TOKEN
+
+5.1 Get All Insurance Companies
+--------------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/insurance?page=1&limit=10&status=approved&search=company
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+Query Parameters:
+  - page: 1 (default)
+  - limit: 10 (default)
+  - status: pending|approved|suspended|rejected (optional)
+  - search: company name search (optional)
+  - sortBy: createdAt|companyName (default: createdAt)
+  - sortOrder: asc|desc (default: desc)
+
+5.2 Get Insurance Statistics
+-----------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/insurance/statistics
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+5.3 Get Insurance by ID
+-----------------------
+Method: GET
+URL: http://localhost:3001/api/v1/admin/insurance/INSURANCE_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+5.4 Approve Insurance Company
+------------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/insurance/INSURANCE_ID/approve
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "notes": "License verified successfully"
+}
+
+5.5 Reject Insurance Company
+-----------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/insurance/INSURANCE_ID/reject
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "reason": "Invalid insurance license"
+}
+
+5.6 Suspend Insurance Company
+------------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/admin/insurance/INSURANCE_ID/suspend
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_ADMIN_TOKEN
+Body:
+{
+  "reason": "Compliance review pending"
+}
+
+5.7 Delete Insurance Company
+-----------------------------
+Method: DELETE
+URL: http://localhost:3001/api/v1/admin/insurance/INSURANCE_ID
+Headers: Authorization: Bearer YOUR_ADMIN_TOKEN
+
+========================================
+6. AGENCY PROFILE MANAGEMENT
+========================================
+Note: All require agency role + Authorization: Bearer YOUR_AGENCY_TOKEN
+
+6.1 Get Agency Profile
+-----------------------
+Method: GET
+URL: http://localhost:3001/api/v1/agency/profile
+Headers: Authorization: Bearer YOUR_AGENCY_TOKEN
+
+6.2 Create/Update Agency Profile
+---------------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/agency/profile
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_AGENCY_TOKEN
+Body:
+{
+  "companyName": "Best Car Rentals",
+  "companyRegistrationNumber": "REG123456",
+  "description": "Leading car rental company",
+  "address": {
+    "street": "456 Business Ave",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zipCode": "90001",
+    "country": "USA"
+  },
+  "phone": "+1234567890",
+  "email": "contact@bestcarrentals.com",
+  "operatingHours": {
+    "monday": { "open": "09:00", "close": "18:00" },
+    "tuesday": { "open": "09:00", "close": "18:00" },
+    "wednesday": { "open": "09:00", "close": "18:00" },
+    "thursday": { "open": "09:00", "close": "18:00" },
+    "friday": { "open": "09:00", "close": "18:00" },
+    "saturday": { "open": "10:00", "close": "16:00" },
+    "sunday": { "open": "10:00", "close": "16:00" }
+  },
+  "services": [
+    {
+      "type": "rental",
+      "description": "Daily and weekly car rentals",
+      "pricing": { "daily": 50, "weekly": 300 }
+    }
+  ],
+  "bankDetails": {
+    "accountHolderName": "Best Car Rentals Inc",
+    "accountNumber": "1234567890",
+    "bankName": "Chase Bank",
+    "routingNumber": "123456789",
+    "swiftCode": "CHASUS33"
+  }
+}
+
+6.3 Upload Agency Logo
+-----------------------
+Method: POST
+URL: http://localhost:3001/api/v1/agency/profile/logo
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_AGENCY_TOKEN
+Body:
+{
+  "imageData": "base64_encoded_image_string"
+}
+
+6.4 Upload Agency Documents
+----------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/agency/documents
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_AGENCY_TOKEN
+Body:
+{
+  "type": "license",
+  "url": "https://example.com/document.pdf"
+}
+
+6.5 Get Agency Dashboard Stats
+-------------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/agency/dashboard/stats
+Headers: Authorization: Bearer YOUR_AGENCY_TOKEN
+
+========================================
+7. INSURANCE PROFILE MANAGEMENT
+========================================
+Note: All require insurance role + Authorization: Bearer YOUR_INSURANCE_TOKEN
+
+7.1 Get Insurance Profile
+--------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/insurance/profile
+Headers: Authorization: Bearer YOUR_INSURANCE_TOKEN
+
+7.2 Create/Update Insurance Profile
+------------------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/insurance/profile
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_INSURANCE_TOKEN
+Body:
+{
+  "companyName": "Premium Insurance Co",
+  "companyRegistrationNumber": "INS123456",
+  "licenseNumber": "LIC789012",
+  "description": "Comprehensive car insurance provider",
+  "address": {
+    "street": "789 Insurance Blvd",
+    "city": "Chicago",
+    "state": "IL",
+    "zipCode": "60601",
+    "country": "USA"
+  },
+  "phone": "+1987654321",
+  "email": "contact@premiuminsurance.com",
+  "operatingHours": {
+    "monday": { "open": "08:00", "close": "17:00" },
+    "tuesday": { "open": "08:00", "close": "17:00" },
+    "wednesday": { "open": "08:00", "close": "17:00" },
+    "thursday": { "open": "08:00", "close": "17:00" },
+    "friday": { "open": "08:00", "close": "17:00" }
+  },
+  "coverageTypes": [
+    {
+      "type": "comprehensive",
+      "name": "Full Coverage",
+      "description": "Complete protection for your vehicle",
+      "basePrice": 150
+    },
+    {
+      "type": "collision",
+      "name": "Collision Coverage",
+      "description": "Coverage for accident damage",
+      "basePrice": 100
+    }
+  ],
+  "bankDetails": {
+    "accountHolderName": "Premium Insurance Co",
+    "accountNumber": "9876543210",
+    "bankName": "Bank of America",
+    "routingNumber": "987654321",
+    "swiftCode": "BOFAUS3N"
+  }
+}
+
+7.3 Upload Insurance Logo
+--------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/insurance/profile/logo
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_INSURANCE_TOKEN
+Body:
+{
+  "imageData": "base64_encoded_image_string"
+}
+
+7.4 Upload Insurance Documents
+-------------------------------
+Method: POST
+URL: http://localhost:3001/api/v1/insurance/documents
+Headers: 
+  Content-Type: application/json
+  Authorization: Bearer YOUR_INSURANCE_TOKEN
+Body:
+{
+  "type": "license",
+  "url": "https://example.com/license.pdf"
+}
+
+7.5 Get Insurance Dashboard Stats
+----------------------------------
+Method: GET
+URL: http://localhost:3001/api/v1/insurance/dashboard/stats
+Headers: Authorization: Bearer YOUR_INSURANCE_TOKEN
+
+========================================
+TESTING WORKFLOW
+========================================
+
+1. Register a User
+------------------
+POST http://localhost:3001/api/v1/auth/register
+{
+  "username": "admin",
+  "email": "admin@example.com",
+  "password": "Admin123!",
+  "role": "admin"
+}
+
+2. Login to Get Tokens
+-----------------------
+POST http://localhost:3001/api/v1/auth/login
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
+Save the accessToken and refreshToken from response
+
+3. Test Protected Endpoints
+----------------------------
+Use the accessToken in Authorization header:
+Authorization: Bearer YOUR_ACCESS_TOKEN_HERE
+
+4. Test Admin Endpoints
+------------------------
+Make sure you're logged in with role: "admin"
+Use admin token for all /admin/* endpoints
+
+5. Test Agency Endpoints
+-------------------------
+Register with role: "agency"
+Login and use agency token for /agency/* endpoints
+
+6. Test Insurance Endpoints
+----------------------------
+Register with role: "insurance"
+Login and use insurance token for /insurance/* endpoints
+
+========================================
+COMMON RESPONSE FORMATS
+========================================
+
+Success Response:
+{
+  "success": true,
+  "data": { ... },
+  "message": "Operation successful"
+}
+
+Error Response:
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Error description"
+  }
+}
+
+Authentication Error (401):
+{
+  "success": false,
+  "error": {
+    "code": "AUTH_INVALID_TOKEN",
+    "message": "Invalid or expired token"
+  }
+}
+
+Forbidden Error (403):
+{
+  "success": false,
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Access denied"
+  }
+}
+
+========================================
+NOTES
+========================================
+
+1. All endpoints except /auth/register, /auth/login, /auth/forgot-password, and /auth/reset-password require authentication
+
+2. Admin endpoints (/admin/*) require admin role
+
+3. Agency endpoints (/agency/*) require agency role
+
+4. Insurance endpoints (/insurance/*) require insurance role
+
+5. Tokens expire after a certain time - use refresh token to get new access token
+
+6. For testing, you can use tools like:
+   - Postman
+   - Thunder Client (VS Code extension)
+   - cURL commands
+   - Insomnia
+
+7. Make sure MongoDB is running before testing
+
+8. Check server logs for detailed error messages
