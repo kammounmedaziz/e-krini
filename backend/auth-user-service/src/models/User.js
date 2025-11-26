@@ -34,10 +34,42 @@ const userSchema = new mongoose.Schema({
             default: Date.now,
         }
     }],
+    // Enhanced KYC tracking fields
+    kycRejectionReason: {
+        type: String,
+        default: null,
+    },
+    kycReviewedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+    },
+    kycReviewedAt: {
+        type: Date,
+        default: null,
+    },
+    kycSubmittedAt: {
+        type: Date,
+        default: null,
+    },
+    kycAiVerificationScore: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: null,
+    },
     mfaEnabled: {
         type: Boolean,
         default: false,
     },
+    mfaSecret: {
+        type: String,
+        default: null,
+    },
+    mfaBackupCodes: [{
+        code: String,
+        used: { type: Boolean, default: false }
+    }],
     profilePicture: {
         type: String,
         default: null,
@@ -63,6 +95,35 @@ const userSchema = new mongoose.Schema({
             }
         }
     ],
+    isBanned: {
+        type: Boolean,
+        default: false,
+    },
+    banReason: {
+        type: String,
+        default: null,
+    },
+    bannedAt: {
+        type: Date,
+        default: null,
+    },
+    bannedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
+    lastLoginAt: {
+        type: Date,
+        default: null,
+    },
+    loginCount: {
+        type: Number,
+        default: 0,
+    },
 }, { timestamps: true });
 
 // Hash password

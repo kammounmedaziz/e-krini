@@ -18,8 +18,11 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('dev'));
+
+// Serve static files for KYC documents
+app.use('/uploads', express.static('uploads'));
 
 // Database connection
 connectDB();
@@ -61,12 +64,20 @@ import userRoutes from './routes/user.js';
 import adminRoutes from './routes/admin.js';
 import agencyRoutes from './routes/agencyRoutes.js';
 import insuranceRoutes from './routes/insuranceRoutes.js';
+import twoFactorRoutes from './routes/twoFactor.js';
+import passwordResetRoutes from './routes/passwordReset.js';
+import loginHistoryRoutes from './routes/loginHistory.js';
+import kycRoutes from './routes/kyc.js';
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/agency', agencyRoutes);
 app.use('/api/v1/insurance', insuranceRoutes);
+app.use('/api/v1/2fa', twoFactorRoutes);
+app.use('/api/v1/password', passwordResetRoutes);
+app.use('/api/v1/login-history', loginHistoryRoutes);
+app.use('/api/v1/kyc', kycRoutes);
 
 // Error handling middleware
 app.use((err, req, res, _next) => {

@@ -11,12 +11,14 @@ import {
   MessageSquare,
   Settings,
   LogOut,
-  Menu
+  Menu,
+  FileCheck
 } from 'lucide-react';
 
 const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
   const items = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'kyc', label: 'Identity Verification', icon: FileCheck },
     { id: 'cars', label: 'My Cars', icon: Car },
     { id: 'reservations', label: 'Reservations', icon: Calendar },
     { id: 'payments', label: 'Payments', icon: CreditCard },
