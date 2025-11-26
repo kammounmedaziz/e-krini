@@ -2,19 +2,8 @@
 AUTH & USER SERVICE - POSTMAN TESTING GUIDE
 ================================================================================
 Service Port: 3001
-Base URL: http://localhost:3000/api (via Gateway)
-Direct URL: http://localhost:3001/api/v1
+Base URL: http://localhost:3001/api/v1
 
-Gateway Routes:
-- /api/auth/* → auth-user-service
-- /api/users/* → auth-user-service
-- /api/admin/* → auth-user-service
-- /api/kyc/* → auth-user-service
-- /api/2fa/* → auth-user-service
-- /api/password-reset/* → auth-user-service
-- /api/login-history/* → auth-user-service
-- /api/agency/* → auth-user-service
-- /api/insurance/* → auth-user-service
 
 ================================================================================
 1. AUTHENTICATION ENDPOINTS
@@ -22,7 +11,7 @@ Gateway Routes:
 
 1.1. REGISTER NEW USER
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/register
+POST http://localhost:3001/api/v1/auth/register
 
 Body (JSON) - Client:
 {
@@ -65,7 +54,7 @@ Expected Response:
 
 1.2. LOGIN
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/login
+POST http://localhost:3001/api/v1/auth/login
 
 Body (JSON):
 {
@@ -106,7 +95,7 @@ Expected Response (2FA Enabled):
 
 1.3. LOGIN WITH 2FA
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/login-2fa
+POST http://localhost:3001/api/v1/auth/login-2fa
 
 Body (JSON):
 {
@@ -127,7 +116,7 @@ Expected Response:
 
 1.4. REFRESH TOKEN
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/refresh-token
+POST http://localhost:3001/api/v1/auth/refresh-token
 
 Body (JSON):
 {
@@ -143,7 +132,7 @@ Expected Response:
 
 1.5. LOGOUT
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/logout
+POST http://localhost:3001/api/v1/auth/logout
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Body (JSON):
@@ -159,7 +148,7 @@ Expected Response:
 
 1.6. ENABLE FACE AUTHENTICATION
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/enable-face-auth
+POST http://localhost:3001/api/v1/auth/enable-face-auth
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Body (form-data):
@@ -174,7 +163,7 @@ Expected Response:
 
 1.7. LOGIN WITH FACE
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/auth/login-face
+POST http://localhost:3001/api/v1/auth/login-face
 
 Body (form-data):
 - username: johndoe
@@ -197,7 +186,7 @@ Expected Response:
 
 2.1. GET USER PROFILE
 --------------------------------------------------------------------------------
-GET http://localhost:3000/api/users/profile
+GET http://localhost:3001/api/v1/users/profile
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Expected Response:
@@ -223,7 +212,7 @@ Expected Response:
 
 2.2. UPDATE USER PROFILE
 --------------------------------------------------------------------------------
-PUT http://localhost:3000/api/users/profile
+PUT http://localhost:3001/api/v1/users/profile
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Body (JSON):
@@ -253,7 +242,7 @@ Expected Response:
 
 2.3. UPLOAD PROFILE PICTURE
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/users/profile/picture
+POST http://localhost:3001/api/v1/users/profile/picture
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Body (form-data):
@@ -270,7 +259,7 @@ Expected Response:
 
 2.4. DELETE PROFILE PICTURE
 --------------------------------------------------------------------------------
-DELETE http://localhost:3000/api/users/profile/picture
+DELETE http://localhost:3001/api/v1/users/profile/picture
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Expected Response:
@@ -285,7 +274,7 @@ Expected Response:
 
 3.1. SUBMIT KYC DOCUMENTS
 --------------------------------------------------------------------------------
-POST http://localhost:3000/api/kyc/submit
+POST http://localhost:3001/api/v1/kyc/submit
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Body (form-data):
@@ -315,7 +304,7 @@ Expected Response:
 
 3.2. GET KYC STATUS
 --------------------------------------------------------------------------------
-GET http://localhost:3000/api/kyc/status
+GET http://localhost:3001/api/v1/kyc/status
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Expected Response:
@@ -340,7 +329,7 @@ Expected Response:
 
 3.3. DELETE KYC DOCUMENT
 --------------------------------------------------------------------------------
-DELETE http://localhost:3000/api/kyc/documents/{documentId}
+DELETE http://localhost:3001/api/v1/kyc/documents/{documentId}
 Headers: Authorization: Bearer ACCESS_TOKEN
 
 Expected Response:
@@ -1468,7 +1457,7 @@ POSTMAN COLLECTION SETUP TIPS
 ================================================================================
 
 1. Environment Variables:
-   - base_url: http://localhost:3000/api
+   - base_url: http://localhost:3001/api/v1
    - access_token: (set after login)
    - refresh_token: (set after login)
    - admin_token: (set after admin login)

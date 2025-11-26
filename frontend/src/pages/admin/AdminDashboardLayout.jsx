@@ -7,6 +7,7 @@ import AdminStatistics from './AdminStatistics';
 import AgencyManagement from './AgencyManagement';
 import InsuranceManagement from './InsuranceManagement';
 import AdminKYCReview from './AdminKYCReview';
+import FeedbackManagement from './FeedbackManagement';
 
 const AdminDashboardLayout = ({ user, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -55,6 +56,8 @@ const AdminDashboardLayout = ({ user, onLogout }) => {
             </div>
           </div>
         );
+      case 'feedback':
+        return <FeedbackManagement />;
       default:
         return <AdminDashboard />;
     }

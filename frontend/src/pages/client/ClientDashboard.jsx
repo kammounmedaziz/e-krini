@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ClientSidebar from '../../components/client/ClientSidebar';
 import ClientSettings from './ClientSettings';
 import IdentityVerification from './IdentityVerification';
+import FeedbackComplaints from './FeedbackComplaints';
 import { Card } from '@ui';
 import {
   Car,
@@ -325,6 +326,8 @@ const ClientDashboard = ({ user: initialUser, onLogout }) => {
             </div>
           </div>
         );
+      case 'feedback':
+        return <FeedbackComplaints />;
       case 'settings':
         return <ClientSettings key={current} />;
       default:

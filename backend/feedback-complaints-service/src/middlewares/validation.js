@@ -115,14 +115,40 @@ export const getFeedbackQueryValidation = [
     .withMessage('Limit must be between 1 and 100'),
   query('status')
     .optional()
-    .isIn(['pending', 'in_progress', 'resolved', 'closed', 'rejected'])
-    .withMessage('Invalid status'),
+    .custom((value) => {
+      if (value && value.trim() !== '') {
+        if (!['pending', 'in_progress', 'resolved', 'closed', 'rejected'].includes(value)) {
+          throw new Error('Invalid status');
+        }
+      }
+      return true;
+    }),
   query('type')
     .optional()
-    .isIn(['feedback', 'complaint', 'report', 'suggestion'])
-    .withMessage('Invalid type'),
+    .custom((value) => {
+      if (value && value.trim() !== '') {
+        if (!['feedback', 'complaint', 'report', 'suggestion'].includes(value)) {
+          throw new Error('Invalid type');
+        }
+      }
+      return true;
+    }),
   query('priority')
     .optional()
-    .isIn(['low', 'medium', 'high', 'urgent'])
-    .withMessage('Invalid priority')
+    .custom((value) => {
+      if (value && value.trim() !== '') {
+        if (!['low', 'medium', 'high', 'urgent'].includes(value)) {
+          throw new Error('Invalid priority');
+        }
+      }
+      return true;
+    }),
+  query('sortBy')
+    .optional()
+    .isIn(['createdAt', 'updatedAt', 'priority', 'status'])
+    .withMessage('Invalid sort field'),
+  query('sortOrder')
+    .optional()
+    .isIn(['asc', 'desc'])
+    .withMessage('Sort order must be asc or desc')
 ];

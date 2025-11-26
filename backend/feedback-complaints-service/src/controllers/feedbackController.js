@@ -16,7 +16,7 @@ export const createFeedback = async (req, res) => {
     } = req.body;
 
     const feedbackData = {
-      userId: req.user.userId,
+      userId: req.user.id,
       userType: req.user.role,
       type,
       category,
@@ -31,7 +31,7 @@ export const createFeedback = async (req, res) => {
 
     const feedback = await Feedback.create(feedbackData);
 
-    logger.info(`Feedback created: ${feedback._id} by user: ${req.user.userId}`);
+    logger.info(`Feedback created: ${feedback._id} by user: ${req.user.id}`);
 
     res.status(201).json({
       success: true,
@@ -80,10 +80,6 @@ export const getAllFeedback = async (req, res) => {
         .sort(sort)
         .skip(skip)
         .limit(parseInt(limit))
-        .populate('userId', 'username email')
-        .populate('assignedTo', 'username email')
-        .populate('response.respondedBy', 'username')
-        .populate('resolution.resolvedBy', 'username')
         .lean(),
       Feedback.countDocuments(query)
     ]);
@@ -124,7 +120,7 @@ export const getMyFeedback = async (req, res) => {
       sortOrder = 'desc'
     } = req.query;
 
-    const query = { userId: req.user.userId };
+    const query = { userId: req.user.id };
     if (status) query.status = status;
     if (type) query.type = type;
 
@@ -136,8 +132,6 @@ export const getMyFeedback = async (req, res) => {
         .sort(sort)
         .skip(skip)
         .limit(parseInt(limit))
-        .populate('response.respondedBy', 'username')
-        .populate('resolution.resolvedBy', 'username')
         .lean(),
       Feedback.countDocuments(query)
     ]);
@@ -171,13 +165,7 @@ export const getFeedbackById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const feedback = await Feedback.findById(id)
-      .populate('userId', 'username email')
-      .populate('assignedTo', 'username email')
-      .populate('response.respondedBy', 'username email')
-      .populate('resolution.resolvedBy', 'username email')
-      .populate('internalNotes.addedBy', 'username')
-      .lean();
+    const feedback = await Feedback.findById(id).lean();
 
     if (!feedback) {
       return res.status(404).json({
@@ -190,7 +178,7 @@ export const getFeedbackById = async (req, res) => {
     }
 
     // Check access permissions
-    if (req.user.role !== 'admin' && feedback.userId._id.toString() !== req.user.userId) {
+    if (req.user.role !== 'admin' && feedback.userId.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         success: false,
         error: {
@@ -231,8 +219,8 @@ export const updateFeedback = async (req, res) => {
       id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('userId', 'username email')
-     .populate('assignedTo', 'username email');
+    )
+     ;
 
     if (!feedback) {
       return res.status(404).json({
@@ -244,7 +232,7 @@ export const updateFeedback = async (req, res) => {
       });
     }
 
-    logger.info(`Feedback ${id} updated by admin: ${req.user.userId}`);
+    logger.info(`Feedback ${id} updated by admin: ${req.user.id}`);
 
     res.json({
       success: true,
@@ -274,14 +262,14 @@ export const respondToFeedback = async (req, res) => {
       {
         response: {
           message,
-          respondedBy: req.user.userId,
+          respondedBy: req.user.id,
           respondedAt: new Date()
         },
         status: 'in_progress'
       },
       { new: true, runValidators: true }
-    ).populate('userId', 'username email')
-     .populate('response.respondedBy', 'username email');
+    )
+     ;
 
     if (!feedback) {
       return res.status(404).json({
@@ -293,7 +281,7 @@ export const respondToFeedback = async (req, res) => {
       });
     }
 
-    logger.info(`Response added to feedback ${id} by admin: ${req.user.userId}`);
+    logger.info(`Response added to feedback ${id} by admin: ${req.user.id}`);
 
     res.json({
       success: true,
@@ -323,14 +311,14 @@ export const resolveFeedback = async (req, res) => {
       {
         resolution: {
           message,
-          resolvedBy: req.user.userId,
+          resolvedBy: req.user.id,
           resolvedAt: new Date()
         },
         status: 'resolved'
       },
       { new: true, runValidators: true }
-    ).populate('userId', 'username email')
-     .populate('resolution.resolvedBy', 'username email');
+    )
+     ;
 
     if (!feedback) {
       return res.status(404).json({
@@ -342,7 +330,7 @@ export const resolveFeedback = async (req, res) => {
       });
     }
 
-    logger.info(`Feedback ${id} resolved by admin: ${req.user.userId}`);
+    logger.info(`Feedback ${id} resolved by admin: ${req.user.id}`);
 
     res.json({
       success: true,
@@ -373,13 +361,13 @@ export const addInternalNote = async (req, res) => {
         $push: {
           internalNotes: {
             note,
-            addedBy: req.user.userId,
+            addedBy: req.user.id,
             addedAt: new Date()
           }
         }
       },
       { new: true, runValidators: true }
-    ).populate('internalNotes.addedBy', 'username');
+    );
 
     if (!feedback) {
       return res.status(404).json({
@@ -391,7 +379,7 @@ export const addInternalNote = async (req, res) => {
       });
     }
 
-    logger.info(`Internal note added to feedback ${id} by admin: ${req.user.userId}`);
+    logger.info(`Internal note added to feedback ${id} by admin: ${req.user.id}`);
 
     res.json({
       success: true,
@@ -416,7 +404,7 @@ export const rateFeedbackResolution = async (req, res) => {
     const { id } = req.params;
     const { rating } = req.body;
 
-    const feedback = await Feedback.findOne({ _id: id, userId: req.user.userId });
+    const feedback = await Feedback.findOne({ _id: id, userId: req.user.id });
 
     if (!feedback) {
       return res.status(404).json({
@@ -444,7 +432,7 @@ export const rateFeedbackResolution = async (req, res) => {
     }
     await feedback.save();
 
-    logger.info(`Feedback ${id} rated ${rating}/5 by user: ${req.user.userId}`);
+    logger.info(`Feedback ${id} rated ${rating}/5 by user: ${req.user.id}`);
 
     res.json({
       success: true,
@@ -482,7 +470,7 @@ export const deleteFeedback = async (req, res) => {
 
     // Only admin can delete any feedback, users can only delete their own pending feedback
     if (req.user.role !== 'admin') {
-      if (feedback.userId.toString() !== req.user.userId || feedback.status !== 'pending') {
+      if (feedback.userId.toString() !== req.user.id || feedback.status !== 'pending') {
         return res.status(403).json({
           success: false,
           error: {
@@ -495,7 +483,7 @@ export const deleteFeedback = async (req, res) => {
 
     await Feedback.findByIdAndDelete(id);
 
-    logger.info(`Feedback ${id} deleted by: ${req.user.userId}`);
+    logger.info(`Feedback ${id} deleted by: ${req.user.id}`);
 
     res.json({
       success: true,
