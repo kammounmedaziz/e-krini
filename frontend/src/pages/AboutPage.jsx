@@ -121,20 +121,23 @@ const AboutPage = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className={`py-20 ${theme === 'dark' ? 'bg-gradient-to-br from-slate-900/30 via-transparent to-slate-900/40' : 'bg-gradient-to-br from-blue-50 to-purple-50/10'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
             <p className="text-gray-700 text-lg">The principles that drive us forward</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <div key={index} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6 text-center hover:bg-white/15 hover:shadow-2xl transition-all duration-300">
+              <div
+                key={index}
+                className={`backdrop-blur-xl rounded-xl p-6 text-center transition-all duration-300 ${theme === 'dark' ? 'bg-dark-800/60 border border-dark-700 hover:bg-dark-800/70 hover:shadow-2xl' : 'bg-white/5 border border-white/10 hover:bg-white/10 hover:shadow-2xl'}`}
+              >
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-600 to-primary-500 rounded-full flex items-center justify-center">
                   <value.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{value.title}</h3>
-                <p className="text-gray-700">{value.description}</p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{value.title}</h3>
+                <p className="text-gray-700 dark:text-gray-300">{value.description}</p>
               </div>
             ))}
           </div>
