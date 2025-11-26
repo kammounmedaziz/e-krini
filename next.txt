@@ -1,0 +1,21 @@
+Login Attempt Limiting: No failed login tracking
+Account Lockout: No temporary lockout after failed attempts
+Rate Limiting: No API rate limiting middleware
+Password History: Prevent reuse of recent passwords
+Password Expiration: Force password changes
+Password Strength Indicator: Frontend feedback
+Password Breach Checking: Check against known breaches
+Security Questions: Backup recovery method
+Account Recovery Codes: One-time recovery code
+
+
+
+
+
+
+
+
+
+
+---------------------------
+finish mailing
