@@ -42,15 +42,15 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Public/User routes
-router.post(
-  '/',
+// Admin statistics route (must be before /:id route)
+router.get(
+  '/admin/statistics',
   authenticateToken,
-  createFeedbackValidation,
-  validate,
-  createFeedback
+  authorizeRoles('admin'),
+  getFeedbackStats
 );
 
+// User specific routes (must be before generic routes)
 router.get(
   '/my-feedback',
   authenticateToken,
@@ -59,27 +59,16 @@ router.get(
   getMyFeedback
 );
 
-router.get(
-  '/:id',
+// Create feedback
+router.post(
+  '/',
   authenticateToken,
-  getFeedbackById
-);
-
-router.patch(
-  '/:id/rate',
-  authenticateToken,
-  rateFeedbackValidation,
+  createFeedbackValidation,
   validate,
-  rateFeedbackResolution
+  createFeedback
 );
 
-router.delete(
-  '/:id',
-  authenticateToken,
-  deleteFeedback
-);
-
-// Admin only routes
+// Admin: Get all feedback (must be after specific routes)
 router.get(
   '/',
   authenticateToken,
@@ -89,6 +78,30 @@ router.get(
   getAllFeedback
 );
 
+// Get feedback by ID (must be after /my-feedback and /admin/statistics)
+router.get(
+  '/:id',
+  authenticateToken,
+  getFeedbackById
+);
+
+// Rate feedback resolution (user)
+router.patch(
+  '/:id/rate',
+  authenticateToken,
+  rateFeedbackValidation,
+  validate,
+  rateFeedbackResolution
+);
+
+// Delete feedback (user)
+router.delete(
+  '/:id',
+  authenticateToken,
+  deleteFeedback
+);
+
+// Admin: Update feedback
 router.patch(
   '/:id',
   authenticateToken,
@@ -98,6 +111,7 @@ router.patch(
   updateFeedback
 );
 
+// Admin: Respond to feedback
 router.post(
   '/:id/respond',
   authenticateToken,
@@ -107,6 +121,7 @@ router.post(
   respondToFeedback
 );
 
+// Admin: Resolve feedback
 router.post(
   '/:id/resolve',
   authenticateToken,
@@ -116,6 +131,7 @@ router.post(
   resolveFeedback
 );
 
+// Admin: Add internal note
 router.post(
   '/:id/notes',
   authenticateToken,
@@ -123,13 +139,6 @@ router.post(
   addNoteValidation,
   validate,
   addInternalNote
-);
-
-router.get(
-  '/admin/statistics',
-  authenticateToken,
-  authorizeRoles('admin'),
-  getFeedbackStats
 );
 
 export default router;

@@ -22,8 +22,8 @@ Before testing, you need a valid JWT token:
    POST http://localhost:3000/api/auth/login
    Body (JSON):
    {
-     "username": "admin_username",
-     "password": "admin_password"
+     "username": "admin,
+     "password": "Admin123!"
    }
    Copy the "accessToken" from response
 
@@ -37,9 +37,11 @@ GET http://localhost:3007/health
 
 Expected Response:
 {
-  "status": "ok",
+  "success": true,
+  "message": "Feedback & Complaints Service is running",
+  "timestamp": "2025-11-26T...",
   "service": "feedback-complaints-service",
-  "timestamp": "2025-11-26T..."
+  "version": "1.0.0"
 }
 
 ================================================================================
@@ -51,13 +53,13 @@ Headers: Authorization: Bearer USER_TOKEN
 Body (JSON) - Example 1 (Complaint):
 {
   "type": "complaint",
-  "category": "vehicle_quality",
+  "category": "vehicle_issue",
   "priority": "high",
   "subject": "Car had mechanical issues",
   "description": "The car I rented had engine problems and broke down on the highway. This was very dangerous and inconvenient.",
   "relatedTo": {
-    "entityType": "reservation",
-    "entityId": "507f1f77bcf86cd799439011"
+    "type": "reservation",
+    "referenceId": "507f1f77bcf86cd799439011"
   },
   "isAnonymous": false
 }
@@ -65,7 +67,7 @@ Body (JSON) - Example 1 (Complaint):
 Body (JSON) - Example 2 (Feedback):
 {
   "type": "feedback",
-  "category": "customer_service",
+  "category": "customer_support",
   "priority": "medium",
   "subject": "Excellent service at pickup",
   "description": "The staff at the pickup location were very helpful and professional. Great experience!",
@@ -76,7 +78,7 @@ Body (JSON) - Example 3 (Report):
 {
   "type": "report",
   "category": "technical_issue",
-  "priority": "critical",
+  "priority": "urgent",
   "subject": "Website payment page not working",
   "description": "Cannot complete payment on the website. The page keeps crashing.",
   "isAnonymous": true,
@@ -91,12 +93,20 @@ Expected Response:
   "success": true,
   "message": "Feedback submitted successfully",
   "data": {
-    "_id": "...",
-    "userId": "...",
-    "type": "complaint",
-    "category": "vehicle_quality",
-    "status": "pending",
-    ...
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "userType": "client",
+      "type": "complaint",
+      "category": "vehicle_issue",
+      "priority": "high",
+      "subject": "Car had mechanical issues",
+      "description": "...",
+      "status": "pending",
+      "isAnonymous": false,
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
+    }
   }
 }
 
@@ -107,7 +117,7 @@ GET http://localhost:3007/api/feedback/my-feedback
 Headers: Authorization: Bearer USER_TOKEN
 
 Query Parameters (optional):
-- status: pending, in_review, in_progress, resolved, closed
+- status: pending, in_progress, resolved, closed, rejected
 - type: feedback, complaint, report, suggestion
 - page: 1, 2, 3...
 - limit: 10, 20, 50...
@@ -119,20 +129,28 @@ GET http://localhost:3007/api/feedback/my-feedback?type=complaint
 Expected Response:
 {
   "success": true,
-  "data": [
-    {
-      "_id": "...",
-      "type": "complaint",
-      "subject": "Car had mechanical issues",
-      "status": "pending",
-      ...
+  "data": {
+    "feedback": [
+      {
+        "_id": "...",
+        "userId": "...",
+        "userType": "client",
+        "type": "complaint",
+        "category": "vehicle_issue",
+        "priority": "high",
+        "subject": "Car had mechanical issues",
+        "description": "...",
+        "status": "pending",
+        "createdAt": "2025-11-26T...",
+        "updatedAt": "2025-11-26T..."
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 3,
+      "totalItems": 25,
+      "itemsPerPage": 10
     }
-  ],
-  "pagination": {
-    "currentPage": 1,
-    "totalPages": 3,
-    "totalItems": 25,
-    "itemsPerPage": 10
   }
 }
 
@@ -149,17 +167,24 @@ Expected Response:
 {
   "success": true,
   "data": {
-    "_id": "507f1f77bcf86cd799439011",
-    "type": "complaint",
-    "subject": "Car had mechanical issues",
-    "description": "...",
-    "status": "in_review",
-    "response": {
-      "respondedBy": "...",
-      "message": "We're looking into this issue",
-      "respondedAt": "2025-11-26T..."
-    },
-    ...
+    "feedback": {
+      "_id": "507f1f77bcf86cd799439011",
+      "userId": "673e5f1a2b68820c416c6eef",
+      "userType": "client",
+      "type": "complaint",
+      "category": "vehicle_issue",
+      "priority": "high",
+      "subject": "Car had mechanical issues",
+      "description": "...",
+      "status": "in_progress",
+      "response": {
+        "message": "We're looking into this issue",
+        "respondedBy": "673e5f1a2b68820c416c6ef0",
+        "respondedAt": "2025-11-26T..."
+      },
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
+    }
   }
 }
 
@@ -171,8 +196,7 @@ Headers: Authorization: Bearer USER_TOKEN
 
 Body (JSON):
 {
-  "rating": 5,
-  "comment": "The issue was resolved quickly and professionally. Thank you!"
+  "rating": 5
 }
 
 Note: Rating must be between 1 and 5
@@ -183,11 +207,19 @@ Expected Response:
   "success": true,
   "message": "Rating submitted successfully",
   "data": {
-    "_id": "...",
-    "resolution": {
-      "rating": 5,
-      "ratingComment": "The issue was resolved quickly...",
-      ...
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "type": "complaint",
+      "status": "closed",
+      "resolution": {
+        "message": "Issue resolved...",
+        "resolvedBy": "...",
+        "resolvedAt": "2025-11-26T...",
+        "satisfactionRating": 5
+      },
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
     }
   }
 }
@@ -219,10 +251,10 @@ GET http://localhost:3007/api/feedback
 Headers: Authorization: Bearer ADMIN_TOKEN
 
 Query Parameters (optional):
-- status: pending, in_review, in_progress, resolved, closed
+- status: pending, in_progress, resolved, closed, rejected
 - type: feedback, complaint, report, suggestion
-- category: vehicle_quality, customer_service, payment_billing, etc.
-- priority: low, medium, high, critical
+- category: service_quality, vehicle_issue, payment_issue, etc.
+- priority: low, medium, high, urgent
 - assignedTo: admin_user_id
 - userId: specific_user_id
 - userType: client, agency
@@ -239,22 +271,32 @@ GET http://localhost:3007/api/feedback?assignedTo=507f1f77bcf86cd799439011
 Expected Response:
 {
   "success": true,
-  "data": [
-    {
-      "_id": "...",
-      "userId": "...",
-      "type": "complaint",
-      "subject": "...",
-      "status": "pending",
-      "priority": "high",
-      ...
+  "data": {
+    "feedback": [
+      {
+        "_id": "...",
+        "userId": {
+          "_id": "...",
+          "username": "aziz",
+          "email": "aziz@example.com"
+        },
+        "userType": "client",
+        "type": "complaint",
+        "category": "vehicle_issue",
+        "priority": "high",
+        "subject": "...",
+        "description": "...",
+        "status": "pending",
+        "createdAt": "2025-11-26T...",
+        "updatedAt": "2025-11-26T..."
+      }
+    ],
+    "pagination": {
+      "currentPage": 1,
+      "totalPages": 5,
+      "totalItems": 48,
+      "itemsPerPage": 10
     }
-  ],
-  "pagination": {
-    "currentPage": 1,
-    "totalPages": 5,
-    "totalItems": 48,
-    "itemsPerPage": 10
   }
 }
 
@@ -266,13 +308,13 @@ Headers: Authorization: Bearer ADMIN_TOKEN
 
 Body (JSON) - Example 1 (Change Status):
 {
-  "status": "in_review"
+  "status": "in_progress"
 }
 
 Body (JSON) - Example 2 (Assign to Admin):
 {
   "assignedTo": "507f1f77bcf86cd799439011",
-  "priority": "critical"
+  "priority": "urgent"
 }
 
 Body (JSON) - Example 3 (Update Priority):
@@ -285,10 +327,18 @@ Expected Response:
   "success": true,
   "message": "Feedback updated successfully",
   "data": {
-    "_id": "...",
-    "status": "in_review",
-    "priority": "critical",
-    ...
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "userType": "client",
+      "type": "complaint",
+      "category": "vehicle_issue",
+      "priority": "urgent",
+      "status": "in_progress",
+      "assignedTo": "507f1f77bcf86cd799439011",
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
+    }
   }
 }
 
@@ -303,19 +353,23 @@ Body (JSON):
   "message": "Thank you for reporting this issue. We have investigated and found that the vehicle had not been properly inspected. We apologize for the inconvenience and have refunded your rental fee."
 }
 
-Note: This will change status to "in_review" if currently "pending"
-
 Expected Response:
 {
   "success": true,
   "message": "Response added successfully",
   "data": {
-    "_id": "...",
-    "status": "in_review",
-    "response": {
-      "respondedBy": "admin_user_id",
-      "message": "Thank you for reporting...",
-      "respondedAt": "2025-11-26T..."
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "type": "complaint",
+      "status": "in_progress",
+      "response": {
+        "message": "Thank you for reporting...",
+        "respondedBy": "admin_user_id",
+        "respondedAt": "2025-11-26T..."
+      },
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
     }
   }
 }
@@ -328,8 +382,7 @@ Headers: Authorization: Bearer ADMIN_TOKEN
 
 Body (JSON):
 {
-  "resolution": "We have refunded the full rental amount and provided a 50% discount coupon for your next rental. The vehicle has been removed from our fleet for inspection.",
-  "actionTaken": "Refund processed, discount coupon issued, vehicle inspected"
+  "message": "We have refunded the full rental amount and provided a 50% discount coupon for your next rental. The vehicle has been removed from our fleet for inspection."
 }
 
 Note: This will change status to "resolved"
@@ -339,13 +392,23 @@ Expected Response:
   "success": true,
   "message": "Feedback resolved successfully",
   "data": {
-    "_id": "...",
-    "status": "resolved",
-    "resolution": {
-      "resolvedBy": "admin_user_id",
-      "resolution": "We have refunded...",
-      "actionTaken": "Refund processed...",
-      "resolvedAt": "2025-11-26T..."
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "type": "complaint",
+      "status": "resolved",
+      "response": {
+        "message": "Thank you for reporting...",
+        "respondedBy": "...",
+        "respondedAt": "2025-11-26T..."
+      },
+      "resolution": {
+        "message": "We have refunded the full rental amount...",
+        "resolvedBy": "admin_user_id",
+        "resolvedAt": "2025-11-26T..."
+      },
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
     }
   }
 }
@@ -368,15 +431,22 @@ Expected Response:
   "success": true,
   "message": "Internal note added successfully",
   "data": {
-    "_id": "...",
-    "internalNotes": [
-      {
-        "_id": "...",
-        "addedBy": "admin_user_id",
-        "note": "Contacted the user via phone...",
-        "addedAt": "2025-11-26T..."
-      }
-    ]
+    "feedback": {
+      "_id": "...",
+      "userId": "...",
+      "type": "complaint",
+      "status": "in_progress",
+      "internalNotes": [
+        {
+          "note": "Contacted the user via phone...",
+          "addedBy": "admin_user_id",
+          "addedAt": "2025-11-26T...",
+          "_id": "..."
+        }
+      ],
+      "createdAt": "2025-11-26T...",
+      "updatedAt": "2025-11-26T..."
+    }
   }
 }
 
@@ -413,18 +483,18 @@ Expected Response:
       "suggestion": 10
     },
     "byCategory": {
-      "vehicle_quality": 40,
-      "customer_service": 35,
-      "payment_billing": 20,
+      "vehicle_issue": 40,
+      "customer_support": 35,
+      "payment_issue": 20,
       "technical_issue": 15,
-      "booking_process": 10,
+      "booking_issue": 10,
       ...
     },
     "byPriority": {
       "low": 40,
       "medium": 60,
       "high": 35,
-      "critical": 15
+      "urgent": 15
     },
     "averageResolutionTime": 48.5,
     "averageRating": 4.2,
@@ -439,49 +509,72 @@ ERROR RESPONSES
 1. Validation Error (400):
 {
   "success": false,
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "type",
-      "message": "Type must be one of: feedback, complaint, report, suggestion"
-    }
-  ]
+  "error": {
+    "message": "Validation failed",
+    "code": "VALIDATION_ERROR",
+    "details": [
+      {
+        "type": "field",
+        "value": "invalid_value",
+        "msg": "Type must be one of: feedback, complaint, report, suggestion",
+        "path": "type",
+        "location": "body"
+      }
+    ]
+  }
 }
 
 2. Authentication Error (401):
 {
   "success": false,
-  "message": "No token provided" 
+  "error": {
+    "message": "No token provided",
+    "code": "NO_TOKEN"
+  }
 }
 OR
 {
   "success": false,
-  "message": "Invalid token"
+  "error": {
+    "message": "Invalid or expired token",
+    "code": "INVALID_TOKEN"
+  }
 }
 
 3. Authorization Error (403):
 {
   "success": false,
-  "message": "Access denied. Admin role required."
+  "error": {
+    "message": "Access denied. Admin role required.",
+    "code": "FORBIDDEN"
+  }
 }
 
 4. Not Found Error (404):
 {
   "success": false,
-  "message": "Feedback not found"
+  "error": {
+    "message": "Feedback not found",
+    "code": "FEEDBACK_NOT_FOUND"
+  }
 }
 
-5. Conflict Error (409):
+5. Conflict Error (400):
 {
   "success": false,
-  "message": "Feedback is not resolved yet. Cannot rate."
+  "error": {
+    "message": "Feedback is not resolved yet. Cannot rate.",
+    "code": "INVALID_STATUS"
+  }
 }
 
 6. Server Error (500):
 {
   "success": false,
-  "message": "Server error message",
-  "error": "..."
+  "error": {
+    "message": "Failed to create feedback",
+    "code": "CREATE_FEEDBACK_ERROR"
+  }
 }
 
 ================================================================================
@@ -494,7 +587,7 @@ Complete Test Scenario: User Submits Complaint → Admin Responds → Resolves �
    POST /api/feedback
    {
      "type": "complaint",
-     "category": "vehicle_quality",
+     "category": "vehicle_issue",
      "priority": "high",
      "subject": "Dirty car interior",
      "description": "The car was not cleaned before rental"
@@ -513,7 +606,7 @@ Complete Test Scenario: User Submits Complaint → Admin Responds → Resolves �
    PATCH /api/feedback/{id}
    {
      "assignedTo": "admin_id",
-     "status": "in_review"
+     "status": "in_progress"
    }
 
 5. ADMIN: Add internal note
@@ -541,15 +634,13 @@ Complete Test Scenario: User Submits Complaint → Admin Responds → Resolves �
 9. ADMIN: Resolve the complaint
    POST /api/feedback/{id}/resolve
    {
-     "resolution": "We have disciplined the cleaning staff and refunded 20% of your rental cost.",
-     "actionTaken": "Staff training, partial refund issued"
+     "message": "We have disciplined the cleaning staff and refunded 20% of your rental cost."
    }
 
 10. USER: Rate the resolution
     PATCH /api/feedback/{id}/rate
     {
-      "rating": 4,
-      "comment": "Thank you for handling this professionally"
+      "rating": 4
     }
 
 11. ADMIN: Get statistics
@@ -572,7 +663,7 @@ POSTMAN COLLECTION SETUP TIPS
 3. Use Tests to extract values:
    // Save feedback ID
    var response = pm.response.json();
-   pm.environment.set("feedback_id", response.data._id);
+   pm.environment.set("feedback_id", response.data.feedback._id);
 
 4. Create folder structure:
    - Health Check
@@ -593,14 +684,14 @@ POSTMAN COLLECTION SETUP TIPS
 ================================================================================
 CATEGORIES REFERENCE
 ================================================================================
-- vehicle_quality
-- customer_service
-- payment_billing
+- service_quality
+- vehicle_issue
+- payment_issue
+- booking_issue
+- insurance_issue
+- customer_support
 - technical_issue
-- booking_process
-- cancellation_refund
-- insurance_claims
-- agency_performance
+- safety_concern
 - other
 
 ================================================================================

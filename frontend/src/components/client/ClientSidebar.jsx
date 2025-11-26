@@ -12,7 +12,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  FileCheck
+  FileCheck,
+  HelpCircle
 } from 'lucide-react';
 
 const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
@@ -24,7 +25,8 @@ const ClientSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogo
     { id: 'payments', label: 'Payments', icon: CreditCard },
     { id: 'locations', label: 'Locations', icon: MapPin },
     { id: 'reviews', label: 'Reviews', icon: Star },
-    { id: 'support', label: 'Support', icon: MessageSquare },
+    { id: 'support', label: 'Support', icon: HelpCircle },
+    { id: 'feedback', label: 'Feedback & Complaints', icon: MessageSquare },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'logout', label: 'Log out', icon: LogOut },
   ];
