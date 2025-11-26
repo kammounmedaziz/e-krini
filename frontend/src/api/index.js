@@ -369,4 +369,48 @@ export const kycAPI = {
   },
 };
 
+// Agency API endpoints (for agency users)
+export const agencyAPI = {
+  uploadDocuments: async (formData) => {
+    const response = await api.post('/agency/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/agency/profile');
+    return response.data;
+  },
+
+  createOrUpdateProfile: async (profileData) => {
+    const response = await api.post('/agency/profile', profileData);
+    return response.data;
+  },
+};
+
+// Insurance API endpoints (for insurance users)
+export const insuranceAPI = {
+  uploadDocuments: async (formData) => {
+    const response = await api.post('/insurance/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/insurance/profile');
+    return response.data;
+  },
+
+  createOrUpdateProfile: async (profileData) => {
+    const response = await api.post('/insurance/profile', profileData);
+    return response.data;
+  },
+};
+
 export default api;

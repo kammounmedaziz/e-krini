@@ -4,10 +4,17 @@ import User from "../models/User.js";
 // Create/Update Agency Profile
 export const createOrUpdateAgencyProfile = async (req, res) => {
     try {
-        const userId = req.user._id;
+        console.log('=== Agency Profile Request ===');
+        console.log('req.user:', req.user);
+        console.log('User ID from token:', req.user?.id);
+        console.log('Request body:', JSON.stringify(req.body, null, 2));
+        
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
         
         // Check if user has agency role
         const user = await User.findById(userId);
+        console.log('User found:', user?.username, 'Role:', user?.role);
+        
         if (user.role !== "agency") {
             return res.status(403).json({
                 success: false,
@@ -52,6 +59,14 @@ export const createOrUpdateAgencyProfile = async (req, res) => {
             });
         } else {
             // Create new agency
+            console.log('Creating new agency with data:', {
+                userId,
+                companyName,
+                companyRegistrationNumber,
+                phone,
+                email
+            });
+            
             agency = new Agency({
                 userId,
                 companyName,
@@ -66,7 +81,9 @@ export const createOrUpdateAgencyProfile = async (req, res) => {
                 bankDetails
             });
 
+            console.log('About to save new agency...');
             await agency.save();
+            console.log('Agency saved successfully:', agency._id);
 
             return res.status(201).json({
                 success: true,
@@ -76,6 +93,33 @@ export const createOrUpdateAgencyProfile = async (req, res) => {
         }
     } catch (error) {
         console.error("Error creating/updating agency profile:", error);
+        console.error("Error details:", {
+            name: error.name,
+            message: error.message,
+            code: error.code,
+            keyPattern: error.keyPattern
+        });
+        
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(409).json({
+                success: false,
+                message: `${field} already exists. Please use a different value.`,
+                error: error.message
+            });
+        }
+        
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: "Validation failed",
+                errors: errors
+            });
+        }
+        
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -87,7 +131,7 @@ export const createOrUpdateAgencyProfile = async (req, res) => {
 // Get Agency Profile
 export const getAgencyProfile = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
 
         const agency = await Agency.findOne({ userId }).populate("userId", "username email");
 
@@ -186,36 +230,65 @@ export const getAllAgencies = async (req, res) => {
     }
 };
 
-// Upload Agency Documents
+// Upload agency documents
 export const uploadAgencyDocuments = async (req, res) => {
     try {
-        const userId = req.user._id;
-        const { type, url } = req.body;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
+        const files = req.files;
+
+        if (!files || Object.keys(files).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No files uploaded"
+            });
+        }
 
         const agency = await Agency.findOne({ userId });
 
         if (!agency) {
             return res.status(404).json({
                 success: false,
-                message: "Agency profile not found"
+                message: "Agency profile not found. Please create your profile first."
             });
         }
 
-        agency.documents.push({
-            type,
-            url,
-            verified: false
+        // Process uploaded files
+        const documentTypeMapping = {
+            'businessLicense': 'license',
+            'insuranceCertificate': 'insurance',
+            'taxDocument': 'registration'
+        };
+        const uploadedDocs = [];
+
+        Object.keys(files).forEach(fieldName => {
+            if (files[fieldName] && files[fieldName][0]) {
+                const file = files[fieldName][0];
+                const docUrl = `uploads/agency/${file.filename}`;
+                const validType = documentTypeMapping[fieldName] || 'other';
+                
+                agency.documents.push({
+                    type: validType,
+                    url: docUrl,
+                    verified: false,
+                    uploadedAt: new Date()
+                });
+
+                uploadedDocs.push(fieldName);
+            }
         });
 
         await agency.save();
 
         return res.status(200).json({
             success: true,
-            message: "Document uploaded successfully",
-            data: agency
+            message: `Documents uploaded successfully: ${uploadedDocs.join(', ')}`,
+            data: {
+                uploadedDocuments: uploadedDocs,
+                agency: agency
+            }
         });
     } catch (error) {
-        console.error("Error uploading document:", error);
+        console.error("Error uploading documents:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -248,10 +321,10 @@ export const updateAgencyStatistics = async (agencyId, updateData) => {
     return agency;
 };
 
-// Get Agency Dashboard Statistics
+// Get Agency Dashboard Stats
 export const getAgencyDashboardStats = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
 
         const agency = await Agency.findOne({ userId });
 

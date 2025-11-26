@@ -8,6 +8,7 @@ import {
     getInsuranceDashboardStats
 } from "../controllers/insuranceController.js";
 import { authMiddleware as authenticate } from "../middlewares/auth.js";
+import { uploadInsuranceDocs } from "../middlewares/upload.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const router = express.Router();
 router.post("/profile", authenticate, createOrUpdateInsuranceProfile);
 router.put("/profile", authenticate, createOrUpdateInsuranceProfile);
 router.get("/profile", authenticate, getInsuranceProfile);
-router.post("/documents", authenticate, uploadInsuranceDocuments);
+router.post("/documents", authenticate, uploadInsuranceDocs, uploadInsuranceDocuments);
 router.get("/dashboard/stats", authenticate, getInsuranceDashboardStats);
 
 // Public routes

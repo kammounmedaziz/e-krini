@@ -8,6 +8,8 @@ import AgencyManagement from './AgencyManagement';
 import InsuranceManagement from './InsuranceManagement';
 import AdminKYCReview from './AdminKYCReview';
 import FeedbackManagement from './FeedbackManagement';
+import AgencyDocumentsManagement from './AgencyDocumentsManagement';
+import InsuranceDocumentsManagement from './InsuranceDocumentsManagement';
 
 const AdminDashboardLayout = ({ user, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -25,8 +27,12 @@ const AdminDashboardLayout = ({ user, onLogout }) => {
         return <AdminKYCReview />;
       case 'agencies':
         return <AgencyManagement />;
+      case 'agency-documents':
+        return <AgencyDocumentsManagement />;
       case 'insurance':
         return <InsuranceManagement />;
+      case 'insurance-documents':
+        return <InsuranceDocumentsManagement />;
       case 'settings':
         return <AdminSettings />;
       case 'cars':

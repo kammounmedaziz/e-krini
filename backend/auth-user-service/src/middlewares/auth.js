@@ -2,8 +2,12 @@ import {verifyAccessToken} from '../utils/jwt.js';
 
 export const authMiddleware = (req, res, next) => {
     try {
+        console.log('=== Auth Middleware ===');
+        console.log('Headers:', req.headers.authorization ? 'Authorization header present' : 'No authorization header');
+        
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            console.log('Auth failed: No token or invalid format');
             return res.status(401).json({
                 success: false,
                 error:{
@@ -13,8 +17,13 @@ export const authMiddleware = (req, res, next) => {
             });
         }
         const token = authHeader.substring(7);
+        console.log('Token extracted, length:', token.length);
+        
         const decoded = verifyAccessToken(token);
+        console.log('Token decoded successfully:', { userId: decoded.userId, id: decoded.id, role: decoded.role });
+        
         req.user = decoded;
+        console.log('req.user set:', req.user);
         next();
     } catch (error) {
         return res.status(401).json({
