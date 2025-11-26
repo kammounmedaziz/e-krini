@@ -121,21 +121,21 @@ const AboutPage = () => {
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-gray-50 dark:bg-dark-900/50">
+      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Core Values</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">The principles that drive us forward</p>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
+            <p className="text-gray-700 text-lg">The principles that drive us forward</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {values.map((value, index) => (
-              <Card key={index} className="text-center">
+              <div key={index} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6 text-center hover:bg-white/15 hover:shadow-2xl transition-all duration-300">
                 <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary-600 to-primary-500 rounded-full flex items-center justify-center">
-                  <value.icon className="w-8 h-8 text-gray-900 dark:text-white" />
+                  <value.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">{value.title}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{value.description}</p>
-              </Card>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">{value.title}</h3>
+                <p className="text-gray-700">{value.description}</p>
+              </div>
             ))}
           </div>
         </div>
@@ -162,11 +162,11 @@ const AboutPage = () => {
                   }`}
                 >
                   <div className={`flex-1 ${index % 2 === 0 ? 'text-right' : 'text-left'}`}>
-                    <Card>
+                    <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
                       <div className="text-3xl font-bold text-gradient mb-2">{milestone.year}</div>
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{milestone.event}</h3>
-                      <p className="text-gray-600 dark:text-gray-400">{milestone.description}</p>
-                    </Card>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">{milestone.event}</h3>
+                      <p className="text-gray-700">{milestone.description}</p>
+                    </div>
                   </div>
                   <div className="relative z-10 w-4 h-4 bg-primary-500 rounded-full border-4 border-white dark:border-dark-900" />
                   <div className="flex-1" />

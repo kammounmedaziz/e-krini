@@ -106,7 +106,17 @@ const UserManagement = () => {
     try {
       await adminAPI.banUser(userId, reason);
       toast.success('User banned successfully');
-      fetchUsers();
+      
+      // Update local state immediately
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user._id === userId 
+            ? { ...user, isBanned: true, banReason: reason, bannedAt: new Date() }
+            : user
+        )
+      );
+      
+      await fetchUsers();
       setShowActionMenu(null);
     } catch (error) {
       toast.error(error.response?.data?.error?.message || 'Failed to ban user');
@@ -117,7 +127,17 @@ const UserManagement = () => {
     try {
       await adminAPI.unbanUser(userId);
       toast.success('User unbanned successfully');
-      fetchUsers();
+      
+      // Update local state immediately
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user._id === userId 
+            ? { ...user, isBanned: false, banReason: null, bannedAt: null, bannedBy: null }
+            : user
+        )
+      );
+      
+      await fetchUsers();
       setShowActionMenu(null);
     } catch (error) {
       toast.error(error.response?.data?.error?.message || 'Failed to unban user');
@@ -246,7 +266,7 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -258,7 +278,7 @@ const UserManagement = () => {
         <div className="flex gap-3">
           <button
             onClick={fetchUsers}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh
@@ -274,7 +294,7 @@ const UserManagement = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-600 p-4">
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search */}
           <div className="lg:col-span-2">
@@ -339,7 +359,7 @@ const UserManagement = () => {
       )}
 
       {/* Users Table */}
-      <div className="bg-white dark:bg-dark-800 rounded-lg border border-gray-200 dark:border-dark-600 overflow-hidden">
+      <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-dark-700 border-b border-gray-200 dark:border-dark-600">
@@ -424,7 +444,7 @@ const UserManagement = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {user.isBanned ? (
+                      {user.isBanned === true ? (
                         <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">
                           <UserX className="w-3 h-3" />
                           Banned
@@ -435,6 +455,10 @@ const UserManagement = () => {
                           Active
                         </span>
                       )}
+                      {/* Debug: Show actual isBanned value */}
+                      {/* <div className="text-xs text-gray-400 mt-1">
+                        isBanned: {JSON.stringify(user.isBanned)} ({typeof user.isBanned})
+                      </div> */}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
                       {new Date(user.createdAt).toLocaleDateString()}
@@ -469,7 +493,7 @@ const UserManagement = () => {
                                 <Shield className="w-4 h-4" />
                                 Change Role
                               </button>
-                              {user.isBanned ? (
+                              {user.isBanned === true ? (
                                 <button
                                   onClick={() => handleUnbanUser(user._id)}
                                   className="w-full px-4 py-2 text-left text-sm text-green-600 dark:text-green-400 hover:bg-gray-100 dark:hover:bg-dark-700 flex items-center gap-2"
@@ -486,6 +510,10 @@ const UserManagement = () => {
                                   Ban User
                                 </button>
                               )}
+                              {/* Debug: Show conditional logic */}
+                              {/* <div className="px-4 py-1 text-xs text-gray-500">
+                                Condition: {user.isBanned === true ? 'TRUE (show unban)' : 'FALSE (show ban)'}
+                              </div> */}
                               <div className="border-t border-gray-200 dark:border-dark-600 my-1" />
                               <button
                                 onClick={() => handleDeleteUser(user._id)}
@@ -508,7 +536,7 @@ const UserManagement = () => {
 
         {/* Pagination */}
         {!loading && users.length > 0 && (
-          <div className="px-4 py-3 border-t border-gray-200 dark:border-dark-600 flex items-center justify-between">
+          <div className="px-4 py-3 border-t border-white/20 flex items-center justify-between">
             <div className="text-sm text-gray-600 dark:text-gray-400">
               Showing {((pagination.currentPage - 1) * filters.limit) + 1} to{' '}
               {Math.min(pagination.currentPage * filters.limit, pagination.totalUsers)} of{' '}
@@ -518,7 +546,7 @@ const UserManagement = () => {
               <button
                 onClick={() => handlePageChange(pagination.currentPage - 1)}
                 disabled={!pagination.hasPrevPage}
-                className="px-4 py-2 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Previous
               </button>
@@ -530,10 +558,10 @@ const UserManagement = () => {
                     <button
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
-                      className={`w-10 h-10 rounded-lg transition-colors ${
+                      className={`w-10 h-10 rounded-xl transition-colors ${
                         pagination.currentPage === pageNum
                           ? 'bg-primary-500 text-white'
-                          : 'bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 hover:bg-gray-50 dark:hover:bg-dark-600'
+                          : 'backdrop-blur-xl bg-white/10 border border-white/20 hover:bg-white/20'
                       }`}
                     >
                       {pageNum}
@@ -544,7 +572,7 @@ const UserManagement = () => {
               <button
                 onClick={() => handlePageChange(pagination.currentPage + 1)}
                 disabled={!pagination.hasNextPage}
-                className="px-4 py-2 bg-white dark:bg-dark-700 border border-gray-300 dark:border-dark-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Next
               </button>

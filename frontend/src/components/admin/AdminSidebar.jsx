@@ -13,7 +13,8 @@ import {
   PieChart,
   Shield,
   Building2,
-  HeartPulse
+  HeartPulse,
+  FileCheck
 } from 'lucide-react';
 
 const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
@@ -21,6 +22,7 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'statistics', label: 'Statistics', icon: PieChart },
     { id: 'users', label: 'User Management', icon: Users },
+    { id: 'kyc', label: 'KYC Review', icon: FileCheck },
     { id: 'agencies', label: 'Agencies', icon: Building2 },
     { id: 'insurance', label: 'Insurance', icon: HeartPulse },
     { id: 'cars', label: 'Car Inventory', icon: Car },

@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import {generateAccessToken, generateRefreshToken, verifyRefreshToken} from '../utils/jwt.js';
+import { createLoginHistory } from './loginHistoryController.js';
+import speakeasy from 'speakeasy';
 
 export const register = async (req, res) => {
     try {
@@ -95,6 +97,9 @@ export const login = async (req, res) => {
         const {username, password} = req.body;
         const user = await User.findOne({ $or: [{username}, {email: username}] }); // allow login with username or email
         if (!user) {
+            // Track failed login attempt
+            await createLoginHistory(null, req, 'failed', 'password', 'User not found');
+            
             return res.status(401).json({
                 success: false,
                 error:{
@@ -104,14 +109,44 @@ export const login = async (req, res) => {
             });
         }
 
+        // Check if user is banned
+        if (user.isBanned) {
+            await createLoginHistory(user._id, req, 'blocked', 'password', 'User is banned');
+            
+            return res.status(403).json({
+                success: false,
+                error: {
+                    code: 'USER_BANNED',
+                    message: `Your account has been banned. Reason: ${user.banReason || 'No reason provided'}`
+                }
+            });
+        }
+
         const isPasswordMatch = await user.comparePassword(password);
         if (!isPasswordMatch) {
+            // Track failed login attempt
+            await createLoginHistory(user._id, req, 'failed', 'password', 'Invalid password');
+            
             return res.status(401).json({
                 success: false,
                 error:{
                     code: 'INVALID_CREDENTIALS',
                     message: 'Invalid username or password.'
                 }
+            });
+        }
+
+        // Check if 2FA is enabled
+        if (user.mfaEnabled) {
+            // Don't generate full tokens yet, return a temporary indicator
+            return res.json({
+                success: true,
+                data: {
+                    requires2FA: true,
+                    userId: user._id,
+                    username: user.username
+                },
+                message: '2FA verification required'
             });
         }
 
@@ -130,7 +165,15 @@ export const login = async (req, res) => {
 
         // Store refresh token
         user.refreshTokens.push({token: refreshToken});
+        
+        // Update login tracking
+        user.lastLoginAt = new Date();
+        user.loginCount = (user.loginCount || 0) + 1;
+        
         await user.save();
+
+        // Track successful login
+        await createLoginHistory(user._id, req, 'success', 'password');
 
         // Determine redirect URL based on role
         let redirectUrl = '/';
@@ -163,7 +206,8 @@ export const login = async (req, res) => {
                     email: user.email,
                     role: user.role,
                     profilePicture: user.profilePicture,
-                    faceAuthEnabled: user.faceAuthEnabled
+                    faceAuthEnabled: user.faceAuthEnabled,
+                    mfaEnabled: user.mfaEnabled
                 }
             },
             message: 'Login successful.'
@@ -364,6 +408,8 @@ export const loginWithFace = async (req, res) => {
         if (username) {
             user = await User.findOne({ username });
             if (!user) {
+                await createLoginHistory(null, req, 'failed', 'face', 'User not found');
+                
                 return res.status(404).json({
                     success: false,
                     error: {
@@ -423,6 +469,8 @@ export const loginWithFace = async (req, res) => {
         }
 
         if (!user) {
+            await createLoginHistory(null, req, 'failed', 'face', 'Face not recognized');
+            
             return res.status(401).json({
                 success: false,
                 error: {
@@ -432,8 +480,23 @@ export const loginWithFace = async (req, res) => {
             });
         }
 
+        // Check if user is banned
+        if (user.isBanned) {
+            await createLoginHistory(user._id, req, 'blocked', 'face', 'User is banned');
+            
+            return res.status(403).json({
+                success: false,
+                error: {
+                    code: 'USER_BANNED',
+                    message: `Your account has been banned. Reason: ${user.banReason || 'No reason provided'}`
+                }
+            });
+        }
+
         // Check if face auth is enabled for this user
         if (!user.faceAuthEnabled || !user.faceEncoding) {
+            await createLoginHistory(user._id, req, 'failed', 'face', 'Face auth not enabled');
+            
             return res.status(403).json({
                 success: false,
                 error: {
@@ -462,7 +525,15 @@ export const loginWithFace = async (req, res) => {
 
         // Store refresh token
         user.refreshTokens.push({ token: refreshToken });
+        
+        // Update login tracking
+        user.lastLoginAt = new Date();
+        user.loginCount = (user.loginCount || 0) + 1;
+        
         await user.save();
+
+        // Track successful login
+        await createLoginHistory(user._id, req, 'success', 'face');
 
         // Determine redirect URL based on role
         let redirectUrl = '/';
@@ -507,6 +578,144 @@ export const loginWithFace = async (req, res) => {
             error: {
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'An error occurred during face authentication.'
+            }
+        });
+    }
+};
+
+// Complete login with 2FA
+export const loginWith2FA = async (req, res) => {
+    try {
+        const { userId, token } = req.body;
+
+        if (!userId || !token) {
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'MISSING_CREDENTIALS',
+                    message: 'User ID and 2FA token are required'
+                }
+            });
+        }
+
+        const user = await User.findById(userId);
+        if (!user || !user.mfaEnabled) {
+            await createLoginHistory(userId, req, 'failed', '2fa', 'Invalid 2FA request');
+            
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_REQUEST',
+                    message: 'Invalid 2FA verification request'
+                }
+            });
+        }
+
+        // Check if it's a backup code
+        const backupCodeIndex = user.mfaBackupCodes.findIndex(
+            bc => bc.code === token.toUpperCase() && !bc.used
+        );
+
+        let verified = false;
+        let method = 'totp';
+
+        if (backupCodeIndex !== -1) {
+            // Mark backup code as used
+            user.mfaBackupCodes[backupCodeIndex].used = true;
+            verified = true;
+            method = 'backup';
+        } else {
+            // Verify TOTP token
+            verified = speakeasy.totp.verify({
+                secret: user.mfaSecret,
+                encoding: 'base32',
+                token: token,
+                window: 2
+            });
+        }
+
+        if (!verified) {
+            await createLoginHistory(user._id, req, 'failed', '2fa', 'Invalid 2FA token');
+            
+            return res.status(400).json({
+                success: false,
+                error: {
+                    code: 'INVALID_TOKEN',
+                    message: 'Invalid 2FA token'
+                }
+            });
+        }
+
+        // Generate tokens
+        const accessToken = generateAccessToken({
+            id: user._id,
+            username: user.username,
+            role: user.role
+        });
+
+        const refreshToken = generateRefreshToken({
+            id: user._id,
+            username: user.username,
+            role: user.role
+        });
+
+        // Store refresh token
+        user.refreshTokens.push({ token: refreshToken });
+        
+        // Update login tracking
+        user.lastLoginAt = new Date();
+        user.loginCount = (user.loginCount || 0) + 1;
+        
+        await user.save();
+
+        // Track successful login
+        await createLoginHistory(user._id, req, 'success', '2fa');
+
+        // Determine redirect URL based on role
+        let redirectUrl = '/';
+        switch (user.role) {
+            case 'admin':
+                redirectUrl = '/admin/dashboard';
+                break;
+            case 'agency':
+                redirectUrl = '/agency/dashboard';
+                break;
+            case 'insurance':
+                redirectUrl = '/insurance/dashboard';
+                break;
+            case 'client':
+            default:
+                redirectUrl = '/client/dashboard';
+                break;
+        }
+
+        res.json({
+            success: true,
+            data: {
+                accessToken,
+                refreshToken,
+                expiresIn: 3600,
+                redirectUrl,
+                user: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                    profilePicture: user.profilePicture,
+                    faceAuthEnabled: user.faceAuthEnabled,
+                    mfaEnabled: user.mfaEnabled
+                },
+                method
+            },
+            message: '2FA verification successful'
+        });
+    } catch (error) {
+        console.error('2FA login error:', error);
+        res.status(500).json({
+            success: false,
+            error: {
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'An error occurred during 2FA verification'
             }
         });
     }

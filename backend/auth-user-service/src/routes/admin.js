@@ -31,6 +31,7 @@ import {
     deleteInsurance,
     getInsuranceStatistics
 } from '../controllers/adminInsuranceController.js';
+import { exportStatisticsPDF } from '../utils/pdfExport.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { adminMiddleware } from '../middlewares/admin.js';
 
@@ -48,7 +49,11 @@ router.get('/users/:userId', getUserById);
 router.put('/users/:userId', updateUser);
 router.delete('/users/:userId', deleteUser);
 
+// Export comprehensive statistics as PDF
+router.get('/statistics/export-pdf', exportStatisticsPDF);
+
 // User status management
+router.post('/users/bulk/ban', bulkBanUsers);
 router.post('/users/:userId/ban', banUser);
 router.post('/users/:userId/unban', unbanUser);
 router.put('/users/:userId/role', changeUserRole);
@@ -56,7 +61,6 @@ router.put('/users/:userId/role', changeUserRole);
 // Bulk operations
 router.post('/users/bulk/delete', bulkDeleteUsers);
 router.post('/users/bulk/role', bulkUpdateRole);
-router.post('/users/bulk/ban', bulkBanUsers);
 
 // Agency management routes
 router.get('/agencies', getAllAgencies);

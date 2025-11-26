@@ -321,4 +321,52 @@ export const adminAPI = {
   },
 };
 
+// KYC API endpoints
+export const kycAPI = {
+  // User endpoints
+  submitKyc: async (formData) => {
+    const response = await api.post('/kyc/submit', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getKycStatus: async () => {
+    const response = await api.get('/kyc/status');
+    return response.data;
+  },
+
+  deleteDocument: async (documentId) => {
+    const response = await api.delete(`/kyc/documents/${documentId}`);
+    return response.data;
+  },
+
+  // Admin endpoints
+  getPendingKyc: async (page = 1, limit = 10) => {
+    const response = await api.get(`/kyc/admin/pending?page=${page}&limit=${limit}`);
+    return response.data;
+  },
+
+  getKycDetails: async (userId) => {
+    const response = await api.get(`/kyc/admin/${userId}`);
+    return response.data;
+  },
+
+  reviewKyc: async (userId, action, notes, rejectionReason) => {
+    const response = await api.post(`/kyc/admin/${userId}/review`, {
+      action,
+      notes,
+      rejectionReason,
+    });
+    return response.data;
+  },
+
+  getKycStats: async () => {
+    const response = await api.get('/kyc/admin/stats');
+    return response.data;
+  },
+};
+
 export default api;

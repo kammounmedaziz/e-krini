@@ -28,6 +28,26 @@ const agencySchema = new mongoose.Schema({
         zipCode: String,
         country: String
     },
+    location: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+            default: [0, 0]
+        },
+        latitude: {
+            type: Number,
+            default: null
+        },
+        longitude: {
+            type: Number,
+            default: null
+        },
+        formattedAddress: String
+    },
     phone: {
         type: String,
         required: true
@@ -137,6 +157,7 @@ const agencySchema = new mongoose.Schema({
 agencySchema.index({ companyName: "text", description: "text" });
 agencySchema.index({ "address.city": 1 });
 agencySchema.index({ status: 1 });
+agencySchema.index({ "location.coordinates": "2dsphere" }); // Geospatial index for location-based queries
 
 const Agency = mongoose.model("Agency", agencySchema);
 

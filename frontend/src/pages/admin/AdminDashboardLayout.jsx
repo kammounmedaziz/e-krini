@@ -6,6 +6,7 @@ import UserManagement from './UserManagement';
 import AdminStatistics from './AdminStatistics';
 import AgencyManagement from './AgencyManagement';
 import InsuranceManagement from './InsuranceManagement';
+import AdminKYCReview from './AdminKYCReview';
 
 const AdminDashboardLayout = ({ user, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -19,6 +20,8 @@ const AdminDashboardLayout = ({ user, onLogout }) => {
         return <AdminStatistics />;
       case 'users':
         return <UserManagement />;
+      case 'kyc':
+        return <AdminKYCReview />;
       case 'agencies':
         return <AgencyManagement />;
       case 'insurance':
