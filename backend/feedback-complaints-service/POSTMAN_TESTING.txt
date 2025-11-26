@@ -1,0 +1,618 @@
+================================================================================
+FEEDBACK & COMPLAINTS SERVICE - POSTMAN TESTING GUIDE
+================================================================================
+Service Port: 3007
+Base URL: http://localhost:3007/api/feedback
+
+================================================================================
+AUTHENTICATION SETUP
+================================================================================
+Before testing, you need a valid JWT token:
+
+1. Login as CLIENT:
+   POST http://localhost:3000/api/auth/login
+   Body (JSON):
+   {
+     "username": "aziz",
+     "password": "your_password"
+   }
+   Copy the "accessToken" from response
+
+2. Login as ADMIN:
+   POST http://localhost:3000/api/auth/login
+   Body (JSON):
+   {
+     "username": "admin_username",
+     "password": "admin_password"
+   }
+   Copy the "accessToken" from response
+
+3. Add to Postman Headers for all requests:
+   Authorization: Bearer YOUR_JWT_TOKEN_HERE
+
+================================================================================
+1. HEALTH CHECK (No Authentication Required)
+================================================================================
+GET http://localhost:3007/health
+
+Expected Response:
+{
+  "status": "ok",
+  "service": "feedback-complaints-service",
+  "timestamp": "2025-11-26T..."
+}
+
+================================================================================
+2. CREATE FEEDBACK/COMPLAINT (USER)
+================================================================================
+POST http://localhost:3007/api/feedback
+Headers: Authorization: Bearer USER_TOKEN
+
+Body (JSON) - Example 1 (Complaint):
+{
+  "type": "complaint",
+  "category": "vehicle_quality",
+  "priority": "high",
+  "subject": "Car had mechanical issues",
+  "description": "The car I rented had engine problems and broke down on the highway. This was very dangerous and inconvenient.",
+  "relatedTo": {
+    "entityType": "reservation",
+    "entityId": "507f1f77bcf86cd799439011"
+  },
+  "isAnonymous": false
+}
+
+Body (JSON) - Example 2 (Feedback):
+{
+  "type": "feedback",
+  "category": "customer_service",
+  "priority": "medium",
+  "subject": "Excellent service at pickup",
+  "description": "The staff at the pickup location were very helpful and professional. Great experience!",
+  "isAnonymous": false
+}
+
+Body (JSON) - Example 3 (Report):
+{
+  "type": "report",
+  "category": "technical_issue",
+  "priority": "critical",
+  "subject": "Website payment page not working",
+  "description": "Cannot complete payment on the website. The page keeps crashing.",
+  "isAnonymous": true,
+  "contactInfo": {
+    "email": "reporter@example.com",
+    "phone": "+1234567890"
+  }
+}
+
+Expected Response:
+{
+  "success": true,
+  "message": "Feedback submitted successfully",
+  "data": {
+    "_id": "...",
+    "userId": "...",
+    "type": "complaint",
+    "category": "vehicle_quality",
+    "status": "pending",
+    ...
+  }
+}
+
+================================================================================
+3. GET MY FEEDBACK (USER)
+================================================================================
+GET http://localhost:3007/api/feedback/my-feedback
+Headers: Authorization: Bearer USER_TOKEN
+
+Query Parameters (optional):
+- status: pending, in_review, in_progress, resolved, closed
+- type: feedback, complaint, report, suggestion
+- page: 1, 2, 3...
+- limit: 10, 20, 50...
+
+Examples:
+GET http://localhost:3007/api/feedback/my-feedback?status=pending&page=1&limit=10
+GET http://localhost:3007/api/feedback/my-feedback?type=complaint
+
+Expected Response:
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "...",
+      "type": "complaint",
+      "subject": "Car had mechanical issues",
+      "status": "pending",
+      ...
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 3,
+    "totalItems": 25,
+    "itemsPerPage": 10
+  }
+}
+
+================================================================================
+4. GET FEEDBACK BY ID (USER)
+================================================================================
+GET http://localhost:3007/api/feedback/{feedbackId}
+Headers: Authorization: Bearer USER_TOKEN
+
+Example:
+GET http://localhost:3007/api/feedback/507f1f77bcf86cd799439011
+
+Expected Response:
+{
+  "success": true,
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "type": "complaint",
+    "subject": "Car had mechanical issues",
+    "description": "...",
+    "status": "in_review",
+    "response": {
+      "respondedBy": "...",
+      "message": "We're looking into this issue",
+      "respondedAt": "2025-11-26T..."
+    },
+    ...
+  }
+}
+
+================================================================================
+5. RATE FEEDBACK RESOLUTION (USER)
+================================================================================
+PATCH http://localhost:3007/api/feedback/{feedbackId}/rate
+Headers: Authorization: Bearer USER_TOKEN
+
+Body (JSON):
+{
+  "rating": 5,
+  "comment": "The issue was resolved quickly and professionally. Thank you!"
+}
+
+Note: Rating must be between 1 and 5
+Note: Only works for feedback with status "resolved"
+
+Expected Response:
+{
+  "success": true,
+  "message": "Rating submitted successfully",
+  "data": {
+    "_id": "...",
+    "resolution": {
+      "rating": 5,
+      "ratingComment": "The issue was resolved quickly...",
+      ...
+    }
+  }
+}
+
+================================================================================
+6. DELETE MY FEEDBACK (USER)
+================================================================================
+DELETE http://localhost:3007/api/feedback/{feedbackId}
+Headers: Authorization: Bearer USER_TOKEN
+
+Example:
+DELETE http://localhost:3007/api/feedback/507f1f77bcf86cd799439011
+
+Note: Only works for feedback with status "pending"
+
+Expected Response:
+{
+  "success": true,
+  "message": "Feedback deleted successfully"
+}
+
+================================================================================
+ADMIN ENDPOINTS (Requires Admin Role)
+================================================================================
+
+7. GET ALL FEEDBACK (ADMIN)
+================================================================================
+GET http://localhost:3007/api/feedback
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Query Parameters (optional):
+- status: pending, in_review, in_progress, resolved, closed
+- type: feedback, complaint, report, suggestion
+- category: vehicle_quality, customer_service, payment_billing, etc.
+- priority: low, medium, high, critical
+- assignedTo: admin_user_id
+- userId: specific_user_id
+- userType: client, agency
+- page: 1
+- limit: 10
+- sortBy: createdAt, priority, status
+- sortOrder: asc, desc
+
+Examples:
+GET http://localhost:3007/api/feedback?status=pending&priority=high&page=1&limit=20
+GET http://localhost:3007/api/feedback?type=complaint&category=vehicle_quality
+GET http://localhost:3007/api/feedback?assignedTo=507f1f77bcf86cd799439011
+
+Expected Response:
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "...",
+      "userId": "...",
+      "type": "complaint",
+      "subject": "...",
+      "status": "pending",
+      "priority": "high",
+      ...
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "totalPages": 5,
+    "totalItems": 48,
+    "itemsPerPage": 10
+  }
+}
+
+================================================================================
+8. UPDATE FEEDBACK (ADMIN)
+================================================================================
+PATCH http://localhost:3007/api/feedback/{feedbackId}
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Body (JSON) - Example 1 (Change Status):
+{
+  "status": "in_review"
+}
+
+Body (JSON) - Example 2 (Assign to Admin):
+{
+  "assignedTo": "507f1f77bcf86cd799439011",
+  "priority": "critical"
+}
+
+Body (JSON) - Example 3 (Update Priority):
+{
+  "priority": "high"
+}
+
+Expected Response:
+{
+  "success": true,
+  "message": "Feedback updated successfully",
+  "data": {
+    "_id": "...",
+    "status": "in_review",
+    "priority": "critical",
+    ...
+  }
+}
+
+================================================================================
+9. RESPOND TO FEEDBACK (ADMIN)
+================================================================================
+POST http://localhost:3007/api/feedback/{feedbackId}/respond
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Body (JSON):
+{
+  "message": "Thank you for reporting this issue. We have investigated and found that the vehicle had not been properly inspected. We apologize for the inconvenience and have refunded your rental fee."
+}
+
+Note: This will change status to "in_review" if currently "pending"
+
+Expected Response:
+{
+  "success": true,
+  "message": "Response added successfully",
+  "data": {
+    "_id": "...",
+    "status": "in_review",
+    "response": {
+      "respondedBy": "admin_user_id",
+      "message": "Thank you for reporting...",
+      "respondedAt": "2025-11-26T..."
+    }
+  }
+}
+
+================================================================================
+10. RESOLVE FEEDBACK (ADMIN)
+================================================================================
+POST http://localhost:3007/api/feedback/{feedbackId}/resolve
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Body (JSON):
+{
+  "resolution": "We have refunded the full rental amount and provided a 50% discount coupon for your next rental. The vehicle has been removed from our fleet for inspection.",
+  "actionTaken": "Refund processed, discount coupon issued, vehicle inspected"
+}
+
+Note: This will change status to "resolved"
+
+Expected Response:
+{
+  "success": true,
+  "message": "Feedback resolved successfully",
+  "data": {
+    "_id": "...",
+    "status": "resolved",
+    "resolution": {
+      "resolvedBy": "admin_user_id",
+      "resolution": "We have refunded...",
+      "actionTaken": "Refund processed...",
+      "resolvedAt": "2025-11-26T..."
+    }
+  }
+}
+
+================================================================================
+11. ADD INTERNAL NOTE (ADMIN)
+================================================================================
+POST http://localhost:3007/api/feedback/{feedbackId}/notes
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Body (JSON):
+{
+  "note": "Contacted the user via phone. They confirmed the issue was resolved satisfactorily."
+}
+
+Note: Internal notes are NOT visible to users, only to admins
+
+Expected Response:
+{
+  "success": true,
+  "message": "Internal note added successfully",
+  "data": {
+    "_id": "...",
+    "internalNotes": [
+      {
+        "_id": "...",
+        "addedBy": "admin_user_id",
+        "note": "Contacted the user via phone...",
+        "addedAt": "2025-11-26T..."
+      }
+    ]
+  }
+}
+
+================================================================================
+12. GET STATISTICS (ADMIN)
+================================================================================
+GET http://localhost:3007/api/feedback/admin/statistics
+Headers: Authorization: Bearer ADMIN_TOKEN
+
+Query Parameters (optional):
+- startDate: 2025-01-01
+- endDate: 2025-12-31
+
+Examples:
+GET http://localhost:3007/api/feedback/admin/statistics
+GET http://localhost:3007/api/feedback/admin/statistics?startDate=2025-11-01&endDate=2025-11-30
+
+Expected Response:
+{
+  "success": true,
+  "data": {
+    "totalFeedback": 150,
+    "byStatus": {
+      "pending": 25,
+      "in_review": 15,
+      "in_progress": 10,
+      "resolved": 80,
+      "closed": 20
+    },
+    "byType": {
+      "feedback": 60,
+      "complaint": 50,
+      "report": 30,
+      "suggestion": 10
+    },
+    "byCategory": {
+      "vehicle_quality": 40,
+      "customer_service": 35,
+      "payment_billing": 20,
+      "technical_issue": 15,
+      "booking_process": 10,
+      ...
+    },
+    "byPriority": {
+      "low": 40,
+      "medium": 60,
+      "high": 35,
+      "critical": 15
+    },
+    "averageResolutionTime": 48.5,
+    "averageRating": 4.2,
+    "totalRatings": 65
+  }
+}
+
+================================================================================
+ERROR RESPONSES
+================================================================================
+
+1. Validation Error (400):
+{
+  "success": false,
+  "message": "Validation failed",
+  "errors": [
+    {
+      "field": "type",
+      "message": "Type must be one of: feedback, complaint, report, suggestion"
+    }
+  ]
+}
+
+2. Authentication Error (401):
+{
+  "success": false,
+  "message": "No token provided" 
+}
+OR
+{
+  "success": false,
+  "message": "Invalid token"
+}
+
+3. Authorization Error (403):
+{
+  "success": false,
+  "message": "Access denied. Admin role required."
+}
+
+4. Not Found Error (404):
+{
+  "success": false,
+  "message": "Feedback not found"
+}
+
+5. Conflict Error (409):
+{
+  "success": false,
+  "message": "Feedback is not resolved yet. Cannot rate."
+}
+
+6. Server Error (500):
+{
+  "success": false,
+  "message": "Server error message",
+  "error": "..."
+}
+
+================================================================================
+TESTING WORKFLOW EXAMPLE
+================================================================================
+
+Complete Test Scenario: User Submits Complaint → Admin Responds → Resolves → User Rates
+
+1. USER: Create complaint
+   POST /api/feedback
+   {
+     "type": "complaint",
+     "category": "vehicle_quality",
+     "priority": "high",
+     "subject": "Dirty car interior",
+     "description": "The car was not cleaned before rental"
+   }
+   → Get feedback ID from response
+
+2. USER: Check my feedback
+   GET /api/feedback/my-feedback
+   → Verify complaint appears with status "pending"
+
+3. ADMIN: Get all pending feedback
+   GET /api/feedback?status=pending
+   → Find the complaint
+
+4. ADMIN: Assign to self and update priority
+   PATCH /api/feedback/{id}
+   {
+     "assignedTo": "admin_id",
+     "status": "in_review"
+   }
+
+5. ADMIN: Add internal note
+   POST /api/feedback/{id}/notes
+   {
+     "note": "Contacted cleaning service. Will investigate."
+   }
+
+6. ADMIN: Respond to user
+   POST /api/feedback/{id}/respond
+   {
+     "message": "We apologize for this. We're investigating with our cleaning service."
+   }
+
+7. USER: Check feedback status
+   GET /api/feedback/{id}
+   → See admin response
+
+8. ADMIN: Update to in_progress
+   PATCH /api/feedback/{id}
+   {
+     "status": "in_progress"
+   }
+
+9. ADMIN: Resolve the complaint
+   POST /api/feedback/{id}/resolve
+   {
+     "resolution": "We have disciplined the cleaning staff and refunded 20% of your rental cost.",
+     "actionTaken": "Staff training, partial refund issued"
+   }
+
+10. USER: Rate the resolution
+    PATCH /api/feedback/{id}/rate
+    {
+      "rating": 4,
+      "comment": "Thank you for handling this professionally"
+    }
+
+11. ADMIN: Get statistics
+    GET /api/feedback/admin/statistics
+    → View overall metrics
+
+================================================================================
+POSTMAN COLLECTION SETUP TIPS
+================================================================================
+
+1. Create Environment Variables:
+   - base_url: http://localhost:3007
+   - user_token: (set after login)
+   - admin_token: (set after admin login)
+   - feedback_id: (set after creating feedback)
+
+2. Use Pre-request Scripts to set tokens:
+   pm.environment.set("user_token", "your_jwt_token");
+
+3. Use Tests to extract values:
+   // Save feedback ID
+   var response = pm.response.json();
+   pm.environment.set("feedback_id", response.data._id);
+
+4. Create folder structure:
+   - Health Check
+   - User Endpoints
+     - Create Feedback
+     - Get My Feedback
+     - Get by ID
+     - Rate Resolution
+     - Delete
+   - Admin Endpoints
+     - Get All
+     - Update
+     - Respond
+     - Resolve
+     - Add Note
+     - Statistics
+
+================================================================================
+CATEGORIES REFERENCE
+================================================================================
+- vehicle_quality
+- customer_service
+- payment_billing
+- technical_issue
+- booking_process
+- cancellation_refund
+- insurance_claims
+- agency_performance
+- other
+
+================================================================================
+NOTES
+================================================================================
+- All timestamps are in ISO 8601 format
+- MongoDB ObjectId format: 24 character hex string
+- JWT tokens expire after configured time (check .env JWT_EXPIRES_IN)
+- Attachments array is supported but file upload not implemented in this version
+- Anonymous submissions require contactInfo field
+- Only resolved feedback can be rated
+- Only pending feedback can be deleted by users
+- Resolution time is calculated in hours
+
+================================================================================
