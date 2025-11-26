@@ -273,7 +273,7 @@ const InsuranceDetailsModal = ({ isOpen, onClose, insuranceId, onActionComplete 
                             </span>
                           )}
                           <a
-                            href={doc.url}
+                            href={doc.url?.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}/${doc.url}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-all"

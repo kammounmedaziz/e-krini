@@ -15,7 +15,8 @@ import {
   Building2,
   HeartPulse,
   FileCheck,
-  MessageSquare
+  MessageSquare,
+  FileText
 } from 'lucide-react';
 
 const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
@@ -25,7 +26,9 @@ const AdminSidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogou
     { id: 'users', label: 'User Management', icon: Users },
     { id: 'kyc', label: 'KYC Review', icon: FileCheck },
     { id: 'agencies', label: 'Agencies', icon: Building2 },
+    { id: 'agency-documents', label: 'Agency Documents', icon: FileText },
     { id: 'insurance', label: 'Insurance', icon: HeartPulse },
+    { id: 'insurance-documents', label: 'Insurance Documents', icon: FileText },
     { id: 'cars', label: 'Car Inventory', icon: Car },
     { id: 'reservations', label: 'Reservations', icon: Calendar },
     { id: 'reports', label: 'Reports', icon: BarChart3 },

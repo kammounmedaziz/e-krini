@@ -6,18 +6,47 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, '../../uploads/kyc');
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Ensure upload directories exist
+const uploadDirKyc = path.join(__dirname, '../../uploads/kyc');
+const uploadDirAgency = path.join(__dirname, '../../uploads/agency');
+const uploadDirInsurance = path.join(__dirname, '../../uploads/insurance');
+
+[uploadDirKyc, uploadDirAgency, uploadDirInsurance].forEach(dir => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, uploadDir);
+        cb(null, uploadDirKyc);
     },
     filename: (req, file, cb) => {
         // Generate unique filename with timestamp and random string
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const extension = path.extname(file.originalname);
+        const basename = path.basename(file.originalname, extension);
+        cb(null, `${basename}-${uniqueSuffix}${extension}`);
+    }
+});
+
+const agencyStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDirAgency);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const extension = path.extname(file.originalname);
+        const basename = path.basename(file.originalname, extension);
+        cb(null, `${basename}-${uniqueSuffix}${extension}`);
+    }
+});
+
+const insuranceStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDirInsurance);
+    },
+    filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const extension = path.extname(file.originalname);
         const basename = path.basename(file.originalname, extension);
@@ -65,13 +94,43 @@ export const uploadSingleDocument = multer({
     fileFilter: fileFilter
 }).single('document');
 
+// Agency documents upload middleware
+export const uploadAgencyDocs = multer({
+    storage: agencyStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit per file
+        files: 3 // businessLicense, insuranceCertificate, taxDocument
+    },
+    fileFilter: fileFilter
+}).fields([
+    { name: 'businessLicense', maxCount: 1 },
+    { name: 'insuranceCertificate', maxCount: 1 },
+    { name: 'taxDocument', maxCount: 1 }
+]);
+
+// Insurance documents upload middleware
+export const uploadInsuranceDocs = multer({
+    storage: insuranceStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit per file
+        files: 10 // insuranceLicense + multiple certificationDocs
+    },
+    fileFilter: fileFilter
+}).fields([
+    { name: 'insuranceLicense', maxCount: 1 },
+    { name: 'certificationDocs', maxCount: 10 }
+]);
+
 // Helper function to get file URL
-export const getFileUrl = (filename) => {
-    return `${process.env.BASE_URL || 'http://localhost:3001'}/uploads/kyc/${filename}`;
+export const getFileUrl = (filename, type = 'kyc') => {
+    return `${process.env.BASE_URL || 'http://localhost:3001'}/uploads/${type}/${filename}`;
 };
 
 // Helper function to delete file
-export const deleteFile = (filename) => {
+export const deleteFile = (filename, type = 'kyc') => {
+    const uploadDir = type === 'agency' ? uploadDirAgency : 
+                      type === 'insurance' ? uploadDirInsurance : 
+                      uploadDirKyc;
     const filePath = path.join(uploadDir, filename);
     if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);

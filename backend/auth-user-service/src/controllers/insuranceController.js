@@ -4,7 +4,7 @@ import User from "../models/User.js";
 // Create/Update Insurance Profile
 export const createOrUpdateInsuranceProfile = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
         
         // Check if user has insurance role
         const user = await User.findById(userId);
@@ -79,6 +79,27 @@ export const createOrUpdateInsuranceProfile = async (req, res) => {
         }
     } catch (error) {
         console.error("Error creating/updating insurance profile:", error);
+        
+        // Handle duplicate key error
+        if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
+            return res.status(409).json({
+                success: false,
+                message: `${field} already exists. Please use a different value.`,
+                error: error.message
+            });
+        }
+        
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const errors = Object.values(error.errors).map(err => err.message);
+            return res.status(400).json({
+                success: false,
+                message: "Validation failed",
+                errors: errors
+            });
+        }
+        
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -90,7 +111,7 @@ export const createOrUpdateInsuranceProfile = async (req, res) => {
 // Get Insurance Profile
 export const getInsuranceProfile = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
 
         const insurance = await Insurance.findOne({ userId }).populate("userId", "username email");
 
@@ -192,33 +213,71 @@ export const getAllInsuranceCompanies = async (req, res) => {
 // Upload Insurance Documents
 export const uploadInsuranceDocuments = async (req, res) => {
     try {
-        const userId = req.user._id;
-        const { type, url } = req.body;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
+        const files = req.files;
+
+        if (!files || Object.keys(files).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No files uploaded"
+            });
+        }
 
         const insurance = await Insurance.findOne({ userId });
 
         if (!insurance) {
             return res.status(404).json({
                 success: false,
-                message: "Insurance profile not found"
+                message: "Insurance profile not found. Please create your profile first."
             });
         }
 
-        insurance.documents.push({
-            type,
-            url,
-            verified: false
-        });
+        // Process uploaded files
+        const uploadedDocs = [];
+
+        // Handle insurance license (single file)
+        if (files.insuranceLicense && files.insuranceLicense[0]) {
+            const file = files.insuranceLicense[0];
+            const docUrl = `uploads/insurance/${file.filename}`;
+            
+            insurance.documents.push({
+                type: 'license', // Map to valid enum value
+                url: docUrl,
+                verified: false,
+                uploadedAt: new Date()
+            });
+
+            uploadedDocs.push('insuranceLicense');
+        }
+
+        // Handle certification docs (multiple files)
+        if (files.certificationDocs && files.certificationDocs.length > 0) {
+            files.certificationDocs.forEach((file, index) => {
+                const docUrl = `uploads/insurance/${file.filename}`;
+                
+                insurance.documents.push({
+                    type: 'certification', // Map to valid enum value
+                    url: docUrl,
+                    verified: false,
+                    uploadedAt: new Date()
+                });
+            });
+
+            uploadedDocs.push(`${files.certificationDocs.length} certification document(s)`);
+        }
 
         await insurance.save();
 
         return res.status(200).json({
             success: true,
-            message: "Document uploaded successfully",
-            data: insurance
+            message: `Documents uploaded successfully: ${uploadedDocs.join(', ')}`,
+            data: {
+                uploadedDocuments: uploadedDocs,
+                insurance: insurance
+            }
         });
     } catch (error) {
-        console.error("Error uploading document:", error);
+        console.error("Error uploading documents:", error);
         return res.status(500).json({
             success: false,
             message: "Internal server error",
@@ -257,7 +316,7 @@ export const updateInsuranceStatistics = async (insuranceId, updateData) => {
 // Get Insurance Dashboard Statistics
 export const getInsuranceDashboardStats = async (req, res) => {
     try {
-        const userId = req.user._id;
+        const userId = req.user.id; // JWT payload uses 'id' not '_id'
 
         const insurance = await Insurance.findOne({ userId });
 

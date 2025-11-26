@@ -8,6 +8,7 @@ import {
     getAgencyDashboardStats
 } from "../controllers/agencyController.js";
 import { authMiddleware as authenticate } from "../middlewares/auth.js";
+import { uploadAgencyDocs } from "../middlewares/upload.js";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ const router = express.Router();
 router.post("/profile", authenticate, createOrUpdateAgencyProfile);
 router.put("/profile", authenticate, createOrUpdateAgencyProfile);
 router.get("/profile", authenticate, getAgencyProfile);
-router.post("/documents", authenticate, uploadAgencyDocuments);
+router.post("/documents", authenticate, uploadAgencyDocs, uploadAgencyDocuments);
 router.get("/dashboard/stats", authenticate, getAgencyDashboardStats);
 
 // Public routes
