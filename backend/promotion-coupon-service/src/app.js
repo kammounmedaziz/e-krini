@@ -1,50 +1,73 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const dotenv = require('dotenv');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import connectDB from './config/database.js';
+import couponRoutes from './routes/couponRoutes.js';
+import promotionRoutes from './routes/promotionRoutes.js';
 
 // Load environment variables
 dotenv.config();
 
-// Import routes
-const couponRoutes = require('./src/routes/couponRoutes');
-const promotionRoutes = require('./src/routes/promotionRoutes');
-
-// Initialize Express app
 const app = express();
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(morgan('combined'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Connect to Database
+connectDB();
 
-// Routes
+// Middlewares
+app.use(helmet()); // Security headers
+app.use(cors()); // Enable CORS
+app.use(morgan('dev')); // HTTP request logger
+app.use(express.json()); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Health check route
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Promotion & Coupon Service is running',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// API Routes
 app.use('/api/coupons', couponRoutes);
 app.use('/api/promotions', promotionRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', service: 'promotion-coupon-service' });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
-});
-
-// 404 handler
+// 404 Handler
 app.use('*', (req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
 });
 
-const PORT = process.env.PORT || 3003;
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
+
+// Start Server
+const PORT = process.env.PORT || 3008;
 
 app.listen(PORT, () => {
-  console.log(`Promotion & Coupon Service running on port ${PORT}`);
+  console.log(`
+    ╔════════════════════════════════════════════╗
+    ║   🚀 Server Started Successfully          ║
+    ║   📍 Port: ${PORT}                         ║
+    ║   🌍 Environment: ${process.env.NODE_ENV || 'development'}        ║
+    ║   📚 API Documentation:                    ║
+    ║      - Coupons: /api/coupons              ║
+    ║      - Promotions: /api/promotions        ║
+    ╚════════════════════════════════════════════╝
+  `);
 });
 
-module.exports = app;
+export default app;
