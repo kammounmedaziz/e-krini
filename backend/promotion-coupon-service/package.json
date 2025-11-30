@@ -2,6 +2,7 @@
   "name": "promotion-coupon-service",
   "version": "1.0.0",
   "description": "Promotion & Coupon Service for managing discounts, promo codes, and loyalty bonuses",
+  "type": "module",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
