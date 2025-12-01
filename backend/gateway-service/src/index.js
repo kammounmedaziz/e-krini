@@ -1,142 +1,82 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import compression from 'compression';
-import morgan from 'morgan';
-import dotenv from 'dotenv';
-import { createProxyMiddleware } from 'http-proxy-middleware';
-import rateLimit from 'express-rate-limit';
+import express from "express";
+import axios from "axios";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import compression from "compression";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
-// Middleware
+// Middleware global
 app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
-}));
+app.use(cors());
 app.use(compression());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(morgan('combined'));
+app.use(express.json());
+app.use(morgan("dev"));
 
-// Rate limiting (in-memory store)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.'
-});
+const DISCOVERY_URL = "http://localhost:3000/services";
 
-app.use('/api/', limiter);
+// Récupérer une URL de service depuis le Discovery service
+async function getServiceURL(serviceName) {
+  try {
+    const response = await axios.get(DISCOVERY_URL);
+    return response.data[serviceName];
+  } catch (err) {
+    console.error("❌ Error connecting to Discovery Service:", err.message);
+    return null;
+  }
+}
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
-    service: 'gateway-service',
-    timestamp: new Date().toISOString()
+// Fonction générique de proxy
+async function proxyRequest(req, res, serviceName) {
+  const baseURL = await getServiceURL(serviceName);
+
+  if (!baseURL) {
+    return res.status(503).json({
+      success: false,
+      message: `Service ${serviceName} unavailable`,
+    });
+  }
+
+  const targetURL = baseURL + req.originalUrl.replace(`/${serviceName}`, "");
+
+  try {
+    const result = await axios({
+      method: req.method,
+      url: targetURL,
+      data: req.body,
+    });
+
+    return res.status(result.status).json(result.data);
+  } catch (error) {
+    return res.status(error.response?.status || 500).json({
+      success: false,
+      message: "Gateway error",
+      details: error.message,
+    });
+  }
+}
+
+// Routes du gateway → basées sur le nom des services
+app.use("/auth", (req, res) => proxyRequest(req, res, "auth"));
+app.use("/fleet", (req, res) => proxyRequest(req, res, "fleet"));
+app.use("/reservation", (req, res) => proxyRequest(req, res, "reservation"));
+app.use("/promotion", (req, res) => proxyRequest(req, res, "promotion"));
+
+// Health check du gateway
+app.get("/health", (req, res) => {
+  res.json({
+    status: "OK",
+    service: "gateway-service",
+    timestamp: new Date().toISOString(),
   });
 });
 
-// Service proxies
-const services = {
-  auth: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
-  agency: process.env.AGENCY_SERVICE_URL || 'http://localhost:3002',
-  search: process.env.SEARCH_SERVICE_URL || 'http://localhost:3003',
-  reservation: process.env.RESERVATION_SERVICE_URL || 'http://localhost:3004',
-  payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:3005',
-  review: process.env.REVIEW_SERVICE_URL || 'http://localhost:3006'
-};
-
-// Proxy configurations
-app.use('/api/auth', createProxyMiddleware({
-  target: services.auth,
-  changeOrigin: true,
-  pathRewrite: { '^/api/auth': '/api/v1/auth' }
-}));
-
-app.use('/api/agencies', createProxyMiddleware({
-  target: services.agency,
-  changeOrigin: true,
-  pathRewrite: { '^/api/agencies': '' }
-}));
-
-app.use('/api/vehicles', createProxyMiddleware({
-  target: services.agency,
-  changeOrigin: true,
-  pathRewrite: { '^/api/vehicles': '' }
-}));
-
-app.use('/api/search', createProxyMiddleware({
-  target: services.search,
-  changeOrigin: true,
-  pathRewrite: { '^/api/search': '' }
-}));
-
-app.use('/api/reservations', createProxyMiddleware({
-  target: services.reservation,
-  changeOrigin: true,
-  pathRewrite: { '^/api/reservations': '' }
-}));
-
-app.use('/api/payments', createProxyMiddleware({
-  target: services.payment,
-  changeOrigin: true,
-  pathRewrite: { '^/api/payments': '' }
-}));
-
-app.use('/api/reviews', createProxyMiddleware({
-  target: services.review,
-  changeOrigin: true,
-  pathRewrite: { '^/api/reviews': '' }
-}));
-
-app.use('/api/support', createProxyMiddleware({
-  target: services.review,
-  changeOrigin: true,
-  pathRewrite: { '^/api/support': '' }
-}));
-
-app.use('/api/users', createProxyMiddleware({
-  target: services.auth,
-  changeOrigin: true,
-  pathRewrite: { '^/api/users': '/api/v1/users' }
-}));
-
-app.use('/api/admin', createProxyMiddleware({
-  target: services.auth,
-  changeOrigin: true,
-  pathRewrite: { '^/api/admin': '/api/v1/admin' }
-}));
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || 'Internal Server Error'
-  });
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Route not found'
-  });
-});
-
-// Start server
+// Start gateway
 app.listen(PORT, () => {
-  console.log(`🚀 Gateway Service running on port ${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, closing server gracefully...');
-  process.exit(0);
+  console.log(`🚪 API Gateway running on port ${PORT}`);
 });
