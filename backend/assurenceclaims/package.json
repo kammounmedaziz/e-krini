@@ -1,0 +1,20 @@
+{
+  "name": "assurance-reclamation-crud",
+  "version": "1.0.0",
+  "description": "CRUD API for Assurance and Reclamation",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "mongoose": "^7.8.7",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
