@@ -55,7 +55,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 3007;
+const PORT = process.env.PORT || 3006;
 app.listen(PORT, () => {
   logger.info(`Feedback & Complaints Service running on port ${PORT}`);
   console.log(`🚀 Feedback & Complaints Service running on port ${PORT}`);

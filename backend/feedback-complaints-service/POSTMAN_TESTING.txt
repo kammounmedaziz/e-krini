@@ -65,14 +65,14 @@ Body (JSON) - Example 1 (Complaint):
 }
 
 Body (JSON) - Example 2 (Feedback):
-{
-  "type": "feedback",
-  "category": "customer_support",
-  "priority": "medium",
-  "subject": "Excellent service at pickup",
-  "description": "The staff at the pickup location were very helpful and professional. Great experience!",
-  "isAnonymous": false
-}
+  {
+    "type": "feedback",
+    "category": "customer_support",
+    "priority": "medium",
+    "subject": "Excellent service at pickup",
+    "description": "The staff at the pickup location were very helpful and professional. Great experience!",
+    "isAnonymous": false
+  }
 
 Body (JSON) - Example 3 (Report):
 {
