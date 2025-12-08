@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import AgencySidebar from '../../components/agency/AgencySidebar';
 import AgencyDashboard from './AgencyDashboard';
 import AgencySettings from './AgencySettings';
-import AgencyProfile from './AgencyProfile';
 
 const AgencyDashboardLayout = ({ user: initialUser, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -86,15 +85,7 @@ const AgencyDashboardLayout = ({ user: initialUser, onLogout }) => {
           </div>
         );
       case 'settings':
-        return (
-          <div>
-            <AgencyProfile />
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">Upload Documents</h2>
-              <AgencySettings />
-            </div>
-          </div>
-        );
+        return <AgencySettings />;
       default:
         return <AgencyDashboard />;
     }

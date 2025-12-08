@@ -167,22 +167,20 @@ const TeamPage = () => {
       </section>
 
       {/* Join Us Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <section className="py-20 bg-gray-50 dark:bg-dark-900/50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-8">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">Join Our Team</h2>
-            <p className="text-gray-700 text-lg mb-8">
-              We're always looking for talented individuals who share our passion for innovation
-              and customer excellence. If you're ready to make an impact, we'd love to hear from you.
-            </p>
-            <a
-              href="mailto:careers@ekrini.com"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold rounded-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-primary-500/30"
-            >
-              <Mail size={20} />
-              Get in Touch
-            </a>
-          </div>
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">Join Our Team</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
+            We're always looking for talented individuals who share our passion for innovation
+            and customer excellence. If you're ready to make an impact, we'd love to hear from you.
+          </p>
+          <a
+            href="mailto:careers@ekrini.com"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-primary-600 to-primary-500 text-white font-semibold rounded-lg hover:scale-105 transition-all duration-300 shadow-lg shadow-primary-500/30"
+          >
+            <Mail size={20} />
+            Get in Touch
+          </a>
         </div>
       </section>
     </section>

@@ -269,7 +269,7 @@ const AgencyDetailsModal = ({ isOpen, onClose, agencyId, onActionComplete }) => 
                             </span>
                           )}
                           <a
-                            href={doc.url?.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}/${doc.url}`}
+                            href={doc.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded transition-all"

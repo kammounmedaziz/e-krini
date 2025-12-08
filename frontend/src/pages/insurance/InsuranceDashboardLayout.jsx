@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import InsuranceSidebar from '../../components/insurance/InsuranceSidebar';
 import InsuranceDashboard from './InsuranceDashboard';
 import InsuranceSettings from './InsuranceSettings';
-import InsuranceProfile from './InsuranceProfile';
 
 const InsuranceDashboardLayout = ({ user: initialUser, onLogout }) => {
   const [current, setCurrent] = useState('dashboard');
@@ -86,15 +85,7 @@ const InsuranceDashboardLayout = ({ user: initialUser, onLogout }) => {
           </div>
         );
       case 'settings':
-        return (
-          <div>
-            <InsuranceProfile />
-            <div className="mt-8">
-              <h2 className="text-2xl font-semibold text-white mb-4">Upload Documents</h2>
-              <InsuranceSettings />
-            </div>
-          </div>
-        );
+        return <InsuranceSettings />;
       default:
         return <InsuranceDashboard />;
     }

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ClientSidebar from '../../components/client/ClientSidebar';
 import ClientSettings from './ClientSettings';
-import IdentityVerification from './IdentityVerification';
-import FeedbackComplaints from './FeedbackComplaints';
 import { Card } from '@ui';
 import {
   Car,
@@ -233,22 +231,20 @@ const ClientDashboard = ({ user: initialUser, onLogout }) => {
             <TransactionsList />
           </div>
         );
-      case 'kyc':
-        return <IdentityVerification />;
       case 'cars':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">My Cars</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <p className="text-gray-300">Car management functionality will be implemented here.</p>
-            </div>
+            </Card>
           </div>
         );
       case 'reservations':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">My Reservations</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <div className="space-y-4">
                 {recentReservations.map((reservation) => (
                   <div key={reservation.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
@@ -287,47 +283,45 @@ const ClientDashboard = ({ user: initialUser, onLogout }) => {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
           </div>
         );
       case 'payments':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">Payment History</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <p className="text-gray-300">Payment history will be displayed here.</p>
-            </div>
+            </Card>
           </div>
         );
       case 'locations':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">Locations</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <p className="text-gray-300">Location services will be implemented here.</p>
-            </div>
+            </Card>
           </div>
         );
       case 'reviews':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">My Reviews</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <p className="text-gray-300">Review management will be implemented here.</p>
-            </div>
+            </Card>
           </div>
         );
       case 'support':
         return (
           <div>
             <h1 className="text-2xl font-semibold mb-6 text-white">Support</h1>
-            <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-xl p-6">
+            <Card className="backdrop-blur-lg bg-white/10 border border-white/20">
               <p className="text-gray-300">Support tickets and help will be available here.</p>
-            </div>
+            </Card>
           </div>
         );
-      case 'feedback':
-        return <FeedbackComplaints />;
       case 'settings':
         return <ClientSettings key={current} />;
       default:
