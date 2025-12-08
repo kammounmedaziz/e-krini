@@ -69,7 +69,7 @@ import passwordResetRoutes from './routes/passwordReset.js';
 import loginHistoryRoutes from './routes/loginHistory.js';
 import kycRoutes from './routes/kyc.js';
 
-app.use('/api/v1/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/agency', agencyRoutes);
