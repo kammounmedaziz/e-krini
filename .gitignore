@@ -4,8 +4,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-package-lock.json
-yarn.lock
 
 # Environment variables
 .env
@@ -48,7 +46,6 @@ Thumbs.db
 Desktop.ini
 
 # Docker
-.dockerignore
 
 # Uploads and temp files
 uploads/
@@ -87,3 +84,19 @@ k8s/secrets.yaml
 # Miscellaneous
 .cache/
 .parcel-cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# AI-backend specific
+AI-backend/face_auth/__pycache__/
+AI-backend/*.pyc
