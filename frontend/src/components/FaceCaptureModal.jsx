@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Card, Button } from '@ui';
 import { Camera, X, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { authAPI } from '../api';
 
 const FaceCaptureModal = ({ isOpen, onClose, onComplete }) => {
   const videoRef = useRef(null);
@@ -183,21 +184,7 @@ const FaceCaptureModal = ({ isOpen, onClose, onComplete }) => {
       });
       
       // Enable face auth in main database and register with AI backend
-      const enableFaceAuthResponse = await fetch('http://localhost:3001/api/v1/auth/enable-face-auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          userId: userId,
-          faceEncoding: faceEncoding
-        })
-      });
-
-      console.log('FaceCaptureModal - API response status:', enableFaceAuthResponse.status);
-      console.log('FaceCaptureModal - API response headers:', Object.fromEntries(enableFaceAuthResponse.headers.entries()));
-
-      const enableResult = await enableFaceAuthResponse.json();
+      const enableResult = await authAPI.enableFaceAuth(userId, faceEncoding);
       console.log('FaceCaptureModal - Enable face auth result:', enableResult);
 
       if (!enableResult.success) {

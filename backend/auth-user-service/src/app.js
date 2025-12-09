@@ -4,12 +4,34 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import connectDB from './config/database.js';
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 3001;
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Auth User Service API',
+      version: '1.0.0',
+      description: 'API for authentication and user management',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
+
+const app = express();
 
 // Middleware
 app.use(helmet());
@@ -35,6 +57,9 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // API routes
 app.get('/', (req, res) => {

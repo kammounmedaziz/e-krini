@@ -204,7 +204,7 @@ const InsuranceDocumentsManagement = () => {
                     </p>
 
                     <a
-                      href={doc.url?.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:3001'}/${doc.url}`}
+                      href={doc.url?.startsWith('http') ? doc.url : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000'}/${doc.url}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded transition-all"

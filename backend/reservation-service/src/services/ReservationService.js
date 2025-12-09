@@ -1,10 +1,19 @@
 import Reservation from '../models/Reservation.js';
 //import Promo from '../models/Promo.js';
 import { v4 as uuidv4 } from 'uuid';
+import ServiceClient from '../../utils/serviceClient.js';
 
 export class ReservationService {
   static async createReservation(data) {
     try {
+      // Verify car exists and get details from fleet service
+      let carDetails;
+      try {
+        carDetails = await ServiceClient.getCarById(data.carId);
+      } catch (error) {
+        throw new Error(`Car not found or unavailable: ${error.message}`);
+      }
+
       const startDate = new Date(data.startDate);
       const endDate = new Date(data.endDate);
 
@@ -12,8 +21,23 @@ export class ReservationService {
         throw new Error('La date de fin doit être après la date de début');
       }
 
+      // Check car availability for the requested dates
+      try {
+        const availabilityCheck = await ServiceClient.checkCarAvailability(
+          [data.carId],
+          startDate.toISOString(),
+          endDate.toISOString()
+        );
+        
+        if (!availabilityCheck || !availabilityCheck.available || !availabilityCheck.available[data.carId]) {
+          throw new Error('Car is not available for the selected dates');
+        }
+      } catch (error) {
+        throw new Error(`Availability check failed: ${error.message}`);
+      }
+
       const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
-      const dailyRate = data.dailyRate || 100;
+      const dailyRate = data.dailyRate || carDetails.prixParJour || 100;
 
       let insuranceAmount = 0;
       if (data.insuranceType === 'basic') {
@@ -28,30 +52,24 @@ export class ReservationService {
 
       // Calcul du sous-total
       const subtotal = dailyRate * totalDays + insuranceAmount;
-      const discountAmount = 0;
+      let discountAmount = 0;
 
-      // Logique promo commentée pour usage futur
-      /*
+      // Apply coupon/promotion if provided
       const promoCode = data.promoCode || null;
       if (promoCode) {
-        const promo = await Promo.findOne({ 
-          code: promoCode.toUpperCase(), 
-          active: true 
-        });
-        
-        if (promo) {
-          if (promo.expiresAt && promo.expiresAt < new Date()) {
-            // expired
-          } else if (promo.maxUses && promo.uses >= promo.maxUses) {
-            // exhausted
-          } else {
-            discountAmount = Math.round((subtotal * (promo.discountPercent / 100)) * 100) / 100;
-            promo.uses += 1;
-            await promo.save();
+        try {
+          const couponResult = await ServiceClient.verifyCoupon(promoCode);
+          if (couponResult && couponResult.valid) {
+            const appliedCoupon = await ServiceClient.applyCoupon(promoCode, subtotal);
+            if (appliedCoupon && appliedCoupon.discountAmount) {
+              discountAmount = appliedCoupon.discountAmount;
+            }
           }
+        } catch (error) {
+          console.warn('Coupon application failed:', error.message);
+          // Continue without coupon if it fails
         }
       }
-      */
 
       const totalAmount = Math.max(0, subtotal - discountAmount);
 
@@ -68,7 +86,7 @@ export class ReservationService {
         dailyRate,
         insuranceAmount,
         totalAmount,
-        // promoCode: promoCode, // À décommenter quand les promos seront activés
+        promoCode: promoCode || undefined,
         discountAmount,
         depositAmount: data.depositAmount || totalAmount * 0.2,
         notes: data.notes || '',
@@ -82,6 +100,14 @@ export class ReservationService {
       } else {
         reservation.status = 'confirmed';
         reservation.depositPaid = true;
+        
+        // Update car status to 'rented' in fleet service when confirmed
+        try {
+          await ServiceClient.updateCarStatus(data.carId, 'rented');
+        } catch (error) {
+          console.error('Failed to update car status:', error.message);
+          // Don't fail the reservation if status update fails
+        }
       }
 
       await reservation.save();

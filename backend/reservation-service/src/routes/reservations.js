@@ -2,26 +2,29 @@ import express from 'express';
 import { body, query } from 'express-validator';
 import ReservationController from '../controllers/ReservationController.js';
 import { sendMail } from '../utils/mailer.js';
+import { authMiddleware, authorize } from '../../middlewares/auth.js';
 
 const router = express.Router();
 
 /**
  * POST /api/reservations
- * Créer une nouvelle réservation
+ * Créer une nouvelle réservation (requires authentication)
  */
 router.post(
   '/',
+  authMiddleware,
   [
     body('clientId').notEmpty().withMessage('clientId est requis'),
     body('carId').notEmpty().withMessage('carId est requis'),
-    body('carModel').notEmpty().withMessage('carModel est requis'),
-    body('carBrand').notEmpty().withMessage('carBrand est requis'),
+    body('carModel').optional(),
+    body('carBrand').optional(),
     body('startDate').isISO8601().withMessage('startDate doit être une date valide'),
     body('endDate').isISO8601().withMessage('endDate doit être une date valide'),
     body('insuranceType')
       .isIn(['basic', 'standard', 'premium', 'comprehensive'])
       .withMessage('insuranceType invalide'),
-    body('dailyRate').isNumeric().withMessage('dailyRate doit être un nombre'),
+    body('dailyRate').optional().isNumeric().withMessage('dailyRate doit être un nombre'),
+    body('promoCode').optional(),
   ],
   ReservationController.createReservation
 );
@@ -47,38 +50,42 @@ router.post('/send-email', async (req, res) => {
 
 /**
  * GET /api/reservations/:reservationId
- * Récupérer une réservation
+ * Récupérer une réservation (requires authentication)
  */
-router.get('/:reservationId', ReservationController.getReservation);
+router.get('/:reservationId', authMiddleware, ReservationController.getReservation);
 
 /**
  * GET /api/reservations/client/:clientId
- * Récupérer les réservations d'un client
+ * Récupérer les réservations d'un client (requires authentication)
  */
-router.get('/client/:clientId', ReservationController.getClientReservations);
+router.get('/client/:clientId', authMiddleware, ReservationController.getClientReservations);
 
 /**
  * GET /api/reservations/search/by-car-model
- * Rechercher par modèle de voiture
+ * Rechercher par modèle de voiture (admin/agency only)
  */
 router.get(
   '/search/by-car-model',
+  authMiddleware,
+  authorize('admin', 'agency'),
   [query('carModel').notEmpty().withMessage('carModel est requis')],
   ReservationController.searchByCarModel
 );
 
 /**
  * GET /api/reservations/by-status/:status
- * Récupérer par statut
+ * Récupérer par statut (admin/agency only)
  */
-router.get('/by-status/:status', ReservationController.getByStatus);
+router.get('/by-status/:status', authMiddleware, authorize('admin', 'agency'), ReservationController.getByStatus);
 
 /**
  * GET /api/reservations/period
- * Récupérer par période
+ * Récupérer par période (admin/agency only)
  */
 router.get(
   '/period',
+  authMiddleware,
+  authorize('admin', 'agency'),
   [
     query('startDate').isISO8601().withMessage('startDate doit être une date valide'),
     query('endDate').isISO8601().withMessage('endDate doit être une date valide'),
@@ -88,13 +95,13 @@ router.get(
 
 /**
  * GET /api/reservations/stats/overview
- * Obtenir les statistiques
+ * Obtenir les statistiques (admin only)
  */
-router.get('/stats/overview', ReservationController.getStats);
+router.get('/stats/overview', authMiddleware, authorize('admin'), ReservationController.getStats);
 
 /**
  * GET /api/reservations/availability/check
- * Vérifier la disponibilité
+ * Vérifier la disponibilité (public access)
  */
 router.get(
   '/availability/check',
@@ -108,27 +115,32 @@ router.get(
 
 /**
  * PUT /api/reservations/:reservationId
- * Mettre à jour une réservation
+ * Mettre à jour une réservation (requires authentication)
  */
-router.put('/:reservationId', ReservationController.updateReservation);
+router.put('/:reservationId', authMiddleware, ReservationController.updateReservation);
 
 /**
  * PUT /api/reservations/:reservationId/cancel
- * Annuler une réservation
+ * Annuler une réservation (requires authentication)
  */
-router.put('/:reservationId/cancel', ReservationController.cancelReservation);
+router.put('/:reservationId/cancel', authMiddleware, ReservationController.cancelReservation);
 
 /**
  * PUT /api/reservations/:reservationId/confirm
- * Confirmer une réservation
+ * Confirmer une réservation (admin/agency only)
  */
-router.put('/:reservationId/confirm', ReservationController.confirmReservation);
+router.put('/:reservationId/confirm', authMiddleware, authorize('admin', 'agency'), ReservationController.confirmReservation);
 
-/**++
+/**
  * PUT /api/reservations/:reservationId/release-hold
- * Libérer un hold (annulation si non confirmé)
+ * Libérer un hold (admin/agency only)
  */
-router.put('/:reservationId/release-hold', ReservationController.releaseHold);
-router.delete('/:reservationId', ReservationController.deleteReservation);
+router.put('/:reservationId/release-hold', authMiddleware, authorize('admin', 'agency'), ReservationController.releaseHold);
+
+/**
+ * DELETE /api/reservations/:reservationId
+ * Supprimer une réservation (admin only)
+ */
+router.delete('/:reservationId', authMiddleware, authorize('admin'), ReservationController.deleteReservation);
 
 export default router;

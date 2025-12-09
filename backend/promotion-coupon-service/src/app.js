@@ -3,12 +3,33 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import connectDB from './config/database.js';
 import couponRoutes from './routes/couponRoutes.js';
 import promotionRoutes from './routes/promotionRoutes.js';
 
 // Load environment variables
 dotenv.config();
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Promotion Coupon Service API',
+      version: '1.0.0',
+      description: 'API for promotion and coupon management',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3008',
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
 const app = express();
 
@@ -21,6 +42,9 @@ app.use(cors()); // Enable CORS
 app.use(morgan('dev')); // HTTP request logger
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -55,7 +79,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-const PORT = process.env.PORT || 3008;
+const PORT = process.env.PORT || 3006;
 
 app.listen(PORT, () => {
   console.log(`

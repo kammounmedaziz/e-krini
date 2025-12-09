@@ -70,7 +70,7 @@ const ClientSettings = () => {
 
         // Also fetch fresh user data from API
         console.log('ClientSettings - Fetching fresh user data from API...');
-        console.log('ClientSettings - API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1');
+        console.log('ClientSettings - API Base URL:', import.meta.env.VITE_API_URL || 'http://localhost:3000/api');
         const response = await userAPI.getProfile();
         console.log('ClientSettings - API response:', response);
         console.log('ClientSettings - Response status:', response?.status);

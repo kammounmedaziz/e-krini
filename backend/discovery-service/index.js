@@ -7,8 +7,11 @@ app.use(express.json());
 const services = {
   auth: "http://localhost:3001",            // auth-user-service
   fleet: "http://localhost:3002",           // fleet-service
-  reservation: "http://localhost:3004",     // reservation-service
-  promotion: "http://localhost:3008"        // promotion-coupon-service
+  reservation: "http://localhost:3003",     // reservation-service
+  promotion: "http://localhost:3006",       // promotion-coupon-service
+  feedback: "http://localhost:3005",        // feedback-complaints-service
+  assurance: "http://localhost:3004",       // assurence-claims-service
+  maintenance: "http://localhost:3007"      // maintenance-service
 };
 
 // Endpoint pour renvoyer toutes les adresses

@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import connectDB from './config/database.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
@@ -9,6 +11,25 @@ import logger from './utils/logger.js';
 
 // Load environment variables
 dotenv.config();
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Feedback Complaints Service API',
+      version: '1.0.0',
+      description: 'API for feedback and complaints management',
+    },
+    servers: [
+      {
+        url: 'http://localhost:3006',
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
 
 // Initialize express app
 const app = express();
@@ -24,6 +45,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Request logging
 app.use((req, res, next) => {
@@ -55,7 +79,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 3006;
+const PORT = process.env.PORT || 3005;
 app.listen(PORT, () => {
   logger.info(`Feedback & Complaints Service running on port ${PORT}`);
   console.log(`🚀 Feedback & Complaints Service running on port ${PORT}`);

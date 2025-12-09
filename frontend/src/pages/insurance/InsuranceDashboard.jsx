@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   FileText,
   AlertCircle,
@@ -10,6 +9,7 @@ import {
   Clock,
   Shield
 } from 'lucide-react';
+import { insuranceAPI } from '../../api';
 
 const InsuranceDashboard = () => {
   const navigate = useNavigate();
@@ -25,13 +25,9 @@ const InsuranceDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('accessToken');
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
 
-      const statsRes = await axios.get('http://localhost:3001/api/v1/insurance/dashboard/stats', config);
-      setStats(statsRes.data.data);
+      const statsRes = await insuranceAPI.getDashboardStats();
+      setStats(statsRes.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setError(error.response?.data?.error?.message || 'Failed to load dashboard');

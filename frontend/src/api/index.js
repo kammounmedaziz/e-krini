@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -138,6 +138,11 @@ export const authAPI = {
 
   deleteFaceImage: async (imageId) => {
     const response = await api.delete(`/auth/face-images/${imageId}`);
+    return response.data;
+  },
+
+  enableFaceAuth: async (userId, faceEncoding) => {
+    const response = await api.post('/auth/enable-face-auth', { userId, faceEncoding });
     return response.data;
   },
 
@@ -317,6 +322,419 @@ export const adminAPI = {
 
   getInsuranceStatistics: async () => {
     const response = await api.get('/admin/insurance/statistics');
+    return response.data;
+  },
+};
+
+// Agency API endpoints
+export const agencyAPI = {
+  getDashboardStats: async () => {
+    const response = await api.get('/agency/dashboard/stats');
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/agency/profile');
+    return response.data;
+  },
+
+  updateProfile: async (data) => {
+    const response = await api.put('/agency/profile', data);
+    return response.data;
+  },
+
+  uploadDocument: async (documentType, file) => {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('documentType', documentType);
+
+    const response = await api.post('/agency/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getDocuments: async () => {
+    const response = await api.get('/agency/documents');
+    return response.data;
+  },
+
+  deleteDocument: async (documentId) => {
+    const response = await api.delete(`/agency/documents/${documentId}`);
+    return response.data;
+  },
+};
+
+// Insurance API endpoints
+export const insuranceAPI = {
+  getDashboardStats: async () => {
+    const response = await api.get('/insurance/dashboard/stats');
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/insurance/profile');
+    return response.data;
+  },
+
+  updateProfile: async (data) => {
+    const response = await api.put('/insurance/profile', data);
+    return response.data;
+  },
+
+  uploadDocument: async (documentType, file) => {
+    const formData = new FormData();
+    formData.append('document', file);
+    formData.append('documentType', documentType);
+
+    const response = await api.post('/insurance/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  getDocuments: async () => {
+    const response = await api.get('/insurance/documents');
+    return response.data;
+  },
+
+  deleteDocument: async (documentId) => {
+    const response = await api.delete(`/insurance/documents/${documentId}`);
+    return response.data;
+  },
+};
+
+// Fleet API endpoints
+export const fleetAPI = {
+  // Car Management
+  getCars: async (params = {}) => {
+    const response = await api.get('/fleet/cars', { params });
+    return response.data;
+  },
+
+  getCarById: async (carId) => {
+    const response = await api.get(`/fleet/cars/${carId}`);
+    return response.data;
+  },
+
+  createCar: async (carData) => {
+    const response = await api.post('/fleet/cars', carData);
+    return response.data;
+  },
+
+  updateCar: async (carId, carData) => {
+    const response = await api.patch(`/fleet/cars/${carId}`, carData);
+    return response.data;
+  },
+
+  deleteCar: async (carId) => {
+    const response = await api.delete(`/fleet/cars/${carId}`);
+    return response.data;
+  },
+
+  // Car Search and Filtering
+  searchCars: async (params = {}) => {
+    const response = await api.get('/fleet/cars/search', { params });
+    return response.data;
+  },
+
+  checkAvailability: async (availabilityData) => {
+    const response = await api.post('/fleet/cars/availability', availabilityData);
+    return response.data;
+  },
+
+  // Categories
+  getCategories: async () => {
+    const response = await api.get('/fleet/categories');
+    return response.data;
+  },
+
+  createCategory: async (categoryData) => {
+    const response = await api.post('/fleet/categories', categoryData);
+    return response.data;
+  },
+
+  updateCategory: async (categoryId, categoryData) => {
+    const response = await api.put(`/fleet/categories/${categoryId}`, categoryData);
+    return response.data;
+  },
+
+  deleteCategory: async (categoryId) => {
+    const response = await api.delete(`/fleet/categories/${categoryId}`);
+    return response.data;
+  },
+
+  // Maintenance
+  getMaintenanceDue: async () => {
+    const response = await api.get('/fleet/cars/maintenance/due');
+    return response.data;
+  },
+
+  checkMaintenance: async () => {
+    const response = await api.get('/fleet/cars/maintenance/check');
+    return response.data;
+  },
+
+  // Pricing
+  updateSeasonPricing: async (pricingData) => {
+    const response = await api.post('/fleet/cars/pricing/update-season', pricingData);
+    return response.data;
+  },
+};
+
+// Reservation API endpoints
+export const reservationAPI = {
+  // Client Reservations
+  createReservation: async (reservationData) => {
+    const response = await api.post('/reservation', reservationData);
+    return response.data;
+  },
+
+  getMyReservations: async (params = {}) => {
+    const response = await api.get('/reservation/my-reservations', { params });
+    return response.data;
+  },
+
+  getReservationById: async (reservationId) => {
+    const response = await api.get(`/reservation/${reservationId}`);
+    return response.data;
+  },
+
+  updateReservation: async (reservationId, updateData) => {
+    const response = await api.put(`/reservation/${reservationId}`, updateData);
+    return response.data;
+  },
+
+  cancelReservation: async (reservationId, reason) => {
+    const response = await api.post(`/reservation/${reservationId}/cancel`, { reason });
+    return response.data;
+  },
+
+  // Admin Reservation Management
+  getAllReservations: async (params = {}) => {
+    const response = await api.get('/reservation/admin', { params });
+    return response.data;
+  },
+
+  updateReservationStatus: async (reservationId, status, notes) => {
+    const response = await api.put(`/reservation/admin/${reservationId}/status`, { status, notes });
+    return response.data;
+  },
+
+  getReservationStatistics: async () => {
+    const response = await api.get('/reservation/admin/statistics');
+    return response.data;
+  },
+};
+
+// Promotion API endpoints
+export const promotionAPI = {
+  getActivePromotions: async () => {
+    const response = await api.get('/promotion/active');
+    return response.data;
+  },
+
+  getPromotionById: async (promotionId) => {
+    const response = await api.get(`/promotion/${promotionId}`);
+    return response.data;
+  },
+
+  createPromotion: async (promotionData) => {
+    const response = await api.post('/promotion', promotionData);
+    return response.data;
+  },
+
+  updatePromotion: async (promotionId, promotionData) => {
+    const response = await api.put(`/promotion/${promotionId}`, promotionData);
+    return response.data;
+  },
+
+  deletePromotion: async (promotionId) => {
+    const response = await api.delete(`/promotion/${promotionId}`);
+    return response.data;
+  },
+
+  // Coupons
+  validateCoupon: async (couponCode, bookingData) => {
+    const response = await api.post('/promotion/coupon/validate', { couponCode, ...bookingData });
+    return response.data;
+  },
+
+  getCoupons: async (params = {}) => {
+    const response = await api.get('/promotion/coupons', { params });
+    return response.data;
+  },
+
+  createCoupon: async (couponData) => {
+    const response = await api.post('/promotion/coupons', couponData);
+    return response.data;
+  },
+
+  updateCoupon: async (couponId, couponData) => {
+    const response = await api.put(`/promotion/coupons/${couponId}`, couponData);
+    return response.data;
+  },
+
+  deleteCoupon: async (couponId) => {
+    const response = await api.delete(`/promotion/coupons/${couponId}`);
+    return response.data;
+  },
+};
+
+// Assurance API endpoints
+export const assuranceAPI = {
+  // Claims
+  createClaim: async (claimData) => {
+    const response = await api.post('/assurance/claims', claimData);
+    return response.data;
+  },
+
+  getMyClaims: async (params = {}) => {
+    const response = await api.get('/assurance/claims/my-claims', { params });
+    return response.data;
+  },
+
+  getClaimById: async (claimId) => {
+    const response = await api.get(`/assurance/claims/${claimId}`);
+    return response.data;
+  },
+
+  updateClaim: async (claimId, updateData) => {
+    const response = await api.put(`/assurance/claims/${claimId}`, updateData);
+    return response.data;
+  },
+
+  // Admin Claim Management
+  getAllClaims: async (params = {}) => {
+    const response = await api.get('/assurance/admin/claims', { params });
+    return response.data;
+  },
+
+  updateClaimStatus: async (claimId, status, notes) => {
+    const response = await api.put(`/assurance/admin/claims/${claimId}/status`, { status, notes });
+    return response.data;
+  },
+
+  getClaimStatistics: async () => {
+    const response = await api.get('/assurance/admin/statistics');
+    return response.data;
+  },
+};
+
+// Maintenance API endpoints
+export const maintenanceAPI = {
+  // Maintenance Records
+  getMaintenanceRecords: async (params = {}) => {
+    const response = await api.get('/maintenance/records', { params });
+    return response.data;
+  },
+
+  createMaintenanceRecord: async (recordData) => {
+    const response = await api.post('/maintenance/records', recordData);
+    return response.data;
+  },
+
+  updateMaintenanceRecord: async (recordId, updateData) => {
+    const response = await api.put(`/maintenance/records/${recordId}`, updateData);
+    return response.data;
+  },
+
+  deleteMaintenanceRecord: async (recordId) => {
+    const response = await api.delete(`/maintenance/records/${recordId}`);
+    return response.data;
+  },
+
+  // Maintenance Scheduling
+  scheduleMaintenance: async (scheduleData) => {
+    const response = await api.post('/maintenance/schedule', scheduleData);
+    return response.data;
+  },
+
+  getScheduledMaintenance: async (params = {}) => {
+    const response = await api.get('/maintenance/scheduled', { params });
+    return response.data;
+  },
+
+  updateMaintenanceSchedule: async (scheduleId, updateData) => {
+    const response = await api.put(`/maintenance/schedule/${scheduleId}`, updateData);
+    return response.data;
+  },
+
+  // Admin Maintenance Management
+  getAllMaintenanceRecords: async (params = {}) => {
+    const response = await api.get('/maintenance/admin/records', { params });
+    return response.data;
+  },
+
+  getMaintenanceStatistics: async () => {
+    const response = await api.get('/maintenance/admin/statistics');
+    return response.data;
+  },
+};
+
+
+// KYC API endpoints
+export const kycAPI = {
+  getKycStatus: async () => {
+    const response = await api.get("/kyc/status");
+    return response.data;
+  },
+
+  uploadDocument: async (documentType, file) => {
+    const formData = new FormData();
+    formData.append("document", file);
+    formData.append("documentType", documentType);
+
+    const response = await api.post("/kyc/documents", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
+  getDocuments: async () => {
+    const response = await api.get("/kyc/documents");
+    return response.data;
+  },
+
+  deleteDocument: async (documentId) => {
+    const response = await api.delete(`/kyc/documents/${documentId}`);
+    return response.data;
+  },
+
+  submitKyc: async () => {
+    const response = await api.post("/kyc/submit");
+    return response.data;
+  },
+
+  // Admin KYC Management
+  getAllKycRequests: async (params = {}) => {
+    const response = await api.get("/admin/kyc", { params });
+    return response.data;
+  },
+
+  getKycRequestById: async (kycId) => {
+    const response = await api.get(`/admin/kyc/${kycId}`);
+    return response.data;
+  },
+
+  approveKyc: async (kycId, notes) => {
+    const response = await api.post(`/admin/kyc/${kycId}/approve`, { notes });
+    return response.data;
+  },
+
+  rejectKyc: async (kycId, reason) => {
+    const response = await api.post(`/admin/kyc/${kycId}/reject`, { reason });
+    return response.data;
+  },
+
+  getKycStatistics: async () => {
+    const response = await api.get("/admin/kyc/statistics");
     return response.data;
   },
 };

@@ -10,22 +10,22 @@ import {
   getCouponStats,
   generateCouponCodes,
 } from '../controllers/couponController.js';
+import { authMiddleware, authorize } from '../../middlewares/auth.js';
 
 const router = express.Router();
 
-// CRUD
-// Business logic first
-router.post('/verify', verifyCoupon);
-router.post('/apply', applyCoupon);
-router.get('/:id/stats', getCouponStats);
-router.post('/generate', generateCouponCodes);
+// Business logic (public/authenticated access)
+router.post('/verify', verifyCoupon); // Public - can verify coupon
+router.post('/apply', authMiddleware, applyCoupon); // Authenticated - apply coupon to purchase
+router.get('/:id/stats', authMiddleware, authorize('admin'), getCouponStats); // Admin only
+router.post('/generate', authMiddleware, authorize('admin'), generateCouponCodes); // Admin only
 
-// CRUD
-router.post('/', createCoupon);
-router.get('/', getAllCoupons);
-router.get('/:id', getCouponById);
-router.put('/:id', updateCoupon);
-router.delete('/:id', deleteCoupon);
+// CRUD operations (admin only)
+router.post('/', authMiddleware, authorize('admin'), createCoupon);
+router.get('/', authMiddleware, authorize('admin', 'agency'), getAllCoupons);
+router.get('/:id', authMiddleware, authorize('admin', 'agency'), getCouponById);
+router.put('/:id', authMiddleware, authorize('admin'), updateCoupon);
+router.delete('/:id', authMiddleware, authorize('admin'), deleteCoupon);
 
 
 export default router;

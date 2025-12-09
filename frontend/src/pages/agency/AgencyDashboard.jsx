@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import {
   Car,
   Calendar,
@@ -10,6 +9,7 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
+import { agencyAPI } from '../../api';
 
 const AgencyDashboard = () => {
   const navigate = useNavigate();
@@ -25,13 +25,9 @@ const AgencyDashboard = () => {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('accessToken');
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      };
 
-      const statsRes = await axios.get('http://localhost:3001/api/v1/agency/dashboard/stats', config);
-      setStats(statsRes.data.data);
+      const statsRes = await agencyAPI.getDashboardStats();
+      setStats(statsRes.data);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setError(error.response?.data?.error?.message || 'Failed to load dashboard');

@@ -1,0 +1,824 @@
+================================================================================
+                    POSTMAN TESTING GUIDE - ProjectCrud
+================================================================================
+
+SERVER DETAILS
+================================================================================
+Base URL: http://localhost:3007
+Port: 3007
+Status: Running (Database connected successfully)
+
+
+ENDPOINTS OVERVIEW
+================================================================================
+
+
+MAINTENANCE ENDPOINTS (/maintenance)
+================================================================================
+
+1. GET /maintenance/show
+Method: GET
+URL: http://localhost:3007/maintenance/show
+Description: Show all maintenance records
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of maintenance records with populated vehicle and material details
+  
+Example Response Structure:
+[
+  {
+    "_id": "692819ab2c775c9805cacb1d",
+    "idVehicule": {
+      "_id": "69276ec4bd5a79fcd979a05e",
+      "immatriculation": "TN5678TU",
+      "marque": "Peugeot",
+      "modele": "208",
+      "annee": 2019,
+      "kilometrage": 62000,
+      "typeCarburant": "Diesel",
+      "etat": "Disponible"
+    },
+    "typeMaintenance": "Corrective",
+    "dateMaintenance": "2025-11-27T00:00:00.000Z",
+    "coutMainOeuvre": 150,
+    "etat": "planifiée",
+    "coutMateriel": 0,
+    "coutTVA": 28.5,
+    "coutTotal": 178.5,
+    "idMateriaux": [],
+    "description": "Regular maintenance",
+    "createdAt": "2025-11-27T09:28:11.864Z",
+    "updatedAt": "2025-11-27T09:28:11.864Z"
+  }
+]
+
+
+2. GET /maintenance/showById/:id
+Method: GET
+URL: http://localhost:3007/maintenance/showById/692819ab2c775c9805cacb1d
+Description: Show maintenance record by ID (returns fully populated vehicle and materials)
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Maintenance record object with nested vehicle and material objects
+
+
+3. POST /maintenance/add
+Method: POST
+URL: http://localhost:3007/maintenance/add
+Description: Add new maintenance record with materials used. System auto-calculates coutMateriel from material prices and quantities, then applies 19.6% VAT.
+Headers: 
+  Content-Type: application/json
+Body (raw JSON - Real Example from Database):
+{
+  "idVehicule": "69276ec4bd5a79fcd979a05e",
+  "idMateriaux": [
+    {
+      "materiel": "6927718ad63e5dbddc493948",
+      "quantiteUtilisee": 1
+    },
+    {
+      "materiel": "692771cfd63e5dbddc49394c",
+      "quantiteUtilisee": 15
+    }
+  ],
+  "typeMaintenance": "Vidange",
+  "dateMaintenance": "2024-11-20",
+  "coutMainOeuvre": 50.00,
+  "etat": "terminée",
+  "description": "Vidange moteur + changement filtre à huile"
+}
+
+COST CALCULATION EXAMPLE:
+- Material 1: Balais (BEG-001) 32€ × 1 = 32€
+- Material 2: Batterie (BAT-60AH) 120€ × 15 = 1800€
+- Subtotal Materials: 1832€
+- Labor Cost (coutMainOeuvre): 50€
+- Total HT: 1882€
+- VAT (19.6%): 357.58€
+- TOTAL TTC: 2239.58€
+
+IMPORTANT: 
+- idVehicule: Must be an existing vehicle ID (e.g., Peugeot 208 TN5678TU)
+- idMateriaux: Array of materials used with their IDs and quantities
+- System will populate material details and calculate costs automatically
+
+REQUIRED FIELDS:
+- idVehicule (string, valid MongoDB ObjectId of existing vehicle)
+- typeMaintenance (string): Corrective, Révision, Réparation, Vidange, Contrôle technique
+- dateMaintenance (date, ISO format YYYY-MM-DD, past date or today)
+- coutMainOeuvre (number, 0-100000)
+
+OPTIONAL FIELDS:
+- etat (string): planifiée, en cours, terminée, annulée (default: planifiée)
+- description (string, max 500 chars)
+- idMateriaux (array of {materiel: ObjectId, quantiteUtilisee: number})
+
+Response (Success):
+  Status: 201 Created
+  Body: Created maintenance record with populated vehicle and materials
+  
+Example Response with Materials:
+{
+  "_id": "692772cbd63e5dbddc49395c",
+  "idVehicule": {
+    "_id": "69276ec4bd5a79fcd979a05e",
+    "immatriculation": "TN5678TU",
+    "marque": "Peugeot",
+    "modele": "208",
+    "annee": 2019,
+    "kilometrage": 62000,
+    "typeCarburant": "Diesel",
+    "etat": "Disponible"
+  },
+  "idMateriaux": [
+    {
+      "materiel": {
+        "_id": "6927718ad63e5dbddc493948",
+        "nom": "Balais d'essuie-glace",
+        "quantiteDisponible": 24,
+        "prixUnitaire": 32,
+        "reference": "BEG-001",
+        "categorie": "Accessoire",
+        "seuilAlerte": 8,
+        "description": "Paire de balais essuie-glace"
+      },
+      "quantiteUtilisee": 1
+    },
+    {
+      "materiel": {
+        "_id": "692771cfd63e5dbddc49394c",
+        "nom": "Batterie 12V 60Ah",
+        "quantiteDisponible": 0,
+        "prixUnitaire": 120,
+        "reference": "BAT-60AH",
+        "categorie": "Électrique",
+        "seuilAlerte": 3,
+        "description": "Batterie 12V 60Ah"
+      },
+      "quantiteUtilisee": 15
+    }
+  ],
+  "typeMaintenance": "Vidange",
+  "dateMaintenance": "2024-11-20T00:00:00.000Z",
+  "coutMainOeuvre": 50,
+  "etat": "terminée",
+  "coutMateriel": 1832,
+  "coutTVA": 357.58,
+  "coutTotal": 2239.58,
+  "description": "Vidange moteur + changement filtre à huile",
+  "createdAt": "2025-11-26T21:36:11.592Z",
+  "updatedAt": "2025-11-26T21:36:11.592Z"
+}
+
+
+4. PUT /maintenance/update/:id
+Method: PUT
+URL: http://localhost:3007/maintenance/update/692819ab2c775c9805cacb1d
+Description: Update maintenance record - all fields are OPTIONAL (send only what you want to change)
+Parameters: :id - MongoDB ObjectId of maintenance record
+Headers: 
+  Content-Type: application/json
+Body (raw JSON - Example: Update only materials and status):
+{
+  "idMateriaux": [
+    {
+      "materiel": "6927718ad63e5dbddc493948",
+      "quantiteUtilisee": 2
+    }
+  ],
+  "coutMainOeuvre": 75,
+  "etat": "en cours",
+  "description": "Extended maintenance with additional parts"
+}
+
+OPTIONAL FIELDS (send only the fields you want to update):
+- typeMaintenance (string): Corrective, Révision, Réparation, Vidange, Contrôle technique
+- dateMaintenance (date, ISO format YYYY-MM-DD)
+- coutMainOeuvre (number, 0-100000)
+- etat (string): planifiée, en cours, terminée, annulée
+- description (string, max 500 chars)
+- idMateriaux (array of {materiel: ObjectId, quantiteUtilisee: number})
+
+EXAMPLE - Update only the status:
+{
+  "etat": "terminée"
+}
+
+EXAMPLE - Update only the cost:
+{
+  "coutMainOeuvre": 100
+}
+
+Response (Success):
+  Status: 200 OK
+  Body: Updated maintenance record object with all fields (including unchanged ones)
+
+
+5. DELETE /maintenance/delete/:id
+Method: DELETE
+URL: http://localhost:3007/maintenance/delete/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Delete maintenance record
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Deleted maintenance record object
+
+
+6. GET /maintenance/vehicule/:idVehicule
+Method: GET
+URL: http://localhost:3007/maintenance/vehicule/69276ec4bd5a79fcd979a05e
+Description: Show all maintenance records for a specific vehicle
+Parameters: :idVehicule - Vehicle MongoDB ObjectId (TN5678TU)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of maintenance records for vehicle with populated details
+
+
+7. GET /maintenance/type/:type
+Method: GET
+URL: http://localhost:3007/maintenance/type/Corrective
+Description: Show maintenance records by type
+Parameters: :type - Maintenance type (Corrective, Révision, Réparation, Vidange, Contrôle technique)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of maintenance records of specified type
+
+
+8. GET /maintenance/historique/:idVehicule
+Method: GET
+URL: http://localhost:3007/maintenance/historique/69276ec4bd5a79fcd979a05e
+Description: Get complete maintenance history for a vehicle (Peugeot 208 TN5678TU)
+Parameters: :idVehicule - Vehicle MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of all maintenance history for vehicle with populated vehicle/material details
+
+
+9. GET /maintenance/couts/:id
+Method: GET
+URL: http://localhost:3007/maintenance/couts/692772cbd63e5dbddc49395c
+Description: Get detailed maintenance costs breakdown (example: Vidange - Total: 2239.58)
+Parameters: :id - Maintenance ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Detailed costs object with breakdown:
+    - coutMainOeuvre: Labor cost (50.00)
+    - coutMateriel: Materials cost (calculated from quantities and prices: 1832)
+    - coutTVA: Tax (19.6%: 357.58)
+    - coutTotal: Total (2239.58)
+
+
+================================================================================
+MATERIEL ENDPOINTS (/materiel)
+================================================================================
+
+1. GET /materiel/show
+Method: GET
+URL: http://localhost:3007/materiel/show
+Description: Show all materials
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of material records
+
+
+2. GET /materiel/showById/:id
+Method: GET
+URL: http://localhost:3007/materiel/showById/6927718ad63e5dbddc493948
+Description: Show material by ID
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Material record object
+
+
+3. GET /materiel/showByName/:name
+Method: GET
+URL: http://localhost:3007/materiel/showByName/Oil
+Description: Show material by name
+Parameters: :name - Material name (string)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of materials matching name
+
+
+4. POST /materiel/add
+Method: POST
+URL: http://localhost:3007/materiel/add
+Description: Add new material
+Headers: 
+  Content-Type: application/json
+Body (raw JSON - Example: Add a new filter):
+{
+  "nom": "Filtre à carburant",
+  "quantiteDisponible": 35,
+  "prixUnitaire": 22.00,
+  "categorie": "Pièce mécanique",
+  "reference": "FC-001",
+  "seuilAlerte": 8,
+  "description": "Filtre à carburant haute performance"
+}
+
+EXISTING MATERIALS IN DATABASE (use their IDs for maintenance):
+1. Balais essuie-glace (32€) - ID: 6927718ad63e5dbddc493948 - Qty: 24
+2. Batterie 12V (120€) - ID: 692771cfd63e5dbddc49394c - Qty: 0 (LOW STOCK)
+3. Bougie allumage (8.50€) - ID: 692771d5d63e5dbddc49394e - Qty: 80
+4. Filtre à air (18.50€) - ID: 6927715dd63e5dbddc493944 - Qty: 40
+5. Filtre à eau (25.50€) - ID: 692815a249c21d9d4cd807db - Qty: 50
+6. Filtre à huile (25.50€) - ID: 69277064d63e5dbddc49393d - Qty: 50
+7. Huile moteur 5W30 (45€) - ID: 69277085d63e5dbddc49393f - Qty: 100
+8. Liquide refroidissement (12€) - ID: 6927716ed63e5dbddc493946 - Qty: 80
+9. Plaquettes frein avant (85€) - ID: 69277147d63e5dbddc493942 - Qty: 30
+
+REQUIRED FIELDS:
+- nom (string, 3-100 chars)
+- quantiteDisponible (integer, 0-999999)
+- prixUnitaire (number, 0-1000000)
+
+OPTIONAL FIELDS:
+- categorie (string): Pièce mécanique, Électrique, Carrosserie, Pneumatique, Fluide, Accessoire, Autre
+- reference (string)
+- seuilAlerte (integer, min 0)
+- description (string, max 300 chars)
+
+Response (Success):
+  Status: 201 Created
+  Body: Created material record object
+
+
+5. PUT /materiel/update/:id
+Method: PUT
+URL: http://localhost:3007/materiel/update/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Update material record
+Parameters: :id - MongoDB ObjectId
+Headers: 
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "quantiteDisponible": 40,
+  "prixUnitaire": 23.50
+}
+
+OPTIONAL FIELDS (any of these can be updated):
+- nom (string, 3-100 chars)
+- quantiteDisponible (integer, 0-999999)
+- prixUnitaire (number, 0-1000000)
+- categorie (string): Pièce mécanique, Électrique, Carrosserie, Pneumatique, Fluide, Accessoire, Autre
+- reference (string)
+- seuilAlerte (integer)
+- description (string, max 300 chars)
+
+Response (Success):
+  Status: 200 OK
+  Body: Updated material record object
+
+
+6. DELETE /materiel/delete/:id
+Method: DELETE
+URL: http://localhost:3007/materiel/delete/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Delete material record
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Deleted material record object
+
+
+7. GET /materiel/categorie/:categorie
+Method: GET
+URL: http://localhost:3007/materiel/categorie/Fluide
+Description: Show material by category
+Parameters: :categorie - Material category (Pièce mécanique, Électrique, Carrosserie, Pneumatique, Fluide, Accessoire, Autre)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of materials in category
+
+
+8. GET /materiel/alertes
+Method: GET
+URL: http://localhost:3007/materiel/alertes
+Description: Show material alerts (low stock, etc.)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of alert records
+
+
+9. PUT /materiel/reapprovisionner/:id
+Method: PUT
+URL: http://localhost:3007/materiel/reapprovisionner/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Resupply material (restock)
+Parameters: :id - MongoDB ObjectId
+Headers: 
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "quantite": 100
+}
+Response (Success):
+  Status: 200 OK
+  Body: Updated material record object
+
+
+10. GET /materiel/statistiques
+Method: GET
+URL: http://localhost:3007/materiel/statistiques
+Description: Get material statistics
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Statistics object (total items, total value, etc.)
+
+
+================================================================================
+VEHICULE ENDPOINTS (/vehicule)
+================================================================================
+
+1. GET /vehicule/show
+Method: GET
+URL: http://localhost:3007/vehicule/show
+Description: Show all vehicles
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Array of vehicle records
+
+
+2. GET /vehicule/showById/:id
+Method: GET
+URL: http://localhost:3007/vehicule/showById/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Show vehicle by ID
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Vehicle record object
+
+
+3. GET /vehicule/immatriculation/:immatriculation
+Method: GET
+URL: http://localhost:3007/vehicule/immatriculation/ABC123XYZ
+Description: Show vehicle by registration/immatriculation number
+Parameters: :immatriculation - Vehicle registration number (string)
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Vehicle record object
+
+
+4. POST /vehicule/add
+Method: POST
+URL: http://localhost:3007/vehicule/add
+Description: Add new vehicle
+Headers: 
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "immatriculation": "ABC123XYZ",
+  "marque": "Toyota",
+  "modele": "Camry",
+  "annee": 2020,
+  "type": "Sedan"
+}
+Response (Success):
+  Status: 201 Created
+  Body: Created vehicle record object
+
+
+5. PUT /vehicule/update/:id
+Method: PUT
+URL: http://localhost:3007/vehicule/update/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Update vehicle record
+Parameters: :id - MongoDB ObjectId
+Headers: 
+  Content-Type: application/json
+Body (raw JSON):
+{
+  "marque": "Honda",
+  "annee": 2021
+}
+Response (Success):
+  Status: 200 OK
+  Body: Updated vehicle record object
+
+
+6. DELETE /vehicule/delete/:id
+Method: DELETE
+URL: http://localhost:3007/vehicule/delete/67a1b2c3d4e5f6g7h8i9j0k1
+Description: Delete vehicle record
+Parameters: :id - MongoDB ObjectId
+Headers: None required
+Response (Success):
+  Status: 200 OK
+  Body: Deleted vehicle record object
+
+
+================================================================================
+POSTMAN SETUP STEPS
+================================================================================
+
+Step 1: Open Postman
+- Launch Postman application
+
+Step 2: Create a New Request
+- Click "+" to create a new tab
+- Or go to File > New > HTTP Request
+
+Step 3: Configure GET Request Example (Show All Maintenance)
+- Set Method to: GET
+- Set URL to: http://localhost:3007/maintenance/show
+- Click "Send"
+- View response in the Response panel below
+
+Step 4: Configure POST Request Example (Add Vehicle)
+- Set Method to: POST
+- Set URL to: http://localhost:3007/vehicule/add
+- Go to "Headers" tab
+  - Key: Content-Type
+  - Value: application/json
+- Go to "Body" tab
+  - Select "raw"
+  - Select "JSON" from the dropdown (right side)
+  - Paste this JSON:
+    {
+      "immatriculation": "TEST001",
+      "marque": "Toyota",
+      "modele": "Corolla",
+      "annee": 2023,
+      "type": "Sedan"
+    }
+- Click "Send"
+- View response in the Response panel
+
+Step 5: Test All Endpoints
+- Create separate requests for each endpoint listed above
+- Save them in a collection for reuse
+
+
+TESTING CHECKLIST
+================================================================================
+
+MAINTENANCE ENDPOINTS:
+[ ] GET /maintenance/show returns 200 OK with array
+[ ] GET /maintenance/showById/:id returns 200 OK with single record
+[ ] POST /maintenance/add returns 201 Created
+[ ] PUT /maintenance/update/:id returns 200 OK
+[ ] DELETE /maintenance/delete/:id returns 200 OK
+[ ] GET /maintenance/vehicule/:idVehicule returns 200 OK
+[ ] GET /maintenance/type/:type returns 200 OK
+[ ] GET /maintenance/historique/:idVehicule returns 200 OK
+[ ] GET /maintenance/couts/:id returns 200 OK
+
+MATERIEL ENDPOINTS:
+[ ] GET /materiel/show returns 200 OK with array
+[ ] GET /materiel/showById/:id returns 200 OK with single record
+[ ] GET /materiel/showByName/:name returns 200 OK
+[ ] POST /materiel/add returns 201 Created
+[ ] PUT /materiel/update/:id returns 200 OK
+[ ] DELETE /materiel/delete/:id returns 200 OK
+[ ] GET /materiel/categorie/:categorie returns 200 OK
+[ ] GET /materiel/alertes returns 200 OK
+[ ] PUT /materiel/reapprovisionner/:id returns 200 OK
+[ ] GET /materiel/statistiques returns 200 OK
+
+VEHICULE ENDPOINTS:
+[ ] GET /vehicule/show returns 200 OK with array
+[ ] GET /vehicule/showById/:id returns 200 OK with single record
+[ ] GET /vehicule/immatriculation/:immatriculation returns 200 OK
+[ ] POST /vehicule/add returns 201 Created
+[ ] PUT /vehicule/update/:id returns 200 OK
+[ ] DELETE /vehicule/delete/:id returns 200 OK
+
+
+TROUBLESHOOTING
+================================================================================
+
+Issue: "Cannot GET /maintenance/..."
+Solution:
+  - Verify server is running: Check terminal for startup messages
+  - Verify URL is correct (check spelling and port 3007)
+  - Verify the base path includes the module prefix (/maintenance, /materiel, or /vehicule)
+
+Issue: "POST returns 400 Bad Request"
+Solution:
+  - Verify Content-Type header is set to "application/json"
+  - Verify JSON body is valid (use Postman's JSON validator)
+  - Verify all required fields are present in the request body
+  - Check MongoDB is running and connected
+
+Issue: "Connection refused"
+Solution:
+  - Verify server is running: node app.js in project directory
+  - Verify port 3007 is not in use by another process
+  - Run in PowerShell: netstat -ano | findstr :3007
+  - Kill process if needed: taskkill /PID <PID> /F
+
+Issue: "Database not connected"
+Solution:
+  - Verify MongoDB service is running
+  - Check config/db.json for correct connection URL
+  - Verify network connectivity to MongoDB
+
+
+POWERSHELL TESTING EXAMPLES
+================================================================================
+
+Test 1: Show All Vehicles
+powershell
+Invoke-RestMethod -Method Get -Uri http://localhost:3007/vehicule/show
+powershell
+
+Test 2: Add New Vehicle
+powershell
+$body = @{
+    immatriculation = 'POWERSHELL001'
+    marque = 'BMW'
+    modele = 'X5'
+    annee = 2023
+    type = 'SUV'
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method Post `
+  -Uri http://localhost:3007/vehicule/add `
+  -Body $body `
+  -ContentType 'application/json'
+powershell
+
+Test 3: Show All Maintenance Records
+powershell
+Invoke-RestMethod -Method Get -Uri http://localhost:3007/maintenance/show
+powershell
+
+Test 4: Show All Materials
+powershell
+Invoke-RestMethod -Method Get -Uri http://localhost:3007/materiel/show
+powershell
+
+
+CURL TESTING EXAMPLES
+================================================================================
+
+Test 1: Show All Vehicles
+curl http://localhost:3007/vehicule/show
+
+Test 2: Add New Vehicle
+curl -X POST http://localhost:3007/vehicule/add ^
+  -H "Content-Type: application/json" ^
+  -d "{\"immatriculation\":\"CURL001\",\"marque\":\"Ford\",\"modele\":\"Mustang\",\"annee\":2023,\"type\":\"Sports\"}"
+
+Test 3: Show All Maintenance
+curl http://localhost:3007/maintenance/show
+
+Test 4: Show All Materials
+curl http://localhost:3007/materiel/show
+
+
+IMPORTANT NOTES
+================================================================================
+
+1. Server Status
+   - Start server with: node app.js (from ProjectCrud directory)
+   - Server runs on: http://localhost:3007
+   - Confirm messages in terminal: Server startup confirmation and "Database connected"
+
+2. Database
+   - Uses MongoDB via Mongoose
+   - Connection string from: config/db.json
+   - Models located in: models/ directory
+
+3. Route Prefixes
+   - Maintenance routes: /maintenance
+   - Material routes: /materiel
+   - Vehicle routes: /vehicule
+   - Full URLs: http://localhost:3007/<module>/...
+
+4. Response Status Codes
+   - 201 Created: Record successfully added (POST endpoints)
+   - 200 OK: Data successfully retrieved or modified (GET, PUT, DELETE)
+   - 400 Bad Request: Invalid input data
+   - 404 Not Found: Resource not found
+   - 500 Internal Server Error: Server error (DB connection issues)
+
+5. Request Format
+   - GET requests: Use URL parameters (/show, /showById/:id, etc.)
+   - POST/PUT requests: Use JSON body with Content-Type: application/json header
+
+6. Validation
+   - Some POST/PUT endpoints require field validation
+   - Check middleware in: middl/validateMaintenance.js
+   - Ensure all required fields are provided in request body
+
+7. Database Population & References (IMPORTANT)
+   - Maintenance records POPULATE vehicle and material details
+   - When creating maintenance, only send ObjectIds for idVehicule and idMateriaux
+   - Response includes full nested objects with all details
+
+8. Cost Calculation (Automatic)
+   - coutMateriel = SUM(material.prixUnitaire × quantiteUtilisee)
+   - coutTVA = (coutMainOeuvre + coutMateriel) × 19.6%
+   - coutTotal = coutMainOeuvre + coutMateriel + coutTVA
+
+
+REAL DATABASE REFERENCE
+================================================================================
+
+VEHICLES:
+- ID: 69276ec4bd5a79fcd979a05e
+- Immatriculation: TN5678TU
+- Marque: Peugeot
+- Modèle: 208
+- Année: 2019
+- Carburant: Diesel
+
+MATERIALS:
+1. Balais d'essuie-glace (BEG-001)
+   - ID: 6927718ad63e5dbddc493948
+   - Prix: 32€
+   - Catégorie: Accessoire
+   - Disponible: 24 units
+   - Seuil alerte: 8 units
+
+2. Batterie 12V 60Ah (BAT-60AH)
+   - ID: 692771cfd63e5dbddc49394c
+   - Prix: 120€
+   - Catégorie: Électrique
+   - Disponible: 0 units (LOW STOCK!)
+   - Seuil alerte: 3 units
+
+3. Bougie d'allumage (BOU-001)
+   - ID: 692771d5d63e5dbddc49394e
+   - Prix: 8.50€
+   - Catégorie: Électrique
+   - Disponible: 80 units
+   - Seuil alerte: 20 units
+
+4. Filtre à air (FA-001)
+   - ID: 6927715dd63e5dbddc493944
+   - Prix: 18.50€
+   - Catégorie: Pièce mécanique
+   - Disponible: 40 units
+   - Seuil alerte: 10 units
+
+5. Filtre à eau
+   - ID: 692815a249c21d9d4cd807db
+   - Prix: 25.50€
+   - Catégorie: Pièce mécanique
+   - Disponible: 50 units
+   - Seuil alerte: 10 units
+
+6. Filtre à huile (FO-001)
+   - ID: 69277064d63e5dbddc49393d
+   - Prix: 25.50€
+   - Catégorie: Pièce mécanique
+   - Disponible: 50 units
+   - Seuil alerte: 10 units
+
+7. Huile moteur 5W30 (HM-5W30)
+   - ID: 69277085d63e5dbddc49393f
+   - Prix: 45€
+   - Catégorie: Fluide
+   - Disponible: 100 units
+   - Seuil alerte: 20 units
+
+8. Liquide de refroidissement (LR-001)
+   - ID: 6927716ed63e5dbddc493946
+   - Prix: 12€
+   - Catégorie: Fluide
+   - Disponible: 80 units
+   - Seuil alerte: 15 units
+
+9. Plaquettes de frein avant (PF-AV-001)
+   - ID: 69277147d63e5dbddc493942
+   - Prix: 85€
+   - Catégorie: Pièce mécanique
+   - Disponible: 30 units
+   - Seuil alerte: 5 units
+
+MAINTENANCE RECORDS (2 examples in database):
+1. Maintenance simple (no materials)
+   - ID: 692819ab2c775c9805cacb1d
+   - Type: Corrective
+   - Labour: 150€
+   - Total: 178.5€
+   - État: planifiée
+
+2. Maintenance with materials (full example)
+   - ID: 692772cbd63e5dbddc49395c
+   - Type: Vidange
+   - Labour: 50€
+   - Materials: 1832€ (Balais×1 + Batterie×15)
+   - VAT: 357.58€
+   - Total: 2239.58€
+   - État: terminée
+   - Date: 2024-11-20

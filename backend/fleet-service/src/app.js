@@ -4,14 +4,36 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 import connectDB from './config/db.js';
 import carRoutes from './routes/carRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 
 dotenv.config();
 
-const app = express();
 const PORT = process.env.PORT || 3002;
+
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Fleet Service API',
+      version: '1.0.0',
+      description: 'API for fleet and vehicle management',
+    },
+    servers: [
+      {
+        url: `http://localhost:${PORT}`,
+      },
+    ],
+  },
+  apis: ['./src/routes/*.js'],
+};
+
+const swaggerSpecs = swaggerJsdoc(swaggerOptions);
+
+const app = express();
 
 // Middleware
 app.use(helmet());
@@ -22,6 +44,9 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Mount fleet routes
 app.use('/api/categories', categoryRoutes);

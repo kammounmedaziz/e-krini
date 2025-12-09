@@ -1,21 +1,22 @@
 import express from 'express';
 import * as categoryController from '../controllers/categoryController.js';
+import { authMiddleware, authorize } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-// Create a new category
-router.post('/', categoryController.createCategory);
-
-// List categories (supports pagination and search)
+// List categories (public access)
 router.get('/', categoryController.getCategories);
 
-// Get single category
+// Get single category (public access)
 router.get('/:id', categoryController.getCategoryById);
 
-// Update category
-router.put('/:id', categoryController.updateCategory);
+// Create a new category (admin/agency only)
+router.post('/', authMiddleware, authorize('admin', 'agency'), categoryController.createCategory);
 
-// Delete category
-router.delete('/:id', categoryController.deleteCategory);
+// Update category (admin/agency only)
+router.put('/:id', authMiddleware, authorize('admin', 'agency'), categoryController.updateCategory);
+
+// Delete category (admin/agency only)
+router.delete('/:id', authMiddleware, authorize('admin', 'agency'), categoryController.deleteCategory);
 
 export default router;
