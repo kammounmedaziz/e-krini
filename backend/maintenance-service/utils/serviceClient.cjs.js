@@ -10,7 +10,7 @@ class ServiceClient {
      */
     static async getCarById(carId, token = null) {
         try {
-            const fleetServiceUrl = process.env.FLEET_SERVICE_URL || 'http://localhost:3002';
+            const fleetServiceUrl = process.env.FLEET_SERVICE_URL || 'http://fleet-service:3002';
             const headers = {};
             
             if (token) {
@@ -30,7 +30,7 @@ class ServiceClient {
      */
     static async getUserById(userId, token = null) {
         try {
-            const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
+            const authServiceUrl = process.env.AUTH_SERVICE_URL || 'http://auth-user-service:3001';
             const headers = {};
             
             if (token) {
@@ -50,7 +50,7 @@ class ServiceClient {
      */
     static async createReservation(reservationData, token) {
         try {
-            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3004';
+            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://reservation-service:3003';
             const response = await axios.post(
                 `${reservationServiceUrl}/api/reservations`,
                 reservationData,
@@ -73,7 +73,7 @@ class ServiceClient {
      */
     static async getReservationById(reservationId, token) {
         try {
-            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3004';
+            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://reservation-service:3003';
             const response = await axios.get(
                 `${reservationServiceUrl}/api/reservations/${reservationId}`,
                 {
@@ -94,7 +94,7 @@ class ServiceClient {
      */
     static async updateReservationStatus(reservationId, status, token) {
         try {
-            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3004';
+            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://reservation-service:3003';
             const response = await axios.patch(
                 `${reservationServiceUrl}/api/reservations/${reservationId}/status`,
                 { status },
@@ -117,7 +117,7 @@ class ServiceClient {
      */
     static async checkCarAvailability(carId, startDate, endDate, token = null) {
         try {
-            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3004';
+            const reservationServiceUrl = process.env.RESERVATION_SERVICE_URL || 'http://reservation-service:3003';
             const headers = {};
             
             if (token) {
@@ -143,7 +143,7 @@ class ServiceClient {
      */
     static async getAgencyById(agencyId, token = null) {
         try {
-            const fleetServiceUrl = process.env.FLEET_SERVICE_URL || 'http://localhost:3002';
+            const fleetServiceUrl = process.env.FLEET_SERVICE_URL || 'http://fleet-service:3002';
             const headers = {};
             
             if (token) {

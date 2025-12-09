@@ -5,13 +5,13 @@ app.use(express.json());
 
 // ⭐ La liste complète des services
 const services = {
-  auth: "http://localhost:3001",            // auth-user-service
-  fleet: "http://localhost:3002",           // fleet-service
-  reservation: "http://localhost:3003",     // reservation-service
-  promotion: "http://localhost:3006",       // promotion-coupon-service
-  feedback: "http://localhost:3005",        // feedback-complaints-service
-  assurance: "http://localhost:3004",       // assurence-claims-service
-  maintenance: "http://localhost:3007"      // maintenance-service
+  auth: "http://auth-user-service:3001",            // auth-user-service
+  fleet: "http://fleet-service:3002",           // fleet-service
+  reservation: "http://reservation-service:3003",     // reservation-service
+  promotion: "http://promotion-coupon-service:3006",       // promotion-coupon-service
+  feedback: "http://feedback-complaints-service:3005",        // feedback-complaints-service
+  assurance: "http://assurence-claims-service:3004",       // assurence-claims-service
+  maintenance: "http://maintenance-service:3007"      // maintenance-service
 };
 
 // Endpoint pour renvoyer toutes les adresses

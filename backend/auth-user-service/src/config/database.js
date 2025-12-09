@@ -5,7 +5,7 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/auth-user-db';
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://mongo:27017/car-rental-auth';
 
     const options = {
       // Additional options for better performance and reliability

@@ -10,8 +10,13 @@ COPY package*.json ./
 RUN npm install
 
 # Copy source code
-COPY src ./src
+COPY app.js ./
+COPY config ./config
+COPY controllers ./controllers
 COPY middlewares ./middlewares
+COPY models ./models
+COPY routes ./routes
+COPY services ./services
 COPY utils ./utils
 
 # Expose port

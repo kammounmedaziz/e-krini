@@ -69,13 +69,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 // Hardcoded service URLs for direct routing
 const serviceURLs = {
-  auth: "http://localhost:3001",
-  fleet: "http://localhost:3002",
-  reservation: "http://localhost:3003",
-  promotion: "http://localhost:3006",
-  feedback: "http://localhost:3005",
-  assurance: "http://localhost:3004",
-  maintenance: "http://localhost:3007"
+  auth: "http://auth-user-service:3001",
+  fleet: "http://fleet-service:3002",
+  reservation: "http://reservation-service:3003",
+  promotion: "http://promotion-coupon-service:3006",
+  feedback: "http://feedback-complaints-service:3005",
+  assurance: "http://assurence-claims-service:3004",
+  maintenance: "http://maintenance-service:3007"
 };
 
 // Get service URL (hardcoded)

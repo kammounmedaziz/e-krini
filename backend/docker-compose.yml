@@ -1,5 +1,4 @@
 # Docker Compose for E-Krini Car Rental Platform
-version: '3.8'
 
 services:
   # API Gateway
@@ -24,6 +23,12 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - FLEET_SERVICE_URL=http://fleet-service:3002
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - RESERVATION_SERVICE_URL=http://reservation-service:3003
+      - PROMOTION_SERVICE_URL=http://promotion-coupon-service:3006
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     networks:
       - e-krini-network
     restart: unless-stopped
@@ -58,6 +63,11 @@ services:
       - NODE_ENV=development
       - PORT=3002
       - MONGODB_URI=mongodb://mongo:27017/car-rental-fleet
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - RESERVATION_SERVICE_URL=http://reservation-service:3003
+      - PROMOTION_SERVICE_URL=http://promotion-coupon-service:3006
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
     networks:
@@ -75,6 +85,11 @@ services:
       - PORT=3003
       - MONGODB_URI=mongodb://mongo:27017/car-rental-reservations
       - REDIS_URL=redis://redis:6379
+      - FLEET_SERVICE_URL=http://fleet-service:3002
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - PROMOTION_SERVICE_URL=http://promotion-coupon-service:3006
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
       - redis
@@ -108,6 +123,11 @@ services:
       - NODE_ENV=development
       - PORT=3005
       - MONGODB_URI=mongodb://mongo:27017/ekrini-feedback
+      - FLEET_SERVICE_URL=http://fleet-service:3002
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - RESERVATION_SERVICE_URL=http://reservation-service:3003
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
     networks:
@@ -124,6 +144,11 @@ services:
       - NODE_ENV=development
       - PORT=3006
       - MONGODB_URI=mongodb://mongo:27017/promotion-coupon_db
+      - FLEET_SERVICE_URL=http://fleet-service:3002
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - RESERVATION_SERVICE_URL=http://reservation-service:3003
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
     networks:
@@ -140,6 +165,10 @@ services:
       - NODE_ENV=development
       - PORT=3007
       - MONGODB_URI=mongodb://mongo:27017/maintenance
+      - FLEET_SERVICE_URL=http://fleet-service:3002
+      - AUTH_SERVICE_URL=http://auth-user-service:3001
+      - RESERVATION_SERVICE_URL=http://reservation-service:3003
+      - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
     networks:

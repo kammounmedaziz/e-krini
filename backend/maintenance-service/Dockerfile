@@ -12,7 +12,7 @@ RUN npm install
 # Copy source code
 COPY src ./src
 COPY middlewares ./middlewares
-COPY middl ./middl
+COPY utils ./utils
 
 # Expose port
 EXPOSE 3007

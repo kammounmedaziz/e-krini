@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const FLEET_SERVICE_URL = process.env.FLEET_SERVICE_URL || 'http://localhost:3002';
-const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
-const PROMOTION_SERVICE_URL = process.env.PROMOTION_SERVICE_URL || 'http://localhost:3006';
-const RESERVATION_SERVICE_URL = process.env.RESERVATION_SERVICE_URL || 'http://localhost:3003';
-const MAINTENANCE_SERVICE_URL = process.env.MAINTENANCE_SERVICE_URL || 'http://localhost:3007';
-const ASSURANCE_SERVICE_URL = process.env.ASSURANCE_SERVICE_URL || 'http://localhost:3004';
+const FLEET_SERVICE_URL = process.env.FLEET_SERVICE_URL || 'http://fleet-service:3002';
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || 'http://auth-user-service:3001';
+const PROMOTION_SERVICE_URL = process.env.PROMOTION_SERVICE_URL || 'http://promotion-coupon-service:3006';
+const RESERVATION_SERVICE_URL = process.env.RESERVATION_SERVICE_URL || 'http://reservation-service:3003';
+const MAINTENANCE_SERVICE_URL = process.env.MAINTENANCE_SERVICE_URL || 'http://maintenance-service:3007';
+const ASSURANCE_SERVICE_URL = process.env.ASSURANCE_SERVICE_URL || 'http://assurence-claims-service:3004';
 
 /**
  * Utility for making authenticated inter-service calls
