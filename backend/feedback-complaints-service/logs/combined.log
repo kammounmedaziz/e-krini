@@ -1,7 +1,0 @@
-{"level":"info","message":"Feedback & Complaints Service running on port 3007","service":"feedback-complaints-service","timestamp":"2025-12-08 22:35:10"}
-{"level":"info","message":"Feedback & Complaints Service running on port 3005","service":"feedback-complaints-service","timestamp":"2025-12-08 23:13:40"}
-{"level":"info","message":"Feedback & Complaints Service running on port 3005","service":"feedback-complaints-service","timestamp":"2025-12-08 23:15:14"}
-{"ip":"::1","level":"info","message":"GET /health","service":"feedback-complaints-service","timestamp":"2025-12-08 23:17:50","userAgent":"curl/8.5.0"}
-{"ip":"::1","level":"info","message":"GET /health","service":"feedback-complaints-service","timestamp":"2025-12-08 23:22:54","userAgent":"curl/8.5.0"}
-{"level":"info","message":"Feedback & Complaints Service running on port 3005","service":"feedback-complaints-service","timestamp":"2025-12-09 00:34:40"}
-{"level":"info","message":"Feedback & Complaints Service running on port 3005","service":"feedback-complaints-service","timestamp":"2025-12-09 00:49:33"}
