@@ -29,10 +29,29 @@ export class ReservationService {
           endDate.toISOString()
         );
         
-        if (!availabilityCheck || !availabilityCheck.available || !availabilityCheck.available[data.carId]) {
+        console.log('Availability check response:', JSON.stringify(availabilityCheck, null, 2));
+        
+        // Handle the response format from fleet service
+        // Response can be: { success: true, data: { source: 'fallback', data: [...] } }
+        const availabilityData = availabilityCheck.data || availabilityCheck;
+        const carsData = availabilityData.data || [];
+        
+        console.log('Cars data:', carsData);
+        console.log('Requested car ID:', data.carId);
+        
+        // Check if the requested car is in the available cars list
+        const isAvailable = carsData.some(car => {
+          console.log('Comparing:', car._id, 'with', data.carId);
+          return car._id === data.carId || car._id.toString() === data.carId;
+        });
+        
+        console.log('Is available:', isAvailable);
+        
+        if (!isAvailable) {
           throw new Error('Car is not available for the selected dates');
         }
       } catch (error) {
+        console.error('Availability check error:', error);
         throw new Error(`Availability check failed: ${error.message}`);
       }
 

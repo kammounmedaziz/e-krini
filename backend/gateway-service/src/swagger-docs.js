@@ -87,7 +87,7 @@
  *           schema:
  *             type: object
  *             required:
- *               - email
+ *               - username
  *               - password
  *             properties:
  *               email:

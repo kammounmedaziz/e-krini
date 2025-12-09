@@ -1,0 +1,13 @@
+{
+  "name": "unify-databases",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Database unification script for E-Krini platform",
+  "main": "unify-all-databases.js",
+  "scripts": {
+    "unify": "node unify-all-databases.js"
+  },
+  "dependencies": {
+    "mongoose": "^7.0.0"
+  }
+}

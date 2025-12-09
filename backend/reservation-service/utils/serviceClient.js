@@ -31,14 +31,17 @@ class ServiceClient {
     static async checkCarAvailability(carIds, startDate, endDate, token = null) {
         try {
             const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            console.log('Checking availability for:', { carIds, startDate, endDate });
             const response = await axios.post(
                 `${FLEET_SERVICE_URL}/api/cars/availability`,
                 { carIds, startDate, endDate },
                 { headers }
             );
+            console.log('Fleet service response:', JSON.stringify(response.data, null, 2));
             return response.data;
         } catch (error) {
             console.error('Error checking car availability:', error.message);
+            console.error('Error response:', error.response?.data);
             throw new Error(`Failed to check availability: ${error.response?.data?.message || error.message}`);
         }
     }
