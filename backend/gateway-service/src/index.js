@@ -29,18 +29,16 @@ const swaggerOptions = {
         url: `http://localhost:${PORT}`,
         description: "Development server"
       }
-    ],
-    paths: {}
-  }
+    ]
+  },
+  apis: ["./src/**/*.js"], // Path to the API docs
 };
 
-const swaggerSpec = swaggerOptions.definition;
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 // Swagger JSON endpoint (before any middleware)
 app.get("/swagger.json", (req, res) => {
   console.log('Swagger JSON endpoint called');
-  console.log('Swagger spec type:', typeof swaggerSpec);
-  console.log('Swagger spec keys:', Object.keys(swaggerSpec));
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
@@ -55,6 +53,16 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // Test route
+/**
+ * @swagger
+ * /test:
+ *   get:
+ *     summary: Test endpoint
+ *     description: Returns a test message
+ *     responses:
+ *       200:
+ *         description: Successful response
+ */
 app.get("/test", (req, res) => {
   console.log('Test route called');
   res.json({ message: "Test route works" });
@@ -144,14 +152,15 @@ const createProxyRoute = (serviceName) => {
       const url = `${targetUrl}${req.url}`;
       
       // Forward the request
+      const headers = { ...req.headers };
+      delete headers['content-length']; // Let axios calculate content length
+      delete headers['host']; // Let axios set the host
+
       const response = await axios({
         method: req.method,
         url: url,
         data: req.body,
-        headers: {
-          ...req.headers,
-          host: new URL(targetUrl).host
-        },
+        headers: headers,
         timeout: 30000
       });
 
@@ -177,13 +186,13 @@ const createProxyRoute = (serviceName) => {
 };
 
 // API Routes - proxy to respective services
-// app.use("/api/auth", createProxyRoute("auth"));
-// app.use("/api/fleet", createProxyRoute("fleet"));
-// app.use("/api/reservation", createProxyRoute("reservation"));
-// app.use("/api/assurance", createProxyRoute("assurence"));
-// app.use("/api/feedback", createProxyRoute("feedback"));
-// app.use("/api/promotion", createProxyRoute("promotion"));
-// app.use("/api/maintenance", createProxyRoute("maintenance"));
+app.use("/api/auth", createProxyRoute("auth"));
+app.use("/api/fleet", createProxyRoute("fleet"));
+app.use("/api/reservation", createProxyRoute("reservation"));
+app.use("/api/assurance", createProxyRoute("assurence"));
+app.use("/api/feedback", createProxyRoute("feedback"));
+app.use("/api/promotion", createProxyRoute("promotion"));
+app.use("/api/maintenance", createProxyRoute("maintenance"));
 
 // 404 handler for unmatched routes
 app.use("*", (req, res) => {

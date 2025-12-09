@@ -5,7 +5,8 @@ import speakeasy from 'speakeasy';
 
 export const register = async (req, res) => {
     try {
-        const {username, password, email, role = 'client'} = req.body;
+        const {username, password, email, role = 'client', firstName, lastName, phoneNumber} = req.body;
+        
         const existingUser = await User.findOne({ $or: [{username}, {email}] });
         if (existingUser) {
             return res.status(409).json({
@@ -22,7 +23,10 @@ export const register = async (req, res) => {
             username,
             password,
             email,
-            role
+            role,
+            firstName,
+            lastName,
+            phoneNumber
         });
 
         await newUser.save();
