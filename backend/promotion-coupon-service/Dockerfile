@@ -12,6 +12,8 @@ RUN npm install
 
 # Copy source code
 COPY src/ ./src/
+COPY middlewares/ ./middlewares/
+COPY utils/ ./utils/
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs

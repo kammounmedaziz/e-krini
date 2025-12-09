@@ -33,7 +33,7 @@ export const createLoginHistory = async (userId, req, status = 'success', loginT
         const { device, browser, os } = parseUserAgent(userAgent);
 
         const loginEntry = new LoginHistory({
-            userId,
+            userId: userId || null, // Allow null for failed login attempts
             loginType,
             status,
             ipAddress,
@@ -47,8 +47,8 @@ export const createLoginHistory = async (userId, req, status = 'success', loginT
 
         await loginEntry.save();
 
-        // Send email notification for successful logins
-        if (status === 'success') {
+        // Send email notification for successful logins only
+        if (status === 'success' && userId) {
             try {
                 const user = await User.findById(userId);
                 if (user && user.email) {

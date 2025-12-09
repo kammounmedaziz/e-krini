@@ -10,8 +10,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4000
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Discovery Service
@@ -29,8 +28,6 @@ services:
       - PROMOTION_SERVICE_URL=http://promotion-coupon-service:3006
       - MAINTENANCE_SERVICE_URL=http://maintenance-service:3007
       - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
-    networks:
-      - e-krini-network
     restart: unless-stopped
 
   # Auth & User Service
@@ -42,15 +39,15 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/car-rental-auth
-      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret}
+      - ACCESS_TOKEN_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - REFRESH_TOKEN_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret}
       - JWT_EXPIRES_IN=15m
       - JWT_REFRESH_EXPIRES_IN=7d
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Fleet Service
@@ -62,6 +59,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3002
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/car-rental-fleet
       - AUTH_SERVICE_URL=http://auth-user-service:3001
       - RESERVATION_SERVICE_URL=http://reservation-service:3003
@@ -70,8 +68,7 @@ services:
       - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Reservation Service
@@ -83,6 +80,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3003
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/car-rental-reservations
       - REDIS_URL=redis://redis:6379
       - FLEET_SERVICE_URL=http://fleet-service:3002
@@ -93,8 +91,7 @@ services:
     depends_on:
       - mongo
       - redis
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Assurance Claims Service
@@ -106,11 +103,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3004
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/assurance-claims-db
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Feedback Complaints Service
@@ -122,6 +119,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3005
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/ekrini-feedback
       - FLEET_SERVICE_URL=http://fleet-service:3002
       - AUTH_SERVICE_URL=http://auth-user-service:3001
@@ -130,8 +128,7 @@ services:
       - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Promotion Coupon Service
@@ -143,6 +140,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3006
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/promotion-coupon_db
       - FLEET_SERVICE_URL=http://fleet-service:3002
       - AUTH_SERVICE_URL=http://auth-user-service:3001
@@ -151,8 +149,7 @@ services:
       - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # Maintenance Service
@@ -164,6 +161,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3007
+      - HOST=0.0.0.0
       - MONGODB_URI=mongodb://mongo:27017/maintenance
       - FLEET_SERVICE_URL=http://fleet-service:3002
       - AUTH_SERVICE_URL=http://auth-user-service:3001
@@ -171,8 +169,7 @@ services:
       - ASSURANCE_SERVICE_URL=http://assurence-claims-service:3004
     depends_on:
       - mongo
-    networks:
-      - e-krini-network
+
     restart: unless-stopped
 
   # MongoDB
@@ -183,8 +180,6 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-    networks:
-      - e-krini-network
     restart: unless-stopped
 
   # Redis (for caching and sessions)
@@ -195,13 +190,8 @@ services:
       - "6379:6379"
     volumes:
       - redis-data:/data
-    networks:
-      - e-krini-network
-    restart: unless-stopped
 
-networks:
-  e-krini-network:
-    driver: bridge
+    restart: unless-stopped
 
 volumes:
   mongo-data:

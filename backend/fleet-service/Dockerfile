@@ -7,6 +7,8 @@ COPY package*.json ./
 RUN npm install
 
 COPY src ./src
+COPY middlewares ./middlewares
+COPY utils ./utils
 
 EXPOSE 3002
 

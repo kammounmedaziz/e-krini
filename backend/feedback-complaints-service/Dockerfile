@@ -14,6 +14,10 @@ COPY src ./src
 COPY middlewares ./middlewares
 COPY utils ./utils
 
+# Create logs directory and set permissions
+RUN mkdir -p logs && \
+    chown -R node:node logs
+
 # Expose port
 EXPOSE 3005
 

@@ -12,6 +12,11 @@ RUN npm install
 # Copy source code
 COPY src ./src
 
+# Create uploads directories and set permissions
+RUN mkdir -p uploads/kyc uploads/agency uploads/insurance && \
+    chown -R node:node uploads && \
+    chmod -R 755 uploads
+
 # Expose port
 EXPOSE 3001
 

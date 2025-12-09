@@ -30,4 +30,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 USER node
 
 # Start the service
-CMD ["node", "src/app.js"]
+CMD ["node", "app.js"]

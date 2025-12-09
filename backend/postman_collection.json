@@ -1,0 +1,574 @@
+{
+  "info": {
+    "name": "E-Krini Car Rental Platform - Gateway API",
+    "description": "Complete API testing collection for the E-Krini car rental microservices platform using API Gateway",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Service Discovery",
+      "item": [
+        {
+          "name": "Get Service Registry",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "services"
+              ]
+            },
+            "description": "Get all registered microservices and their URLs from the discovery service"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Authentication (via Gateway)",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"TestPass123!\",\n  \"role\": \"client\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Register a new user through the API Gateway"
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.data.accessToken);",
+                  "    pm.collectionVariables.set('refresh_token', response.data.refreshToken);",
+                  "    pm.collectionVariables.set('user_id', response.data.user.id);",
+                  "    console.log('Tokens saved - Access:', response.data.accessToken.substring(0, 20) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser3\",\n  \"password\": \"TestPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Login user through gateway and automatically save tokens"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.data.accessToken);",
+                  "    console.log('New access token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh-token"
+              ]
+            },
+            "description": "Refresh access token using stored refresh token"
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "profile"
+              ]
+            },
+            "description": "Get current user profile information"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Fleet Management (via Gateway)",
+      "item": [
+        {
+          "name": "Get All Cars",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/fleet/cars",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "fleet",
+                "cars"
+              ]
+            },
+            "description": "Get all cars from fleet service through gateway"
+          }
+        },
+        {
+          "name": "Add New Car",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('car_id', response.data._id);",
+                  "    console.log('New car created with ID:', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"immatriculation\": \"TN1234AB\",\n  \"marque\": \"Toyota\",\n  \"modele\": \"Corolla\",\n  \"annee\": 2020,\n  \"kilometrage\": 15000,\n  \"typeCarburant\": \"Essence\",\n  \"prixParJour\": 50,\n  \"description\": \"Comfortable sedan for daily use\",\n  \"images\": [],\n  \"equipements\": [\"Air conditioning\", \"GPS\", \"Bluetooth\"],\n  \"etat\": \"Disponible\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/fleet/cars",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "fleet",
+                "cars"
+              ]
+            },
+            "description": "Add new car to fleet through gateway"
+          }
+        },
+        {
+          "name": "Get Car by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/fleet/cars/{{car_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "fleet",
+                "cars",
+                "{{car_id}}"
+              ]
+            },
+            "description": "Get specific car details by ID"
+          }
+        },
+        {
+          "name": "Update Car",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prixParJour\": 55,\n  \"description\": \"Updated: Comfortable sedan for daily use\",\n  \"etat\": \"Disponible\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/fleet/cars/{{car_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "fleet",
+                "cars",
+                "{{car_id}}"
+              ]
+            },
+            "description": "Update car information"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservation Management (via Gateway)",
+      "item": [
+        {
+          "name": "Create Reservation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('reservation_id', response.data._id);",
+                  "    console.log('Reservation created with ID:', response.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idVehicule\": \"{{car_id}}\",\n  \"dateDebut\": \"2025-12-15T10:00:00.000Z\",\n  \"dateFin\": \"2025-12-17T10:00:00.000Z\",\n  \"lieuPriseEnCharge\": \"Tunis Airport\",\n  \"lieuRestitution\": \"Tunis Airport\",\n  \"optionsSupplementaires\": [\"GPS\", \"Child seat\"],\n  \"prixTotal\": 100\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation/reservations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "reservations"
+              ]
+            },
+            "description": "Create new car reservation through gateway"
+          }
+        },
+        {
+          "name": "Get User Reservations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation/reservations/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "reservations",
+                "user"
+              ]
+            },
+            "description": "Get current user's reservations"
+          }
+        },
+        {
+          "name": "Get Reservation by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/reservation/reservations/{{reservation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "reservations",
+                "{{reservation_id}}"
+              ]
+            },
+            "description": "Get specific reservation details"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Promotion & Coupon (via Gateway)",
+      "item": [
+        {
+          "name": "Get All Promotions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/promotion/promotions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "promotion",
+                "promotions"
+              ]
+            },
+            "description": "Get all active promotions"
+          }
+        },
+        {
+          "name": "Create Promotion",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titre\": \"Winter Special\",\n  \"description\": \"20% off for winter bookings\",\n  \"pourcentageReduction\": 20,\n  \"dateDebut\": \"2025-12-01T00:00:00.000Z\",\n  \"dateFin\": \"2025-12-31T23:59:59.000Z\",\n  \"conditions\": \"Valid for bookings over 3 days\",\n  \"estActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/promotion/promotions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "promotion",
+                "promotions"
+              ]
+            },
+            "description": "Create new promotion"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Checks (via Gateway)",
+      "item": [
+        {
+          "name": "Gateway Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Check gateway service health"
+          }
+        },
+        {
+          "name": "Auth Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/auth/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "health"
+              ]
+            },
+            "description": "Check auth service health through gateway"
+          }
+        },
+        {
+          "name": "Fleet Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/fleet/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "fleet",
+                "health"
+              ]
+            },
+            "description": "Check fleet service health through gateway"
+          }
+        },
+        {
+          "name": "Reservation Service Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/reservation/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "reservation",
+                "health"
+              ]
+            },
+            "description": "Check reservation service health through gateway"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    },
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+    {
+      "key": "user_id",
+      "value": ""
+    },
+    {
+      "key": "car_id",
+      "value": ""
+    },
+    {
+      "key": "reservation_id",
+      "value": ""
+    }
+  ]
+}
