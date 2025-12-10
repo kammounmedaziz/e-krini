@@ -35,6 +35,73 @@
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
+ *   schemas:
+ *     Feedback:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Feedback ID
+ *         userId:
+ *           type: string
+ *           description: User ID who created the feedback
+ *         userType:
+ *           type: string
+ *           enum: [client, agency, insurance]
+ *           description: Type of user
+ *         type:
+ *           type: string
+ *           enum: [feedback, complaint, report, suggestion]
+ *           description: Type of feedback
+ *         category:
+ *           type: string
+ *           enum: [service_quality, vehicle_issue, payment_issue, booking_issue, insurance_issue, customer_support, technical_issue, safety_concern, other]
+ *           description: Category of feedback
+ *         priority:
+ *           type: string
+ *           enum: [low, medium, high, urgent]
+ *           description: Priority level
+ *         subject:
+ *           type: string
+ *           description: Subject of the feedback
+ *         description:
+ *           type: string
+ *           description: Detailed description
+ *         relatedTo:
+ *           type: object
+ *           properties:
+ *             type:
+ *               type: string
+ *               enum: [reservation, vehicle, agency, insurance, payment, user, none]
+ *               description: Type of related entity
+ *             referenceId:
+ *               type: string
+ *               description: Reference ID of related entity
+ *         status:
+ *           type: string
+ *           enum: [pending, in_progress, resolved, closed, rejected]
+ *           description: Current status
+ *         isAnonymous:
+ *           type: boolean
+ *           description: Whether feedback is anonymous
+ *         contactInfo:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               format: email
+ *               description: Contact email
+ *             phone:
+ *               type: string
+ *               description: Contact phone
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
  */
 
 /**
@@ -90,9 +157,9 @@
  *               - username
  *               - password
  *             properties:
- *               email:
+ *               username:
  *                 type: string
- *                 format: email
+ *                 description: User's username
  *               password:
  *                 type: string
  *                 format: password
@@ -798,36 +865,85 @@
  *               type:
  *                 type: string
  *                 enum: [feedback, complaint, report, suggestion]
+ *                 description: Type of feedback
  *               category:
  *                 type: string
  *                 enum: [service_quality, vehicle_issue, payment_issue, booking_issue, insurance_issue, customer_support, technical_issue, safety_concern, other]
+ *                 description: Category of the feedback
  *               subject:
  *                 type: string
+ *                 maxLength: 200
+ *                 description: Subject of the feedback
  *               description:
  *                 type: string
+ *                 maxLength: 2000
+ *                 description: Detailed description of the feedback
  *               priority:
  *                 type: string
  *                 enum: [low, medium, high, urgent]
+ *                 default: medium
+ *                 description: Priority level (optional, defaults to medium)
  *               relatedTo:
  *                 type: object
+ *                 description: Related entity information
  *                 properties:
  *                   type:
  *                     type: string
  *                     enum: [reservation, vehicle, agency, insurance, payment, user, none]
+ *                     default: none
+ *                     description: Type of related entity
  *                   referenceId:
  *                     type: string
+ *                     format: objectId
+ *                     description: MongoDB ObjectId of the related entity
  *               isAnonymous:
  *                 type: boolean
+ *                 default: false
+ *                 description: Whether the feedback should be anonymous
  *               contactInfo:
  *                 type: object
+ *                 description: Contact information for follow-up
  *                 properties:
  *                   email:
  *                     type: string
+ *                     format: email
+ *                     description: Contact email address
  *                   phone:
  *                     type: string
+ *                     description: Contact phone number
+ *           example:
+ *             type: "feedback"
+ *             category: "service_quality"
+ *             subject: "Great service experience"
+ *             description: "The car rental process was smooth and efficient"
+ *             priority: "low"
+ *             isAnonymous: false
+ *             contactInfo:
+ *               email: "user@example.com"
+ *               phone: "+1234567890"
  *     responses:
  *       201:
- *         description: Feedback created
+ *         description: Feedback created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Feedback submitted successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     feedback:
+ *                       $ref: '#/components/schemas/Feedback'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  *   get:
  *     summary: Get all feedback (Admin)
  *     tags: [Feedback]

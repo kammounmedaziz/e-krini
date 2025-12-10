@@ -70,7 +70,7 @@ app.get('/health', (req, res) => {
 });
 
 // API routes
-app.use('/api/feedback', feedbackRoutes);
+app.use('/', feedbackRoutes);
 
 // 404 handler
 app.use(notFound);
