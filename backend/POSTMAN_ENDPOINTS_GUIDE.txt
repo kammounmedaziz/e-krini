@@ -1,0 +1,980 @@
+================================================================================
+E-KRINI CAR RENTAL PLATFORM - POSTMAN ENDPOINTS COLLECTION
+================================================================================
+Base URL: http://localhost:4000
+Gateway Port: 4000
+
+================================================================================
+1. AUTHENTICATION ENDPOINTS
+================================================================================
+
+1.1 Register User
+POST {{base_url}}/api/auth/register
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "Test@123",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+21612345678"
+}
+
+1.2 Login
+POST {{base_url}}/api/auth/login
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "username": "admin",
+  "password": "Admin@123"
+}
+Response: Returns accessToken and refreshToken
+
+1.3 Login with 2FA
+POST {{base_url}}/api/auth/login-2fa
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "email": "admin@ekrini.com",
+  "code": "123456"
+}
+
+1.4 Refresh Token
+POST {{base_url}}/api/auth/refresh
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "refreshToken": "{{refresh_token}}"
+}
+
+1.5 Logout
+POST {{base_url}}/api/auth/logout
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "refreshToken": "{{refresh_token}}"
+}
+
+1.6 Request Password Reset
+POST {{base_url}}/api/auth/forgot-password
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "email": "admin@ekrini.com"
+}
+
+1.7 Reset Password
+POST {{base_url}}/api/auth/reset-password
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "token": "{{reset_token}}",
+  "newPassword": "NewPassword@123"
+}
+
+================================================================================
+2. USER PROFILE ENDPOINTS
+================================================================================
+
+2.1 Get Current User Profile
+GET {{base_url}}/api/users/me
+Headers: Authorization: Bearer {{access_token}}
+
+2.2 Update User Profile
+PUT {{base_url}}/api/users/me
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "firstName": "Updated",
+  "lastName": "Name",
+  "phoneNumber": "+21612345679"
+}
+
+2.3 Change Password
+PUT {{base_url}}/api/users/me/password
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "currentPassword": "Admin@123",
+  "newPassword": "NewAdmin@123"
+}
+
+2.4 Upload Profile Picture
+POST {{base_url}}/api/users/me/profile-picture
+Headers: Authorization: Bearer {{access_token}}
+Body (form-data):
+  - profilePicture: [file]
+
+================================================================================
+3. ADMIN ENDPOINTS
+================================================================================
+
+3.1 Get All Users (Admin Only)
+GET {{base_url}}/api/admin/users?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+3.2 Get User by ID (Admin Only)
+GET {{base_url}}/api/admin/users/{{user_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+3.3 Update User (Admin Only)
+PUT {{base_url}}/api/admin/users/{{user_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "role": "agency",
+  "isActive": true
+}
+
+3.4 Delete User (Admin Only)
+DELETE {{base_url}}/api/admin/users/{{user_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+3.5 Get All KYC Submissions (Admin Only)
+GET {{base_url}}/api/admin/kyc?status=pending
+Headers: Authorization: Bearer {{admin_token}}
+
+3.6 Review KYC (Admin Only)
+PUT {{base_url}}/api/admin/kyc/{{kyc_id}}/review
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "approved",
+  "rejectionReason": ""
+}
+
+================================================================================
+4. AGENCY PROFILE ENDPOINTS
+================================================================================
+
+4.1 Create Agency Profile
+POST {{base_url}}/api/agency/profile
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "companyName": "Test Agency",
+  "registrationNumber": "REG123456",
+  "address": {
+    "street": "123 Main St",
+    "city": "Tunis",
+    "state": "Tunis",
+    "zipCode": "1000",
+    "country": "Tunisia"
+  },
+  "phoneNumber": "+21671234567",
+  "email": "agency@example.com"
+}
+
+4.2 Get Agency Profile
+GET {{base_url}}/api/agency/profile
+Headers: Authorization: Bearer {{access_token}}
+
+4.3 Update Agency Profile
+PUT {{base_url}}/api/agency/profile
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "companyName": "Updated Agency Name",
+  "phoneNumber": "+21671234568"
+}
+
+4.4 Upload Agency Documents
+POST {{base_url}}/api/agency/documents
+Headers: Authorization: Bearer {{access_token}}
+Body (form-data):
+  - documents: [file]
+
+================================================================================
+5. INSURANCE PROFILE ENDPOINTS
+================================================================================
+
+5.1 Create Insurance Profile
+POST {{base_url}}/api/insurance/profile
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "companyName": "Test Insurance Co",
+  "registrationNumber": "INS123456",
+  "address": {
+    "street": "456 Insurance Ave",
+    "city": "Tunis",
+    "state": "Tunis",
+    "zipCode": "1000",
+    "country": "Tunisia"
+  },
+  "phoneNumber": "+21671234567",
+  "email": "insurance@example.com"
+}
+
+5.2 Get Insurance Profile
+GET {{base_url}}/api/insurance/profile
+Headers: Authorization: Bearer {{access_token}}
+
+5.3 Update Insurance Profile
+PUT {{base_url}}/api/insurance/profile
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "companyName": "Updated Insurance Co",
+  "phoneNumber": "+21671234568"
+}
+
+================================================================================
+6. CAR ENDPOINTS (FLEET SERVICE)
+================================================================================
+
+6.1 Get All Cars (Public)
+GET {{base_url}}/api/cars?page=1&limit=10&category={{category_id}}&marque=Toyota&disponibilite=true
+Headers: None required (public endpoint)
+
+6.2 Get Car by ID (Public)
+GET {{base_url}}/api/cars/{{car_id}}
+Headers: None required (public endpoint)
+
+6.3 Create Car (Admin/Agency)
+POST {{base_url}}/api/cars
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "nom": "Toyota Corolla 2024",
+  "category": "{{category_id}}",
+  "matricule": "TUN-5678",
+  "marque": "Toyota",
+  "modele": "Corolla",
+  "annee": 2024,
+  "prixParJour": 90,
+  "couleur": "White",
+  "typeCarburant": "Hybrid",
+  "transmission": "Automatic",
+  "nombrePlaces": 5,
+  "climatisation": true,
+  "disponibilite": true,
+  "kilometrage": 5000,
+  "images": ["https://example.com/car1.jpg"]
+}
+
+6.4 Update Car (Admin/Agency)
+PATCH {{base_url}}/api/cars/{{car_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "prixParJour": 95,
+  "disponibilite": false,
+  "kilometrage": 5500
+}
+
+6.5 Delete Car (Admin Only)
+DELETE {{base_url}}/api/cars/{{car_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+6.6 Search Cars (Public)
+GET {{base_url}}/api/cars/search?categorie={{category_id}}&marque=Toyota&prixMax=100&disponibilite=true
+Headers: None required (public endpoint)
+
+6.7 Check Car Availability (Public)
+POST {{base_url}}/api/cars/availability
+Headers: Content-Type: application/json
+Body (JSON):
+{
+  "startDate": "2024-12-25T00:00:00.000Z",
+  "endDate": "2024-12-30T00:00:00.000Z",
+  "carIds": ["{{car_id1}}", "{{car_id2}}"]
+}
+
+6.8 Check Maintenance (Admin/Agency)
+GET {{base_url}}/api/cars/maintenance/check
+Headers: Authorization: Bearer {{admin_token}}
+
+6.9 Get Cars Due for Maintenance (Admin/Agency)
+GET {{base_url}}/api/cars/maintenance/due
+Headers: Authorization: Bearer {{admin_token}}
+
+6.10 Update Seasonal Pricing (Admin Only)
+POST {{base_url}}/api/cars/pricing/update-season
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+7. CATEGORY ENDPOINTS (FLEET SERVICE)
+================================================================================
+
+7.1 Get All Categories (Public)
+GET {{base_url}}/api/categories
+Headers: None required (public endpoint)
+
+7.2 Get Category by ID (Public)
+GET {{base_url}}/api/categories/{{category_id}}
+Headers: None required (public endpoint)
+
+7.3 Create Category (Admin/Agency)
+POST {{base_url}}/api/categories
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "name": "Electric Vehicles",
+  "description": "Eco-friendly electric cars"
+}
+
+7.4 Update Category (Admin/Agency)
+PUT {{base_url}}/api/categories/{{category_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "name": "Updated Category Name",
+  "description": "Updated description"
+}
+
+7.5 Delete Category (Admin/Agency)
+DELETE {{base_url}}/api/categories/{{category_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+8. RESERVATION ENDPOINTS
+================================================================================
+
+8.1 Get All Reservations (Admin/Agency)
+GET {{base_url}}/api/reservations?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+8.2 Get Reservation by ID
+GET {{base_url}}/api/reservations/{{reservation_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+8.3 Create Reservation
+POST {{base_url}}/api/reservations
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "clientId": "{{client_id}}",
+  "carId": "{{car_id}}",
+  "startDate": "2024-12-25T00:00:00.000Z",
+  "endDate": "2024-12-30T00:00:00.000Z",
+  "insuranceType": "premium",
+  "carModel": "Corolla",
+  "carBrand": "Toyota",
+  "dailyRate": 90,
+  "promoCode": "DISCOUNT10"
+}
+
+8.4 Update Reservation
+PUT {{base_url}}/api/reservations/{{reservation_id}}
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "endDate": "2024-12-31T00:00:00.000Z",
+  "insuranceType": "comprehensive"
+}
+
+8.5 Delete Reservation (Admin Only)
+DELETE {{base_url}}/api/reservations/{{reservation_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+8.6 Get Client Reservations
+GET {{base_url}}/api/reservations/client/{{client_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+8.7 Search Reservations by Car Model (Admin/Agency)
+GET {{base_url}}/api/reservations/search/by-car-model?carModel=Corolla
+Headers: Authorization: Bearer {{admin_token}}
+
+8.8 Get Reservations by Status (Admin/Agency)
+GET {{base_url}}/api/reservations/by-status/pending
+Headers: Authorization: Bearer {{admin_token}}
+
+8.9 Get Reservations by Date Range (Admin/Agency)
+GET {{base_url}}/api/reservations/period?startDate=2024-12-01T00:00:00.000Z&endDate=2024-12-31T23:59:59.999Z
+Headers: Authorization: Bearer {{admin_token}}
+
+8.10 Get Reservation Statistics (Admin Only)
+GET {{base_url}}/api/reservations/stats/overview
+Headers: Authorization: Bearer {{admin_token}}
+
+8.11 Check Availability (Public)
+GET {{base_url}}/api/reservations/availability/check?carId={{car_id}}&startDate=2024-12-25T00:00:00.000Z&endDate=2024-12-30T00:00:00.000Z
+Headers: None required (public endpoint)
+
+8.12 Cancel Reservation
+PUT {{base_url}}/api/reservations/{{reservation_id}}/cancel
+Headers: Authorization: Bearer {{access_token}}
+
+8.13 Confirm Reservation (Admin/Agency)
+PUT {{base_url}}/api/reservations/{{reservation_id}}/confirm
+Headers: Authorization: Bearer {{admin_token}}
+
+8.14 Release Hold (Admin/Agency)
+PUT {{base_url}}/api/reservations/{{reservation_id}}/release-hold
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+9. CONTRACT ENDPOINTS
+================================================================================
+
+9.1 Get All Contracts (Admin/Agency)
+GET {{base_url}}/api/contracts?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+9.2 Get Contract by ID
+GET {{base_url}}/api/contracts/{{contract_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+9.3 Create Contract
+POST {{base_url}}/api/contracts
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "reservationId": "{{reservation_id}}"
+}
+
+9.4 Get Contract Statistics
+GET {{base_url}}/api/contracts/stats/overview
+Headers: Authorization: Bearer {{admin_token}}
+
+9.5 Get Contracts by Status
+GET {{base_url}}/api/contracts/by-status/signed
+Headers: Authorization: Bearer {{admin_token}}
+
+9.6 Get Client Contracts
+GET {{base_url}}/api/contracts/client/{{client_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+9.7 Generate Contract PDF
+POST {{base_url}}/api/contracts/{{contract_id}}/generate-pdf
+Headers: Authorization: Bearer {{access_token}}
+
+9.8 Sign Contract
+POST {{base_url}}/api/contracts/{{contract_id}}/sign
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "signer": "John Doe",
+  "signature": "base64_encoded_signature_data"
+}
+
+9.9 Download Contract PDF
+GET {{base_url}}/api/contracts/{{contract_id}}/download-pdf
+Headers: Authorization: Bearer {{access_token}}
+
+9.10 Update Contract Status
+PUT {{base_url}}/api/contracts/{{contract_id}}/status
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "active"
+}
+
+9.11 Update Contract Rules
+PUT {{base_url}}/api/contracts/{{contract_id}}/rules
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "rules": [
+    "No smoking in the vehicle",
+    "Return with full tank",
+    "Maximum mileage: 200km per day"
+  ]
+}
+
+================================================================================
+10. ASSURANCE (INSURANCE) ENDPOINTS
+================================================================================
+
+10.1 Get All Assurances
+GET {{base_url}}/api/assurances?page=1&limit=10
+Headers: Authorization: Bearer {{access_token}}
+
+10.2 Get Assurance by ID
+GET {{base_url}}/api/assurances/{{assurance_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+10.3 Create Assurance
+POST {{base_url}}/api/assurances
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "userId": "{{user_id}}",
+  "carId": "{{car_id}}",
+  "type": "comprehensive",
+  "startDate": "2024-12-01T00:00:00.000Z",
+  "endDate": "2024-12-31T23:59:59.999Z",
+  "premium": 500,
+  "coverage": {
+    "collision": true,
+    "theft": true,
+    "liability": true
+  }
+}
+
+10.4 Update Assurance
+PUT {{base_url}}/api/assurances/{{assurance_id}}
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "premium": 550,
+  "status": "active"
+}
+
+10.5 Delete Assurance
+DELETE {{base_url}}/api/assurances/{{assurance_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+10.6 Get User Assurances
+GET {{base_url}}/api/assurances/user/me
+Headers: Authorization: Bearer {{access_token}}
+
+10.7 Get Expiring Assurances (Admin/Agency)
+GET {{base_url}}/api/assurances/expiring/30
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+11. CONSTAT (ACCIDENT REPORT) ENDPOINTS
+================================================================================
+
+11.1 Get All Constats
+GET {{base_url}}/api/constats?page=1&limit=10
+Headers: Authorization: Bearer {{access_token}}
+
+11.2 Get Constat by ID
+GET {{base_url}}/api/constats/{{constat_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+11.3 Create Constat
+POST {{base_url}}/api/constats
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "reservationId": "{{reservation_id}}",
+  "carId": "{{car_id}}",
+  "userId": "{{user_id}}",
+  "date": "2024-12-15T10:30:00.000Z",
+  "location": {
+    "address": "123 Street, Tunis",
+    "coordinates": {
+      "latitude": 36.8065,
+      "longitude": 10.1815
+    }
+  },
+  "description": "Minor accident at intersection",
+  "damages": [
+    {
+      "part": "Front bumper",
+      "severity": "minor",
+      "estimatedCost": 200
+    }
+  ],
+  "witnesses": [],
+  "photos": ["https://example.com/damage1.jpg"]
+}
+
+11.4 Update Constat
+PUT {{base_url}}/api/constats/{{constat_id}}
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "reviewed",
+  "adminNotes": "Approved for repair"
+}
+
+11.5 Delete Constat
+DELETE {{base_url}}/api/constats/{{constat_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+11.6 Get User Constats
+GET {{base_url}}/api/constats/user/{{user_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+================================================================================
+12. FEEDBACK ENDPOINTS
+================================================================================
+
+12.1 Get All Feedbacks (Admin Only)
+GET {{base_url}}/api/feedbacks?page=1&limit=10&status=pending
+Headers: Authorization: Bearer {{admin_token}}
+
+12.2 Get Feedback by ID
+GET {{base_url}}/api/feedbacks/{{feedback_id}}
+Headers: Authorization: Bearer {{access_token}}
+
+12.3 Create Feedback
+POST {{base_url}}/api/feedbacks
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "type": "complaint",
+  "category": "vehicle_issue",
+  "subject": "Car cleanliness issue",
+  "description": "The car was not properly cleaned before rental.",
+  "priority": "medium",
+  "relatedTo": {
+    "type": "vehicle",
+    "referenceId": "{{car_id}}"
+  },
+  "isAnonymous": false,
+  "contactInfo": {
+    "email": "user@example.com",
+    "phone": "+21612345678"
+  }
+}
+
+12.4 Update Feedback
+PUT {{base_url}}/api/feedbacks/{{feedback_id}}
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "in_progress",
+  "priority": "high"
+}
+
+12.5 Delete Feedback (Admin Only)
+DELETE {{base_url}}/api/feedbacks/{{feedback_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+12.6 Get User Feedbacks
+GET {{base_url}}/api/feedbacks/user/me
+Headers: Authorization: Bearer {{access_token}}
+
+12.7 Update Feedback Status (Admin Only)
+PATCH {{base_url}}/api/feedbacks/{{feedback_id}}/status
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "resolved"
+}
+
+12.8 Get Feedback Statistics (Admin Only)
+GET {{base_url}}/api/feedbacks/stats
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+13. PROMOTION ENDPOINTS
+================================================================================
+
+13.1 Get All Promotions (Public)
+GET {{base_url}}/api/promotions?page=1&limit=10&isActive=true
+Headers: None required (public endpoint)
+
+13.2 Get Promotion by ID (Public)
+GET {{base_url}}/api/promotions/{{promotion_id}}
+Headers: None required (public endpoint)
+
+13.3 Create Promotion (Admin Only)
+POST {{base_url}}/api/promotions
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "name": "Summer Sale 2024",
+  "description": "20% off on all SUVs",
+  "discountType": "percentage",
+  "discountValue": 20,
+  "startDate": "2024-06-01T00:00:00.000Z",
+  "endDate": "2024-08-31T23:59:59.999Z",
+  "conditions": {
+    "minRentalDays": 3,
+    "categories": ["{{suv_category_id}}"]
+  },
+  "isActive": true
+}
+
+13.4 Update Promotion (Admin Only)
+PUT {{base_url}}/api/promotions/{{promotion_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "discountValue": 25,
+  "isActive": true
+}
+
+13.5 Delete Promotion (Admin Only)
+DELETE {{base_url}}/api/promotions/{{promotion_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+13.6 Get Active Promotions (Public)
+GET {{base_url}}/api/promotions/active
+Headers: None required (public endpoint)
+
+================================================================================
+14. COUPON ENDPOINTS
+================================================================================
+
+14.1 Get All Coupons (Admin Only)
+GET {{base_url}}/api/coupons?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+14.2 Get Coupon by Code
+GET {{base_url}}/api/coupons/code/{{coupon_code}}
+Headers: Authorization: Bearer {{access_token}}
+
+14.3 Create Coupon (Admin Only)
+POST {{base_url}}/api/coupons
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "code": "SAVE50",
+  "description": "50 TND off on your rental",
+  "discountType": "fixed",
+  "discountValue": 50,
+  "startDate": "2024-12-01T00:00:00.000Z",
+  "endDate": "2024-12-31T23:59:59.999Z",
+  "maxUses": 100,
+  "maxUsesPerUser": 1,
+  "minPurchaseAmount": 200,
+  "isActive": true
+}
+
+14.4 Update Coupon (Admin Only)
+PUT {{base_url}}/api/coupons/{{coupon_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "discountValue": 60,
+  "maxUses": 150,
+  "isActive": true
+}
+
+14.5 Delete Coupon (Admin Only)
+DELETE {{base_url}}/api/coupons/{{coupon_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+14.6 Validate Coupon
+POST {{base_url}}/api/coupons/validate
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "code": "SAVE50",
+  "userId": "{{user_id}}",
+  "purchaseAmount": 300
+}
+
+14.7 Apply Coupon
+POST {{base_url}}/api/coupons/apply
+Headers: 
+  - Authorization: Bearer {{access_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "code": "SAVE50",
+  "userId": "{{user_id}}",
+  "reservationId": "{{reservation_id}}"
+}
+
+================================================================================
+15. MAINTENANCE ENDPOINTS
+================================================================================
+
+15.1 Get All Maintenance Records (Admin/Agency)
+GET {{base_url}}/api/maintenance?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+15.2 Get Maintenance by ID
+GET {{base_url}}/api/maintenance/{{maintenance_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+15.3 Create Maintenance Record
+POST {{base_url}}/api/maintenance
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "carId": "{{car_id}}",
+  "type": "scheduled",
+  "description": "Regular oil change and tire rotation",
+  "scheduledDate": "2024-12-20T09:00:00.000Z",
+  "estimatedCost": 150,
+  "notes": "Check brake pads as well"
+}
+
+15.4 Update Maintenance Record
+PUT {{base_url}}/api/maintenance/{{maintenance_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "status": "completed",
+  "completedDate": "2024-12-20T11:30:00.000Z",
+  "actualCost": 175,
+  "notes": "All work completed successfully"
+}
+
+15.5 Delete Maintenance Record
+DELETE {{base_url}}/api/maintenance/{{maintenance_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+15.6 Get Maintenance by Car
+GET {{base_url}}/api/maintenance/car/{{car_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+16. MATERIEL (MATERIALS/PARTS) ENDPOINTS
+================================================================================
+
+16.1 Get All Materials (Admin/Agency)
+GET {{base_url}}/api/materiel?page=1&limit=10
+Headers: Authorization: Bearer {{admin_token}}
+
+16.2 Get Material by ID
+GET {{base_url}}/api/materiel/{{material_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+16.3 Create Material
+POST {{base_url}}/api/materiel
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "name": "Engine Oil 5W-30",
+  "category": "fluids",
+  "quantity": 50,
+  "unit": "liters",
+  "unitPrice": 15,
+  "supplier": "Auto Parts Inc",
+  "reorderLevel": 10
+}
+
+16.4 Update Material
+PUT {{base_url}}/api/materiel/{{material_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "quantity": 45,
+  "unitPrice": 16
+}
+
+16.5 Delete Material
+DELETE {{base_url}}/api/materiel/{{material_id}}
+Headers: Authorization: Bearer {{admin_token}}
+
+16.6 Get Low Stock Materials
+GET {{base_url}}/api/materiel/low-stock
+Headers: Authorization: Bearer {{admin_token}}
+
+================================================================================
+POSTMAN ENVIRONMENT VARIABLES
+================================================================================
+
+Create a Postman Environment with these variables:
+
+- base_url: http://localhost:4000
+- access_token: [Set after login]
+- admin_token: [Set after admin login]
+- refresh_token: [Set after login]
+- user_id: [Your user ID]
+- client_id: [Client user ID]
+- car_id: [A car ID from your database]
+- category_id: [A category ID from your database]
+- reservation_id: [A reservation ID]
+- contract_id: [A contract ID]
+- assurance_id: [An assurance ID]
+- constat_id: [A constat ID]
+- feedback_id: [A feedback ID]
+- promotion_id: [A promotion ID]
+- coupon_id: [A coupon ID]
+- coupon_code: [A coupon code like "SAVE50"]
+- maintenance_id: [A maintenance record ID]
+- material_id: [A material ID]
+
+================================================================================
+AUTHENTICATION FLOW
+================================================================================
+
+1. Login as Admin:
+   POST {{base_url}}/api/auth/login
+   Body: {"username": "admin", "password": "Admin@123"}
+   
+2. Copy the accessToken from response
+   
+3. Set it in Postman Environment as admin_token
+   
+4. Use {{admin_token}} in Authorization headers for protected endpoints
+
+================================================================================
+COMMON HTTP STATUS CODES
+================================================================================
+
+200 - OK: Request successful
+201 - Created: Resource created successfully
+400 - Bad Request: Validation error or invalid data
+401 - Unauthorized: Missing or invalid authentication token
+403 - Forbidden: User doesn't have permission
+404 - Not Found: Resource not found
+500 - Internal Server Error: Server-side error
+
+================================================================================
+NOTES
+================================================================================
+
+1. Replace {{variable}} with actual IDs from your database
+2. Most endpoints require authentication (Bearer token)
+3. Public endpoints: cars, categories, promotions (GET only)
+4. Admin-only endpoints are clearly marked
+5. All dates use ISO 8601 format: YYYY-MM-DDTHH:mm:ss.sssZ
+6. Swagger UI available at: http://localhost:4000/api-docs
+
+================================================================================
+END OF DOCUMENT
+================================================================================

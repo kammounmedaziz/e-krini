@@ -49,10 +49,18 @@ connectDB();
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Routes
+console.log('🔧 Loading routes...');
 const constatRoutes = require('./routes/newConstatRoutes');
+console.log('✅ Constat routes loaded');
+const assuranceRoutes = require('./routes/assuranceRoutes');
+console.log('✅ Assurance routes loaded');
 
 // Utilisation des routes
+console.log('🔌 Mounting routes...');
 app.use('/api/constats', constatRoutes);
+console.log('✅ Mounted /api/constats');
+app.use('/api/assurances', assuranceRoutes);
+console.log('✅ Mounted /api/assurances');
 
 // Route de base pour tester l'API
 app.get('/', (req, res) => {

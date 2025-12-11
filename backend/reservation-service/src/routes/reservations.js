@@ -49,6 +49,17 @@ router.post('/send-email', async (req, res) => {
 });
 
 /**
+ * GET /api/reservations
+ * Get all reservations (admin/agency only)
+ */
+router.get(
+  '/',
+  authMiddleware,
+  authorize('admin', 'agency'),
+  ReservationController.getAllReservations
+);
+
+/**
  * GET /api/reservations/:reservationId
  * Récupérer une réservation (requires authentication)
  */

@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Car,
   Calendar,
+  Wrench,
   BarChart3,
   Settings,
   LogOut,
@@ -18,12 +19,10 @@ import {
 const AgencySidebar = ({ current, setCurrent, isExpanded, toggleExpanded, onLogout, user }) => {
   const items = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'vehicles', label: 'My Vehicles', icon: Car },
-    { id: 'bookings', label: 'Bookings', icon: Calendar },
-    { id: 'drivers', label: 'Drivers', icon: Users },
-    { id: 'revenue', label: 'Revenue', icon: DollarSign },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'reviews', label: 'Reviews', icon: Star },
+    { id: 'fleet', label: 'Fleet Management', icon: Car },
+    { id: 'reservations', label: 'Reservations', icon: Calendar },
+    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
+    { id: 'profile', label: 'Profile', icon: Building2 },
     { id: 'settings', label: 'Settings', icon: Settings },
     { id: 'logout', label: 'Log out', icon: LogOut },
   ];

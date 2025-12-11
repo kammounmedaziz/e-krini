@@ -1,10 +1,20 @@
 import express from 'express';
 import { body } from 'express-validator';
 import ContractController from '../controllers/ContractController.js';
+import { authMiddleware, authorize } from '../../middlewares/auth.js';
+
 const router = express.Router();
-router.delete('/:contractId', ContractController.deleteContract);
 
-
+/**
+ * GET /api/contracts
+ * Get all contracts (admin/agency only)
+ */
+router.get(
+  '/',
+  authMiddleware,
+  authorize('admin', 'agency'),
+  ContractController.getAllContracts
+);
 
 /**
  * POST /api/contracts
@@ -17,28 +27,28 @@ router.post(
 );
 
 /**
- * GET /api/contracts/:contractId
- * Récupérer un contrat
+ * GET /api/contracts/stats/overview
+ * Obtenir les statistiques (must be before /:contractId)
  */
-router.get('/:contractId', ContractController.getContract);
-
-/**
- * GET /api/contracts/client/:clientId
- * Récupérer les contrats d'un client
- */
-router.get('/client/:clientId', ContractController.getClientContracts);
+router.get('/stats/overview', ContractController.getContractStats);
 
 /**
  * GET /api/contracts/by-status/:status
- * Récupérer par statut
+ * Récupérer par statut (must be before /:contractId)
  */
 router.get('/by-status/:status', ContractController.getContractsByStatus);
 
 /**
- * GET /api/contracts/stats/overview
- * Obtenir les statistiques
+ * GET /api/contracts/client/:clientId
+ * Récupérer les contrats d'un client (must be before /:contractId)
  */
-router.get('/stats/overview', ContractController.getContractStats);
+router.get('/client/:clientId', ContractController.getClientContracts);
+
+/**
+ * GET /api/contracts/:contractId
+ * Récupérer un contrat
+ */
+router.get('/:contractId', ContractController.getContract);
 
 /**
  * POST /api/contracts/:contractId/generate-pdf

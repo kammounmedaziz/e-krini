@@ -4,6 +4,9 @@ const maintenanceController = require('../controllers/maintenanceController');
 const { validateMaintenance, validateMaintenanceUpdate } = require('../middlewares/validateMaintenance');
 const { authMiddleware, authorize } = require('../../middlewares/auth.cjs.js');
 
+// GET / - List all maintenance records (admin/agency only)
+router.get('/', authMiddleware, authorize('admin', 'agency'), maintenanceController.show);
+
 // All maintenance routes require authentication (admin/agency only)
 router.get('/show', authMiddleware, authorize('admin', 'agency'), maintenanceController.show);
 router.get('/showById/:id', authMiddleware, authorize('admin', 'agency'), maintenanceController.showbyId);

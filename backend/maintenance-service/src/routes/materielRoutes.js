@@ -3,6 +3,9 @@ const router = express.Router();
 const materielController = require('../controllers/materielController');
 const { validateMateriel } = require('../middlewares/validateMaintenance');
 
+// GET / - List all materials
+router.get('/', materielController.show);
+
 router.get('/show', materielController.show);
 router.get('/showById/:id', materielController.showById);
 router.get('/showByName/:name', materielController.showByName);

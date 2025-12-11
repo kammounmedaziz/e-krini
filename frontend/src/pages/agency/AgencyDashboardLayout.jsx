@@ -30,60 +30,18 @@ const AgencyDashboardLayout = ({ user: initialUser, onLogout }) => {
     switch (current) {
       case 'dashboard':
         return <AgencyDashboard />;
-      case 'vehicles':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">My Vehicles</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Vehicle management will be implemented here.</p>
-            </div>
-          </div>
-        );
-      case 'bookings':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Bookings</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Booking management will be implemented here.</p>
-            </div>
-          </div>
-        );
-      case 'drivers':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Drivers</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Driver management will be implemented here.</p>
-            </div>
-          </div>
-        );
-      case 'revenue':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Revenue</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Revenue tracking will be implemented here.</p>
-            </div>
-          </div>
-        );
-      case 'analytics':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Analytics</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Analytics and reports will be implemented here.</p>
-            </div>
-          </div>
-        );
-      case 'reviews':
-        return (
-          <div>
-            <h1 className="text-2xl font-semibold mb-6 text-white">Reviews</h1>
-            <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-lg p-8">
-              <p className="text-gray-300">Customer reviews will be displayed here.</p>
-            </div>
-          </div>
-        );
+      case 'fleet':
+        const FleetManagement = require('./FleetManagement').default;
+        return <FleetManagement />;
+      case 'reservations':
+        const AgencyReservations = require('./AgencyReservations').default;
+        return <AgencyReservations />;
+      case 'maintenance':
+        const MaintenanceManagement = require('./MaintenanceManagement').default;
+        return <MaintenanceManagement />;
+      case 'profile':
+        const AgencyProfile = require('./AgencyProfile').default;
+        return <AgencyProfile />;
       case 'settings':
         return <AgencySettings />;
       default:

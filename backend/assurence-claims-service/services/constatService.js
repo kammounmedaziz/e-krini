@@ -73,9 +73,7 @@ class ConstatService {
             if (filters.incidentType) query.incidentType = filters.incidentType;
 
             const constats = await Constat.find(query)
-                .populate('userId', 'username email')
                 .populate('assuranceId', 'policyNumber insuranceType')
-                .populate('reviewedBy', 'username')
                 .sort({ createdAt: -1 });
 
             return constats;

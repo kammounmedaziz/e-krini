@@ -56,8 +56,6 @@ class AssuranceService {
             if (filters.vehicleId) query.vehicleId = filters.vehicleId;
 
             const assurances = await Assurance.find(query)
-                .populate('userId', 'username email')
-                .populate('approvedBy', 'username')
                 .sort({ createdAt: -1 });
 
             return assurances;
@@ -71,9 +69,7 @@ class AssuranceService {
      */
     static async getAssuranceById(id) {
         try {
-            const assurance = await Assurance.findById(id)
-                .populate('userId', 'username email phone')
-                .populate('approvedBy', 'username');
+            const assurance = await Assurance.findById(id);
 
             if (!assurance) {
                 throw new Error('Insurance policy not found');

@@ -1,0 +1,212 @@
+# E-Krini Database Seeding Information
+
+## Test Users Created
+
+| Role       | Username    | Email                  | Password      | KYC Status |
+|------------|-------------|------------------------|---------------|------------|
+| ADMIN      | admin       | admin@ekrini.com       | Admin@123     | Approved   |
+| CLIENT     | client1     | client1@test.com       | Client@123    | Approved   |
+| CLIENT     | client2     | client2@test.com       | Client@123    | Pending    |
+| AGENCY     | agency1     | agency1@test.com       | Agency@123    | Approved   |
+| INSURANCE  | insurance1  | insurance1@test.com    | Insurance@123 | Approved   |
+
+## Test Data Summary
+
+### Fleet Service
+- **5 Categories**: Economy, Sedan, SUV, Luxury, Sports
+- **6 Cars**: 
+  - Toyota Corolla 2023 (80 TND/day) - Available
+  - Honda Civic 2023 (85 TND/day) - Available
+  - Hyundai Tucson 2024 (120 TND/day) - Available
+  - BMW 5 Series 2024 (200 TND/day) - Available
+  - Kia Picanto 2023 (50 TND/day) - Available
+  - Porsche 911 2024 (400 TND/day) - Unavailable
+
+### Reservation Service
+- **2 Reservations**:
+  - Toyota Corolla (Dec 15-20, 2024) - Confirmed
+  - Hyundai Tucson (Dec 25-30, 2024) - Pending
+
+### Promotion & Coupon Service
+- **2 Promotions**:
+  - Summer Special: 20% off on SUVs
+  - Weekend Deal: 15% off for weekend rentals
+- **2 Coupons**:
+  - WELCOME10: 10% discount for new users
+  - FIRST50: 50 TND flat discount
+
+### Assurance Service
+- **1 Insurance Policy**: Comprehensive coverage for Toyota Corolla
+- **1 Claim**: Minor fender bender (Pending review)
+
+### Maintenance Service
+- **6 Vehicles**: All cars from fleet
+- **2 Maintenance Records**: 
+  - Toyota Corolla: Oil change (Completed)
+  - Honda Civic: Brake pad replacement (Completed)
+- **4 Materials**: Engine Oil, Brake Pads, Air Filter, Tire
+
+### Feedback Service
+- **2 Feedback Entries**:
+  - Positive feedback (5 stars) - Resolved
+  - Complaint about cleanliness - In Progress
+
+## How to Run the Seeding Script
+
+### Prerequisites
+1. Ensure all Docker services are running:
+   ```bash
+   cd backend
+   docker-compose up -d
+   ```
+
+2. Wait for MongoDB to be ready (check with `docker logs e-krini-mongodb`)
+
+### Execute the Script
+
+```bash
+cd backend
+node seed-database.js
+```
+
+### Environment Variables (Optional)
+You can customize the seeding by setting these environment variables:
+
+```bash
+MONGODB_URI=mongodb://localhost:27017 node seed-database.js
+API_BASE_URL=http://localhost:4000/api node seed-database.js
+```
+
+## Testing After Seeding
+
+### 1. Login as Admin
+```bash
+curl -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","password":"Admin@123"}'
+```
+
+### 2. Login as Client
+```bash
+curl -X POST http://localhost:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"client1","password":"Client@123"}'
+```
+
+### 3. Browse Cars (No Authentication Required)
+```bash
+curl http://localhost:4000/api/fleet/cars
+```
+
+### 4. Check Reservations (Requires Authentication)
+```bash
+curl http://localhost:4000/api/reservation/my-reservations \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+### 5. View Active Promotions
+```bash
+curl http://localhost:4000/api/promotion/active
+```
+
+### 6. Validate Coupon
+```bash
+curl -X POST http://localhost:4000/api/promotion/coupons/verify \
+  -H "Content-Type: application/json" \
+  -d '{"code":"WELCOME10"}'
+```
+
+## API Testing Workflows
+
+### Client Workflow
+1. Login as `client1`
+2. Browse available cars: `GET /api/fleet/cars`
+3. Check car availability: `POST /api/fleet/cars/availability`
+4. Apply coupon: `POST /api/promotion/coupons/verify`
+5. Create reservation: `POST /api/reservation`
+6. View my reservations: `GET /api/reservation/my-reservations`
+7. Submit feedback: `POST /api/feedback`
+
+### Agency Workflow
+1. Login as `agency1`
+2. View dashboard stats: `GET /api/agency/dashboard/stats`
+3. Add new car: `POST /api/fleet/cars`
+4. Schedule maintenance: `POST /api/maintenance`
+5. View maintenance due: `GET /api/fleet/cars/maintenance/due`
+6. Manage materials: `GET /api/maintenance/materiel`
+
+### Insurance Workflow
+1. Login as `insurance1`
+2. View dashboard stats: `GET /api/insurance/dashboard/stats`
+3. View all policies: `GET /api/assurance/assurances`
+4. Review claims: `GET /api/assurance/constats`
+5. Approve/reject claims: `PUT /api/assurance/constats/:id/review`
+
+### Admin Workflow
+1. Login as `admin`
+2. View user statistics: `GET /api/admin/users/statistics`
+3. Manage users: `GET /api/admin/users`
+4. Approve KYC: `POST /api/admin/kyc/:userId/review`
+5. Manage promotions: `POST /api/promotion`
+6. View feedback: `GET /api/feedback`
+7. Export data: `GET /api/admin/users/export`
+
+## Database Cleanup
+
+To remove all test data and reseed:
+
+```bash
+# Stop services
+docker-compose down
+
+# Remove MongoDB volume (WARNING: This deletes ALL data)
+docker volume rm backend_mongo-data
+
+# Restart services
+docker-compose up -d
+
+# Wait for MongoDB to be ready, then reseed
+node seed-database.js
+```
+
+## Notes
+
+- All passwords follow the format: `Role@123` (e.g., Admin@123, Client@123)
+- User IDs are automatically generated as MongoDB ObjectIDs
+- Reservation IDs follow the format: `RES-{timestamp}-{random}`
+- All dates are set relative to the current date for realistic testing
+- KYC documents are not uploaded (would require file handling)
+- Face authentication data is not included (requires AI backend integration)
+
+## Troubleshooting
+
+### MongoDB Connection Error
+```
+Error: connect ECONNREFUSED 127.0.0.1:27017
+```
+**Solution**: Ensure MongoDB is running via Docker: `docker ps | grep mongo`
+
+### Permission Denied
+```
+Error: EACCES: permission denied
+```
+**Solution**: Run with appropriate permissions or use `sudo` (not recommended) or fix file permissions
+
+### Module Not Found
+```
+Error: Cannot find module 'mongoose'
+```
+**Solution**: Ensure you're in the correct directory and dependencies are installed:
+```bash
+cd backend
+npm install
+```
+
+## Next Steps
+
+After seeding, you can:
+1. Access Swagger UI for each service (if configured)
+2. Use Postman collections (see `backend/*/postman/` directories)
+3. Test the frontend application with real data
+4. Explore API endpoints with the test users
+5. Validate business logic with realistic scenarios

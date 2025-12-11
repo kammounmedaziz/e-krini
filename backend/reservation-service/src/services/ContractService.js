@@ -2,10 +2,47 @@ import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Contract from '../models/Contract.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class ContractService {
+  static async getAllContracts(options = {}) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        status,
+        clientId
+      } = options;
+
+      const query = {};
+      if (status) query.status = status;
+      if (clientId) query.clientId = clientId;
+
+      const skip = (page - 1) * limit;
+
+      const contracts = await Contract.find(query)
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip);
+
+      const total = await Contract.countDocuments(query);
+
+      return {
+        contracts,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw new Error(`Error fetching contracts: ${error.message}`);
+    }
+  }
+
   static generateStandardRules(insuranceType) {
     const baseRules = [
       {

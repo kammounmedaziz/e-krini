@@ -10,6 +10,36 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class ContractController {
   /**
+   * Get all contracts
+   * GET /api/contracts
+   */
+  static async getAllContracts(req, res) {
+    try {
+      const { page, limit, status, clientId } = req.query;
+
+      const result = await ContractService.getAllContracts({
+        page,
+        limit,
+        status,
+        clientId
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: result.contracts,
+        pagination: result.pagination
+      });
+    } catch (error) {
+      console.error('Error:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching contracts',
+        error: error.message
+      });
+    }
+  }
+
+  /**
    * Créer un contrat pour une réservation
    * POST /api/contracts
    */

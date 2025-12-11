@@ -3,7 +3,7 @@ import { Car, Shield, Clock, Star, ArrowRight, Zap, Users, Award } from 'lucide-
 import { Button, Card } from '@ui';
 import { useTheme } from '../context/ThemeContext';
 
-const LandingPage = ({ onGetStarted, onAuthClick }) => {
+const LandingPage = ({ onGetStarted, onAuthClick, isAuthenticated, user, onLogout }) => {
   const { theme } = useTheme();
   const features = [
     {
@@ -155,6 +155,42 @@ const LandingPage = ({ onGetStarted, onAuthClick }) => {
           <Button variant="primary" size="lg" onClick={onAuthClick}>
             Create Your Account
           </Button>
+        </div>
+      </section>
+
+      {/* Debug Section - Remove in production */}
+      <section className="py-8 bg-gray-100 dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl mx-auto">
+            <h3 className="text-lg font-semibold mb-4 text-center">Debug Info</h3>
+            <div className="bg-white dark:bg-gray-700 p-4 rounded-lg shadow">
+              <p><strong>Authenticated:</strong> {isAuthenticated ? 'Yes' : 'No'}</p>
+              <p><strong>User:</strong> {user ? `${user.firstName} ${user.lastName} (${user.role})` : 'None'}</p>
+              <p><strong>Access Token:</strong> {localStorage.getItem('accessToken') ? 'Present' : 'None'}</p>
+              <p><strong>Refresh Token:</strong> {localStorage.getItem('refreshToken') ? 'Present' : 'None'}</p>
+              <div className="mt-4 flex gap-2">
+                <Button 
+                  variant="secondary" 
+                  size="sm" 
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.reload();
+                  }}
+                >
+                  Clear Storage & Reload
+                </Button>
+                {isAuthenticated && (
+                  <Button 
+                    variant="danger" 
+                    size="sm" 
+                    onClick={onLogout}
+                  >
+                    Logout
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </section>

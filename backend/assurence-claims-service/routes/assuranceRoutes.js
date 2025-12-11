@@ -3,6 +3,9 @@ const router = express.Router();
 const AssuranceController = require('../controllers/assuranceController');
 const { authMiddleware, authorize } = require('../middlewares/auth.cjs.js');
 
+console.log('📋 Loading assuranceRoutes.js...');
+console.log('📦 AssuranceController methods:', Object.keys(AssuranceController));
+
 /**
  * @swagger
  * /api/assurances:
@@ -13,17 +16,6 @@ const { authMiddleware, authorize } = require('../middlewares/auth.cjs.js');
  *       - bearerAuth: []
  */
 router.post('/', authMiddleware, AssuranceController.createAssurance);
-
-/**
- * @swagger
- * /api/assurances:
- *   get:
- *     summary: Get all insurance policies
- *     tags: [Assurance]
- *     security:
- *       - bearerAuth: []
- */
-router.get('/', authMiddleware, authorize('admin', 'agency', 'insurance'), AssuranceController.getAllAssurances);
 
 /**
  * @swagger
@@ -55,6 +47,17 @@ router.get('/expiring/:days', authMiddleware, authorize('admin', 'agency', 'insu
  *     tags: [Assurance]
  */
 router.get('/vehicle/:vehicleId', AssuranceController.getVehicleInsurance);
+
+/**
+ * @swagger
+ * /api/assurances:
+ *   get:
+ *     summary: Get all insurance policies
+ *     tags: [Assurance]
+ *     security:
+ *       - bearerAuth: []
+ */
+router.get('/', authMiddleware, authorize('admin', 'agency', 'insurance'), AssuranceController.getAllAssurances);
 
 /**
  * @swagger

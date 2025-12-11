@@ -18,20 +18,24 @@ function AppContent() {
   const [user, setUser] = useState(null);
   const [showWelcome, setShowWelcome] = useState(true);
   const [resetToken, setResetToken] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if user is logged in on mount and when storage changes
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
+      setIsLoading(true);
       const token = localStorage.getItem('accessToken');
       const userData = localStorage.getItem('user');
 
       if (token && userData) {
+        // Skip token validation for now - just trust stored data
         setIsAuthenticated(true);
         setUser(JSON.parse(userData));
       } else {
         setIsAuthenticated(false);
         setUser(null);
       }
+      setIsLoading(false);
     };
 
     // Check on mount
@@ -50,36 +54,30 @@ function AppContent() {
   }, []);
 
   const redirectBasedOnRole = (user) => {
-    console.log('redirectBasedOnRole called with user:', user);
-    
     if (user?.role === 'admin') {
-      console.log('Navigating to admin dashboard');
       navigate('/admin/dashboard');
     } else if (user?.role === 'client') {
-      console.log('Navigating to client dashboard');
       navigate('/client/dashboard');
     } else if (user?.role === 'agency') {
-      console.log('Navigating to agency dashboard');
       navigate('/agency/dashboard');
     } else if (user?.role === 'insurance') {
-      console.log('Navigating to insurance dashboard');
       navigate('/insurance/dashboard');
     } else {
-      console.log('No specific role, navigating to home');
       navigate('/');
     }
   };
 
-  // Auto-redirect authenticated users on mount
+  // Handle login redirects
   useEffect(() => {
-    if (isAuthenticated && user) {
-      // Only redirect if we're on the landing page
-      if (window.location.pathname === '/') {
-        console.log('Auto-redirecting authenticated user from landing page');
+    if (isAuthenticated && user && !isLoading) {
+      const currentPath = window.location.pathname;
+      
+      // If we're on the landing page after login, redirect to dashboard
+      if (currentPath === '/') {
         redirectBasedOnRole(user);
       }
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, isLoading]);
 
   const handleLogin = async (credentials) => {
     try {
@@ -116,10 +114,7 @@ function AppContent() {
 
         toast.success(response.message || 'Login successful!');
 
-        console.log('About to redirect, user role:', userData.role);
-
-        // Redirect based on role - removed setTimeout, no delay needed since localStorage is already set
-        redirectBasedOnRole(userData);
+        // Let the useEffect handle the redirect after state updates
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error?.message || 'Login failed. Please try again.';
@@ -146,8 +141,7 @@ function AppContent() {
 
         toast.success(response.message || 'Registration successful!');
 
-        // Redirect based on role
-        redirectBasedOnRole(newUser);
+        // Let the useEffect handle the redirect after state updates
       }
     } catch (error) {
       const errorMessage = error.response?.data?.error?.message || 'Registration failed. Please try again.';
@@ -192,7 +186,12 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-dark-900 text-gray-900 dark:text-white transition-colors duration-300">
-      <Routes>
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+      ) : (
+        <Routes>
         {/* Public routes */}
         <Route
           path="/"
@@ -210,7 +209,7 @@ function AppContent() {
 
         {/* Protected dashboard routes */}
         <Route
-          path="/client/*"
+          path="/client/dashboard"
           element={
             isAuthenticated && user?.role === 'client' ? (
               <ClientDashboardLayout user={user} onLogout={handleLogout} />
@@ -221,7 +220,7 @@ function AppContent() {
         />
 
         <Route
-          path="/admin/*"
+          path="/admin/dashboard"
           element={
             isAuthenticated && user?.role === 'admin' ? (
               <AdminDashboardLayout user={user} onLogout={handleLogout} />
@@ -256,6 +255,7 @@ function AppContent() {
         {/* Catch all route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      )}
 
       <AuthModal
         isOpen={isAuthModalOpen}

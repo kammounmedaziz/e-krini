@@ -102,6 +102,211 @@
  *           type: string
  *           format: date-time
  *           description: Last update timestamp
+ *     Reservation:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Reservation ID
+ *         clientId:
+ *           type: string
+ *           description: Client ID who made the reservation
+ *         carId:
+ *           type: string
+ *           description: Car ID being reserved
+ *         carModel:
+ *           type: string
+ *           description: Car model
+ *         carBrand:
+ *           type: string
+ *           description: Car brand
+ *         startDate:
+ *           type: string
+ *           format: date-time
+ *           description: Reservation start date
+ *         endDate:
+ *           type: string
+ *           format: date-time
+ *           description: Reservation end date
+ *         insuranceType:
+ *           type: string
+ *           enum: [basic, standard, premium, comprehensive]
+ *           description: Insurance type
+ *         dailyRate:
+ *           type: number
+ *           description: Daily rental rate
+ *         promoCode:
+ *           type: string
+ *           description: Applied promo code
+ *         status:
+ *           type: string
+ *           enum: [pending, confirmed, active, completed, cancelled]
+ *           description: Reservation status
+ *         totalAmount:
+ *           type: number
+ *           description: Total reservation amount
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
+ *     Contract:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Contract ID
+ *         reservationId:
+ *           type: string
+ *           description: Associated reservation ID
+ *         clientId:
+ *           type: string
+ *           description: Client ID
+ *         agencyId:
+ *           type: string
+ *           description: Agency ID
+ *         carId:
+ *           type: string
+ *           description: Car ID
+ *         startDate:
+ *           type: string
+ *           format: date-time
+ *           description: Contract start date
+ *         endDate:
+ *           type: string
+ *           format: date-time
+ *           description: Contract end date
+ *         dailyRate:
+ *           type: number
+ *           description: Daily rental rate
+ *         totalAmount:
+ *           type: number
+ *           description: Total contract amount
+ *         insuranceType:
+ *           type: string
+ *           enum: [basic, standard, premium, comprehensive]
+ *           description: Insurance type
+ *         status:
+ *           type: string
+ *           enum: [draft, signed, active, completed, terminated]
+ *           description: Contract status
+ *         rules:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Contract rules and terms
+ *         signatures:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               signer:
+ *                 type: string
+ *                 description: Signer name
+ *               signature:
+ *                 type: string
+ *                 description: Digital signature
+ *               signedAt:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Signature timestamp
+ *         pdfUrl:
+ *           type: string
+ *           description: URL to generated PDF
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
+ *     Car:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Car ID
+ *         nom:
+ *           type: string
+ *           description: Car name
+ *         category:
+ *           type: string
+ *           description: Category ID
+ *         matricule:
+ *           type: string
+ *           description: License plate number
+ *         marque:
+ *           type: string
+ *           description: Car brand
+ *         modele:
+ *           type: string
+ *           description: Car model
+ *         annee:
+ *           type: number
+ *           description: Year of manufacture
+ *         prixParJour:
+ *           type: number
+ *           description: Daily rental price
+ *         couleur:
+ *           type: string
+ *           description: Car color
+ *         typeCarburant:
+ *           type: string
+ *           enum: [Essence, Diesel, Hybrid, Electric]
+ *           description: Fuel type
+ *         transmission:
+ *           type: string
+ *           enum: [Manual, Automatic]
+ *           description: Transmission type
+ *         nombrePlaces:
+ *           type: number
+ *           description: Number of seats
+ *         climatisation:
+ *           type: boolean
+ *           description: Air conditioning availability
+ *         disponibilite:
+ *           type: boolean
+ *           description: Availability status
+ *         kilometrage:
+ *           type: number
+ *           description: Current mileage
+ *         images:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Array of image URLs
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
+ *     Category:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Category ID
+ *         name:
+ *           type: string
+ *           description: Category name
+ *         description:
+ *           type: string
+ *           description: Category description
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Creation timestamp
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Last update timestamp
  */
 
 /**
@@ -545,7 +750,7 @@
  *       200:
  *         description: KYC reviewed
  * 
- * /api/fleet/api/cars:
+ * /api/cars:
  *   get:
  *     summary: Get all cars
  *     tags: [Fleet]
@@ -554,20 +759,61 @@
  *         name: page
  *         schema:
  *           type: integer
+ *           default: 1
+ *         description: Page number
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *       - in: query
  *         name: category
  *         schema:
  *           type: string
- *           description: Category ID
+ *         description: Filter by category ID
+ *       - in: query
+ *         name: marque
+ *         schema:
+ *           type: string
+ *         description: Filter by brand
+ *       - in: query
+ *         name: prixMax
+ *         schema:
+ *           type: number
+ *         description: Maximum price per day
+ *       - in: query
+ *         name: disponibilite
+ *         schema:
+ *           type: boolean
+ *         description: Filter by availability
  *     responses:
  *       200:
  *         description: List of cars
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Car'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
  *   post:
- *     summary: Create a new car (Admin/Agency)
+ *     summary: Create a new car
  *     tags: [Fleet]
  *     security:
  *       - bearerAuth: []
@@ -580,35 +826,69 @@
  *             required:
  *               - nom
  *               - category
- *               - prixParJour
  *               - matricule
- *               - modele
  *               - marque
- *               - dernierMaintenance
+ *               - modele
+ *               - prixParJour
  *             properties:
  *               nom:
  *                 type: string
+ *                 description: Car name
  *               category:
  *                 type: string
  *                 description: Category ID
- *               prixParJour:
- *                 type: number
  *               matricule:
  *                 type: string
- *               modele:
- *                 type: string
+ *                 description: License plate
  *               marque:
  *                 type: string
- *               dernierMaintenance:
+ *                 description: Car brand
+ *               modele:
  *                 type: string
- *                 format: date-time
+ *                 description: Car model
+ *               annee:
+ *                 type: number
+ *                 description: Year of manufacture
+ *               prixParJour:
+ *                 type: number
+ *                 description: Daily rental price
+ *               couleur:
+ *                 type: string
+ *                 description: Car color
+ *               typeCarburant:
+ *                 type: string
+ *                 enum: [Essence, Diesel, Hybrid, Electric]
+ *                 description: Fuel type
+ *               transmission:
+ *                 type: string
+ *                 enum: [Manual, Automatic]
+ *                 description: Transmission type
+ *               nombrePlaces:
+ *                 type: number
+ *                 description: Number of seats
+ *               climatisation:
+ *                 type: boolean
+ *                 description: Air conditioning
  *               disponibilite:
  *                 type: boolean
+ *                 description: Availability status
+ *               kilometrage:
+ *                 type: number
+ *                 description: Mileage
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Car images URLs
  *     responses:
  *       201:
- *         description: Car created
+ *         description: Car created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  * 
- * /api/fleet/api/cars/{id}:
+ * /api/cars/{id}:
  *   get:
  *     summary: Get car by ID
  *     tags: [Fleet]
@@ -618,11 +898,18 @@
  *         required: true
  *         schema:
  *           type: string
+ *         description: Car ID
  *     responses:
  *       200:
  *         description: Car details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Car'
+ *       404:
+ *         description: Car not found
  *   patch:
- *     summary: Update car (Admin/Agency)
+ *     summary: Update car
  *     tags: [Fleet]
  *     security:
  *       - bearerAuth: []
@@ -632,91 +919,250 @@
  *         required: true
  *         schema:
  *           type: string
- *     responses:
- *       200:
- *         description: Car updated
- *   delete:
- *     summary: Delete car (Admin)
- *     tags: [Fleet]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Car deleted
- * 
- * /api/fleet/api/cars/search:
- *   get:
- *     summary: Search cars
- *     tags: [Fleet]
- *     parameters:
- *       - in: query
- *         name: make
- *         schema:
- *           type: string
- *       - in: query
- *         name: category
- *         schema:
- *           type: string
- *       - in: query
- *         name: maxPrice
- *         schema:
- *           type: number
- *     responses:
- *       200:
- *         description: Search results
- * 
- * /api/fleet/api/cars/availability:
- *   post:
- *     summary: Check car availability
- *     tags: [Fleet]
+ *         description: Car ID
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               startDate:
+ *               nom:
  *                 type: string
- *                 format: date-time
- *               endDate:
+ *               category:
  *                 type: string
- *                 format: date-time
- *               carIds:
+ *               matricule:
+ *                 type: string
+ *               marque:
+ *                 type: string
+ *               modele:
+ *                 type: string
+ *               annee:
+ *                 type: number
+ *               prixParJour:
+ *                 type: number
+ *               couleur:
+ *                 type: string
+ *               typeCarburant:
+ *                 type: string
+ *                 enum: [Essence, Diesel, Hybrid, Electric]
+ *               transmission:
+ *                 type: string
+ *                 enum: [Manual, Automatic]
+ *               nombrePlaces:
+ *                 type: number
+ *               climatisation:
+ *                 type: boolean
+ *               disponibilite:
+ *                 type: boolean
+ *               kilometrage:
+ *                 type: number
+ *               images:
  *                 type: array
  *                 items:
  *                   type: string
  *     responses:
  *       200:
- *         description: Availability status
+ *         description: Car updated successfully
+ *       404:
+ *         description: Car not found
+ *       401:
+ *         description: Unauthorized
+ *   delete:
+ *     summary: Delete car
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car ID
+ *     responses:
+ *       200:
+ *         description: Car deleted successfully
+ *       404:
+ *         description: Car not found
+ *       401:
+ *         description: Unauthorized
  * 
- * /api/fleet/api/categories:
+ * /api/cars/search:
  *   get:
- *     summary: Get all car categories
+ *     summary: Search cars with filters
  *     tags: [Fleet]
  *     parameters:
  *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *       - in: query
- *         name: search
+ *         name: categorie
  *         schema:
  *           type: string
+ *         description: Category ID
+ *       - in: query
+ *         name: marque
+ *         schema:
+ *           type: string
+ *         description: Car brand
+ *       - in: query
+ *         name: prixMax
+ *         schema:
+ *           type: number
+ *         description: Maximum price per day
+ *       - in: query
+ *         name: disponibilite
+ *         schema:
+ *           type: boolean
+ *         description: Availability status
+ *     responses:
+ *       200:
+ *         description: Search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Car'
+ * 
+ * /api/cars/availability:
+ *   post:
+ *     summary: Check car availability for date range
+ *     tags: [Fleet]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - startDate
+ *               - endDate
+ *               - carIds
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Start date for rental
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *                 description: End date for rental
+ *               carIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of car IDs to check
+ *     responses:
+ *       200:
+ *         description: Availability status for each car
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       carId:
+ *                         type: string
+ *                       available:
+ *                         type: boolean
+ *                       reason:
+ *                         type: string
+ * 
+ * /api/cars/maintenance/check:
+ *   get:
+ *     summary: Trigger maintenance check and get flagged cars
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cars needing maintenance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Car'
+ *                 message:
+ *                   type: string
+ * 
+ * /api/cars/maintenance/due:
+ *   get:
+ *     summary: Get cars currently flagged for maintenance
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Cars due for maintenance
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Car'
+ * 
+ * /api/cars/pricing/update-season:
+ *   post:
+ *     summary: Apply seasonal pricing updates
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Seasonal pricing updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 updatedCount:
+ *                   type: integer
+ * 
+ * /api/categories:
+ *   get:
+ *     summary: Get all car categories
+ *     tags: [Fleet]
  *     responses:
  *       200:
  *         description: List of categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
  *   post:
- *     summary: Create category (Admin/Agency)
+ *     summary: Create a new category
  *     tags: [Fleet]
  *     security:
  *       - bearerAuth: []
@@ -731,11 +1177,87 @@
  *             properties:
  *               name:
  *                 type: string
+ *                 description: Category name
+ *               description:
+ *                 type: string
+ *                 description: Category description
+ *     responses:
+ *       201:
+ *         description: Category created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ * 
+ * /api/categories/{id}:
+ *   get:
+ *     summary: Get category by ID
+ *     tags: [Fleet]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: Category not found
+ *   put:
+ *     summary: Update category
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
  *               description:
  *                 type: string
  *     responses:
- *       201:
- *         description: Category created
+ *       200:
+ *         description: Category updated successfully
+ *       404:
+ *         description: Category not found
+ *       401:
+ *         description: Unauthorized
+ *   delete:
+ *     summary: Delete category
+ *     tags: [Fleet]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully
+ *       404:
+ *         description: Category not found
+ *       401:
+ *         description: Unauthorized
  * 
  * /api/reservation/api/reservations:
  *   post:
@@ -843,6 +1365,688 @@
  *     responses:
  *       200:
  *         description: Contract signed
+ * 
+ * /api/reservations:
+ *   get:
+ *     summary: Get all reservations
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: List of reservations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservation'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ * 
+ * /api/reservations/{reservationId}:
+ *   get:
+ *     summary: Get reservation by ID
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     responses:
+ *       200:
+ *         description: Reservation details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Reservation'
+ *       404:
+ *         description: Reservation not found
+ * 
+ *   put:
+ *     summary: Update reservation
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               startDate:
+ *                 type: string
+ *                 format: date-time
+ *               endDate:
+ *                 type: string
+ *                 format: date-time
+ *               insuranceType:
+ *                 type: string
+ *                 enum: [basic, standard, premium, comprehensive]
+ *               carModel:
+ *                 type: string
+ *               carBrand:
+ *                 type: string
+ *               dailyRate:
+ *                 type: number
+ *               promoCode:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Reservation updated
+ *       404:
+ *         description: Reservation not found
+ * 
+ *   delete:
+ *     summary: Delete reservation
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     responses:
+ *       200:
+ *         description: Reservation deleted
+ *       404:
+ *         description: Reservation not found
+ * 
+ * /api/reservations/client/{clientId}:
+ *   get:
+ *     summary: Get client reservations
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: clientId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Client ID
+ *     responses:
+ *       200:
+ *         description: Client reservations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservation'
+ * 
+ * /api/reservations/search/by-car-model:
+ *   get:
+ *     summary: Search reservations by car model
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: carModel
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car model to search for
+ *     responses:
+ *       200:
+ *         description: Search results
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservation'
+ * 
+ * /api/reservations/by-status/{status}:
+ *   get:
+ *     summary: Get reservations by status
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pending, confirmed, active, completed, cancelled]
+ *         description: Reservation status
+ *     responses:
+ *       200:
+ *         description: Reservations by status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservation'
+ * 
+ * /api/reservations/period:
+ *   get:
+ *     summary: Get reservations by date range
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date
+ *     responses:
+ *       200:
+ *         description: Reservations in date range
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Reservation'
+ * 
+ * /api/reservations/stats/overview:
+ *   get:
+ *     summary: Get reservation statistics
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Reservation statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalReservations:
+ *                       type: integer
+ *                     pendingReservations:
+ *                       type: integer
+ *                     confirmedReservations:
+ *                       type: integer
+ *                     activeReservations:
+ *                       type: integer
+ *                     completedReservations:
+ *                       type: integer
+ *                     cancelledReservations:
+ *                       type: integer
+ *                     totalRevenue:
+ *                       type: number
+ * 
+ * /api/reservations/availability/check:
+ *   get:
+ *     summary: Check car availability
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: query
+ *         name: carId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car ID
+ *       - in: query
+ *         name: startDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date
+ *       - in: query
+ *         name: endDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date
+ *     responses:
+ *       200:
+ *         description: Availability status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 available:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ * 
+ * /api/reservations/{reservationId}/cancel:
+ *   put:
+ *     summary: Cancel reservation
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     responses:
+ *       200:
+ *         description: Reservation cancelled
+ *       404:
+ *         description: Reservation not found
+ * 
+ * /api/reservations/{reservationId}/confirm:
+ *   put:
+ *     summary: Confirm reservation
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     responses:
+ *       200:
+ *         description: Reservation confirmed
+ *       404:
+ *         description: Reservation not found
+ * 
+ * /api/reservations/{reservationId}/release-hold:
+ *   put:
+ *     summary: Release reservation hold
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: reservationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reservation ID
+ *     responses:
+ *       200:
+ *         description: Hold released
+ *       404:
+ *         description: Reservation not found
+ * 
+ * /api/contracts:
+ *   get:
+ *     summary: Get all contracts
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: List of contracts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Contract'
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     pages:
+ *                       type: integer
+ * 
+ *   post:
+ *     summary: Create a contract
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - reservationId
+ *             properties:
+ *               reservationId:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Contract created
+ * 
+ * /api/contracts/stats/overview:
+ *   get:
+ *     summary: Get contract statistics
+ *     tags: [Reservation]
+ *     responses:
+ *       200:
+ *         description: Contract statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalContracts:
+ *                       type: integer
+ *                     draftContracts:
+ *                       type: integer
+ *                     signedContracts:
+ *                       type: integer
+ *                     activeContracts:
+ *                       type: integer
+ *                     completedContracts:
+ *                       type: integer
+ *                     terminatedContracts:
+ *                       type: integer
+ * 
+ * /api/contracts/by-status/{status}:
+ *   get:
+ *     summary: Get contracts by status
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [draft, signed, active, completed, terminated]
+ *         description: Contract status
+ *     responses:
+ *       200:
+ *         description: Contracts by status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Contract'
+ * 
+ * /api/contracts/client/{clientId}:
+ *   get:
+ *     summary: Get client contracts
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: path
+ *         name: clientId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Client ID
+ *     responses:
+ *       200:
+ *         description: Client contracts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Contract'
+ * 
+ * /api/contracts/{contractId}:
+ *   get:
+ *     summary: Get contract details
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Contract details
+ * 
+ * /api/contracts/{contractId}/generate-pdf:
+ *   post:
+ *     summary: Generate contract PDF
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Contract ID
+ *     responses:
+ *       200:
+ *         description: PDF generated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 pdfUrl:
+ *                   type: string
+ * 
+ * /api/contracts/{contractId}/sign:
+ *   post:
+ *     summary: Sign contract
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - signer
+ *               - signature
+ *             properties:
+ *               signer:
+ *                 type: string
+ *               signature:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contract signed
+ * 
+ * /api/contracts/{contractId}/download-pdf:
+ *   get:
+ *     summary: Download contract PDF
+ *     tags: [Reservation]
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Contract ID
+ *     responses:
+ *       200:
+ *         description: PDF file
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ * 
+ * /api/contracts/{contractId}/status:
+ *   put:
+ *     summary: Update contract status
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Contract ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [draft, signed, active, completed, terminated]
+ *     responses:
+ *       200:
+ *         description: Contract status updated
+ *       400:
+ *         description: Invalid status
+ *       404:
+ *         description: Contract not found
+ * 
+ * /api/contracts/{contractId}/rules:
+ *   put:
+ *     summary: Update contract rules
+ *     tags: [Reservation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contractId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Contract ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - rules
+ *             properties:
+ *               rules:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Contract rules updated
+ *       404:
+ *         description: Contract not found
  * 
  * /api/feedback/:
  *   post:

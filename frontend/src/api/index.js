@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -108,6 +108,11 @@ export const authAPI = {
 
   refreshToken: async (refreshToken) => {
     const response = await api.post('/auth/refresh-token', { refreshToken });
+    return response.data;
+  },
+
+  getProfile: async () => {
+    const response = await api.get('/users/profile');
     return response.data;
   },
 
@@ -490,43 +495,113 @@ export const fleetAPI = {
 export const reservationAPI = {
   // Client Reservations
   createReservation: async (reservationData) => {
-    const response = await api.post('/reservation', reservationData);
+    const response = await api.post('/reservation/reservations', reservationData);
     return response.data;
   },
 
   getMyReservations: async (params = {}) => {
-    const response = await api.get('/reservation/my-reservations', { params });
+    const response = await api.get('/reservation/reservations/client/' + localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).id : '', { params });
     return response.data;
   },
 
   getReservationById: async (reservationId) => {
-    const response = await api.get(`/reservation/${reservationId}`);
+    const response = await api.get(`/reservation/reservations/${reservationId}`);
     return response.data;
   },
 
   updateReservation: async (reservationId, updateData) => {
-    const response = await api.put(`/reservation/${reservationId}`, updateData);
+    const response = await api.put(`/reservation/reservations/${reservationId}`, updateData);
     return response.data;
   },
 
   cancelReservation: async (reservationId, reason) => {
-    const response = await api.post(`/reservation/${reservationId}/cancel`, { reason });
+    const response = await api.put(`/reservation/reservations/${reservationId}/cancel`, { reason });
+    return response.data;
+  },
+
+  confirmReservation: async (reservationId) => {
+    const response = await api.put(`/reservation/reservations/${reservationId}/confirm`);
     return response.data;
   },
 
   // Admin Reservation Management
   getAllReservations: async (params = {}) => {
-    const response = await api.get('/reservation/admin', { params });
+    const response = await api.get('/reservation/reservations', { params });
+    return response.data;
+  },
+
+  getReservationsByStatus: async (status) => {
+    const response = await api.get(`/reservation/reservations/status/${status}`);
     return response.data;
   },
 
   updateReservationStatus: async (reservationId, status, notes) => {
-    const response = await api.put(`/reservation/admin/${reservationId}/status`, { status, notes });
+    const response = await api.put(`/reservation/reservations/${reservationId}/status`, { status, notes });
     return response.data;
   },
 
   getReservationStatistics: async () => {
-    const response = await api.get('/reservation/admin/statistics');
+    const response = await api.get('/reservation/reservations/stats/overview');
+    return response.data;
+  },
+
+  searchByCarModel: async (model) => {
+    const response = await api.get('/reservation/reservations/search/by-car-model', { params: { model } });
+    return response.data;
+  },
+
+  checkAvailability: async (carId, startDate, endDate) => {
+    const response = await api.get('/reservation/reservations/availability/check', { 
+      params: { carId, startDate, endDate } 
+    });
+    return response.data;
+  },
+
+  // Contract Management
+  createContract: async (contractData) => {
+    const response = await api.post('/reservation/contracts', contractData);
+    return response.data;
+  },
+
+  getContractById: async (contractId) => {
+    const response = await api.get(`/reservation/contracts/${contractId}`);
+    return response.data;
+  },
+
+  getMyContracts: async (clientId) => {
+    const response = await api.get(`/reservation/contracts/client/${clientId}`);
+    return response.data;
+  },
+
+  getContractsByStatus: async (status) => {
+    const response = await api.get(`/reservation/contracts/status/${status}`);
+    return response.data;
+  },
+
+  signContract: async (contractId, signatureData) => {
+    const response = await api.post(`/reservation/contracts/${contractId}/sign`, signatureData);
+    return response.data;
+  },
+
+  generateContractPDF: async (contractId) => {
+    const response = await api.post(`/reservation/contracts/${contractId}/generate-pdf`);
+    return response.data;
+  },
+
+  downloadContractPDF: async (contractId) => {
+    const response = await api.get(`/reservation/contracts/${contractId}/download-pdf`, {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  updateContractStatus: async (contractId, status) => {
+    const response = await api.put(`/reservation/contracts/status/${contractId}`, { status });
+    return response.data;
+  },
+
+  deleteContract: async (contractId) => {
+    const response = await api.delete(`/reservation/contracts/${contractId}`);
     return response.data;
   },
 };
@@ -587,40 +662,110 @@ export const promotionAPI = {
 
 // Assurance API endpoints
 export const assuranceAPI = {
-  // Claims
+  // Insurance Policies
+  createPolicy: async (policyData) => {
+    const response = await api.post('/assurance/assurances', policyData);
+    return response.data;
+  },
+
+  getAllPolicies: async () => {
+    const response = await api.get('/assurance/assurances');
+    return response.data;
+  },
+
+  getMyPolicies: async () => {
+    const response = await api.get('/assurance/assurances/user/me');
+    return response.data;
+  },
+
+  getPolicyById: async (id) => {
+    const response = await api.get(`/assurance/assurances/${id}`);
+    return response.data;
+  },
+
+  getPolicyByVehicle: async (vehicleId) => {
+    const response = await api.get(`/assurance/assurances/vehicle/${vehicleId}`);
+    return response.data;
+  },
+
+  getExpiringPolicies: async (days) => {
+    const response = await api.get(`/assurance/assurances/expiring/${days}`);
+    return response.data;
+  },
+
+  updatePolicy: async (id, updateData) => {
+    const response = await api.put(`/assurance/assurances/${id}`, updateData);
+    return response.data;
+  },
+
+  approvePolicy: async (id) => {
+    const response = await api.put(`/assurance/assurances/${id}/approve`);
+    return response.data;
+  },
+
+  cancelPolicy: async (id) => {
+    const response = await api.put(`/assurance/assurances/${id}/cancel`);
+    return response.data;
+  },
+
+  deletePolicy: async (id) => {
+    const response = await api.delete(`/assurance/assurances/${id}`);
+    return response.data;
+  },
+
+  // Claims (Constats)
   createClaim: async (claimData) => {
-    const response = await api.post('/assurance/claims', claimData);
+    const response = await api.post('/assurance/constats', claimData);
     return response.data;
   },
 
-  getMyClaims: async (params = {}) => {
-    const response = await api.get('/assurance/claims/my-claims', { params });
+  getAllClaims: async () => {
+    const response = await api.get('/assurance/constats');
     return response.data;
   },
 
-  getClaimById: async (claimId) => {
-    const response = await api.get(`/assurance/claims/${claimId}`);
+  getMyClaims: async () => {
+    const response = await api.get('/assurance/constats/user/me');
     return response.data;
   },
 
-  updateClaim: async (claimId, updateData) => {
-    const response = await api.put(`/assurance/claims/${claimId}`, updateData);
+  getClaimById: async (id) => {
+    const response = await api.get(`/assurance/constats/${id}`);
     return response.data;
   },
 
-  // Admin Claim Management
-  getAllClaims: async (params = {}) => {
-    const response = await api.get('/assurance/admin/claims', { params });
+  getClaimsStatistics: async () => {
+    const response = await api.get('/assurance/constats/stats');
     return response.data;
   },
 
-  updateClaimStatus: async (claimId, status, notes) => {
-    const response = await api.put(`/assurance/admin/claims/${claimId}/status`, { status, notes });
+  updateClaim: async (id, updateData) => {
+    const response = await api.put(`/assurance/constats/${id}`, updateData);
     return response.data;
   },
 
-  getClaimStatistics: async () => {
-    const response = await api.get('/assurance/admin/statistics');
+  submitClaim: async (id) => {
+    const response = await api.put(`/assurance/constats/${id}/submit`);
+    return response.data;
+  },
+
+  reviewClaim: async (id, action, notes) => {
+    const response = await api.put(`/assurance/constats/${id}/review`, { action, notes });
+    return response.data;
+  },
+
+  addFraudDetection: async (id, fraudData) => {
+    const response = await api.put(`/assurance/constats/${id}/fraud-detection`, fraudData);
+    return response.data;
+  },
+
+  processPayment: async (id, paymentData) => {
+    const response = await api.put(`/assurance/constats/${id}/payment`, paymentData);
+    return response.data;
+  },
+
+  deleteClaim: async (id) => {
+    const response = await api.delete(`/assurance/constats/${id}`);
     return response.data;
   },
 };
@@ -628,50 +773,130 @@ export const assuranceAPI = {
 // Maintenance API endpoints
 export const maintenanceAPI = {
   // Maintenance Records
-  getMaintenanceRecords: async (params = {}) => {
-    const response = await api.get('/maintenance/records', { params });
+  getAllMaintenance: async () => {
+    const response = await api.get('/maintenance');
     return response.data;
   },
 
-  createMaintenanceRecord: async (recordData) => {
-    const response = await api.post('/maintenance/records', recordData);
+  getMaintenanceById: async (id) => {
+    const response = await api.get(`/maintenance/showById/${id}`);
     return response.data;
   },
 
-  updateMaintenanceRecord: async (recordId, updateData) => {
-    const response = await api.put(`/maintenance/records/${recordId}`, updateData);
+  createMaintenance: async (maintenanceData) => {
+    const response = await api.post('/maintenance', maintenanceData);
     return response.data;
   },
 
-  deleteMaintenanceRecord: async (recordId) => {
-    const response = await api.delete(`/maintenance/records/${recordId}`);
+  updateMaintenance: async (id, updateData) => {
+    const response = await api.put(`/maintenance/update/${id}`, updateData);
     return response.data;
   },
 
-  // Maintenance Scheduling
-  scheduleMaintenance: async (scheduleData) => {
-    const response = await api.post('/maintenance/schedule', scheduleData);
+  deleteMaintenance: async (id) => {
+    const response = await api.delete(`/maintenance/delete/${id}`);
     return response.data;
   },
 
-  getScheduledMaintenance: async (params = {}) => {
-    const response = await api.get('/maintenance/scheduled', { params });
+  getMaintenanceByVehicle: async (vehicleId) => {
+    const response = await api.get(`/maintenance/vehicule/${vehicleId}`);
     return response.data;
   },
 
-  updateMaintenanceSchedule: async (scheduleId, updateData) => {
-    const response = await api.put(`/maintenance/schedule/${scheduleId}`, updateData);
+  getMaintenanceByType: async (type) => {
+    const response = await api.get(`/maintenance/type/${type}`);
     return response.data;
   },
 
-  // Admin Maintenance Management
-  getAllMaintenanceRecords: async (params = {}) => {
-    const response = await api.get('/maintenance/admin/records', { params });
+  getMaintenanceHistory: async (vehicleId) => {
+    const response = await api.get(`/maintenance/historique/${vehicleId}`);
     return response.data;
   },
 
-  getMaintenanceStatistics: async () => {
-    const response = await api.get('/maintenance/admin/statistics');
+  getMaintenanceCosts: async (id) => {
+    const response = await api.get(`/maintenance/couts/${id}`);
+    return response.data;
+  },
+
+  // Material/Parts Management
+  getAllMaterials: async () => {
+    const response = await api.get('/maintenance/materiel');
+    return response.data;
+  },
+
+  getMaterialById: async (id) => {
+    const response = await api.get(`/maintenance/materiel/showById/${id}`);
+    return response.data;
+  },
+
+  getMaterialByName: async (name) => {
+    const response = await api.get(`/maintenance/materiel/showByName/${name}`);
+    return response.data;
+  },
+
+  createMaterial: async (materialData) => {
+    const response = await api.post('/maintenance/materiel', materialData);
+    return response.data;
+  },
+
+  updateMaterial: async (id, updateData) => {
+    const response = await api.put(`/maintenance/materiel/update/${id}`, updateData);
+    return response.data;
+  },
+
+  deleteMaterial: async (id) => {
+    const response = await api.delete(`/maintenance/materiel/delete/${id}`);
+    return response.data;
+  },
+
+  getMaterialsByCategory: async (category) => {
+    const response = await api.get(`/maintenance/materiel/categorie/${category}`);
+    return response.data;
+  },
+
+  getLowStockAlerts: async () => {
+    const response = await api.get('/maintenance/materiel/alertes');
+    return response.data;
+  },
+
+  restockMaterial: async (id, quantity) => {
+    const response = await api.put(`/maintenance/materiel/reapprovisionner/${id}`, { quantity });
+    return response.data;
+  },
+
+  getMaterialStatistics: async () => {
+    const response = await api.get('/maintenance/materiel/statistiques');
+    return response.data;
+  },
+
+  // Vehicle Management
+  getAllVehicles: async () => {
+    const response = await api.get('/maintenance/vehicule');
+    return response.data;
+  },
+
+  getVehicleById: async (id) => {
+    const response = await api.get(`/maintenance/vehicule/showById/${id}`);
+    return response.data;
+  },
+
+  getVehicleByRegistration: async (registration) => {
+    const response = await api.get(`/maintenance/vehicule/immatriculation/${registration}`);
+    return response.data;
+  },
+
+  createVehicle: async (vehicleData) => {
+    const response = await api.post('/maintenance/vehicule', vehicleData);
+    return response.data;
+  },
+
+  updateVehicle: async (id, updateData) => {
+    const response = await api.put(`/maintenance/vehicule/update/${id}`, updateData);
+    return response.data;
+  },
+
+  deleteVehicle: async (id) => {
+    const response = await api.delete(`/maintenance/vehicule/delete/${id}`);
     return response.data;
   },
 };

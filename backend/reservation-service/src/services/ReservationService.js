@@ -4,6 +4,47 @@ import { v4 as uuidv4 } from 'uuid';
 import ServiceClient from '../../utils/serviceClient.js';
 
 export class ReservationService {
+  /**
+   * Get all reservations with pagination
+   */
+  static async getAllReservations(options = {}) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        status,
+        clientId,
+        carId
+      } = options;
+
+      const query = {};
+      if (status) query.status = status;
+      if (clientId) query.clientId = clientId;
+      if (carId) query.carId = carId;
+
+      const skip = (page - 1) * limit;
+
+      const reservations = await Reservation.find(query)
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .skip(skip);
+
+      const total = await Reservation.countDocuments(query);
+
+      return {
+        reservations,
+        pagination: {
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          pages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw new Error(`Error fetching reservations: ${error.message}`);
+    }
+  }
+
   static async createReservation(data) {
     try {
       // Verify car exists and get details from fleet service

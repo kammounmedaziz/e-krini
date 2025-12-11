@@ -4,6 +4,37 @@ import { sendReservationEmail } from '../services/emailService.js';
 
 export class ReservationController {
   /**
+   * Get all reservations
+   * GET /api/reservations
+   */
+  static async getAllReservations(req, res) {
+    try {
+      const { page, limit, status, clientId, carId } = req.query;
+
+      const result = await ReservationService.getAllReservations({
+        page,
+        limit,
+        status,
+        clientId,
+        carId
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: result.reservations,
+        pagination: result.pagination
+      });
+    } catch (error) {
+      console.error('Error:', error.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching reservations',
+        error: error.message
+      });
+    }
+  }
+
+  /**
    * Créer une nouvelle réservation
    * POST /api/reservations
    */
