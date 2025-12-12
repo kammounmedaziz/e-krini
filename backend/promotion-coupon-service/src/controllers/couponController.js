@@ -66,12 +66,24 @@ export const getAllCoupons = async (req, res) => {
   }
 };
 
-// @desc    Obtenir un coupon par ID
+// @desc    Obtenir un coupon par ID ou code
 // @route   GET /api/coupons/:id
 // @access  Private/Admin
 export const getCouponById = async (req, res) => {
   try {
-    const coupon = await Coupon.findById(req.params.id);
+    const { id, code } = req.params;
+    const identifier = id || code;
+    let coupon;
+    
+    // Try to find by MongoDB ID first
+    if (identifier && identifier.match(/^[0-9a-fA-F]{24}$/)) {
+      coupon = await Coupon.findById(identifier);
+    }
+    
+    // If not found by ID, try to find by code
+    if (!coupon && identifier) {
+      coupon = await Coupon.findOne({ code: identifier.toUpperCase() });
+    }
 
     if (!coupon) {
       return res.status(404).json({

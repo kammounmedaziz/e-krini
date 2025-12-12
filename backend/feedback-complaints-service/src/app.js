@@ -69,8 +69,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
-app.use('/', feedbackRoutes);
+// API routes (mount at /feedbacks to avoid conflicts)
+app.use('/feedbacks', feedbackRoutes);
 
 // 404 handler
 app.use(notFound);

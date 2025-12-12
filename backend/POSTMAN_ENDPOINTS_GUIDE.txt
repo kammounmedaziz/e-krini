@@ -262,16 +262,9 @@ Body (JSON):
   "matricule": "TUN-5678",
   "marque": "Toyota",
   "modele": "Corolla",
-  "annee": 2024,
   "prixParJour": 90,
-  "couleur": "White",
-  "typeCarburant": "Hybrid",
-  "transmission": "Automatic",
-  "nombrePlaces": 5,
-  "climatisation": true,
   "disponibilite": true,
-  "kilometrage": 5000,
-  "images": ["https://example.com/car1.jpg"]
+  "dernierMaintenance": "2024-12-01T00:00:00.000Z"
 }
 
 6.4 Update Car (Admin/Agency)
@@ -652,16 +645,13 @@ Body (JSON):
   "subject": "Car cleanliness issue",
   "description": "The car was not properly cleaned before rental.",
   "priority": "medium",
-  "relatedTo": {
-    "type": "vehicle",
-    "referenceId": "{{car_id}}"
-  },
   "isAnonymous": false,
   "contactInfo": {
     "email": "user@example.com",
     "phone": "+21612345678"
   }
 }
+Note: To include relatedTo (optional), add a valid MongoDB ObjectId: "relatedTo": {"type": "vehicle", "referenceId": "674b1a2b3c4d5e6f7a8b9c01"}
 
 12.4 Update Feedback
 PUT {{base_url}}/api/feedbacks/{{feedback_id}}
@@ -682,18 +672,8 @@ Headers: Authorization: Bearer {{admin_token}}
 GET {{base_url}}/api/feedbacks/user/me
 Headers: Authorization: Bearer {{access_token}}
 
-12.7 Update Feedback Status (Admin Only)
-PATCH {{base_url}}/api/feedbacks/{{feedback_id}}/status
-Headers: 
-  - Authorization: Bearer {{admin_token}}
-  - Content-Type: application/json
-Body (JSON):
-{
-  "status": "resolved"
-}
-
-12.8 Get Feedback Statistics (Admin Only)
-GET {{base_url}}/api/feedbacks/stats
+12.7 Get Feedback Statistics (Admin Only)
+GET {{base_url}}/api/feedbacks/admin/statistics
 Headers: Authorization: Bearer {{admin_token}}
 
 ================================================================================
@@ -767,16 +747,15 @@ Headers:
 Body (JSON):
 {
   "code": "SAVE50",
-  "description": "50 TND off on your rental",
-  "discountType": "fixed",
-  "discountValue": 50,
-  "startDate": "2024-12-01T00:00:00.000Z",
-  "endDate": "2024-12-31T23:59:59.999Z",
-  "maxUses": 100,
-  "maxUsesPerUser": 1,
-  "minPurchaseAmount": 200,
-  "isActive": true
+  "type": "amount",
+  "value": 50,
+  "date_debut": "2025-12-01T00:00:00.000Z",
+  "date_fin": "2026-12-31T23:59:59.999Z",
+  "max_utilisation": 100,
+  "max_utilisation_user": 1,
+  "actif": true
 }
+Note: Use "type": "percentage" with "value": 10 for 10% discount, or "type": "amount" for fixed amount discount.
 
 14.4 Update Coupon (Admin Only)
 PUT {{base_url}}/api/coupons/{{coupon_id}}
@@ -785,9 +764,9 @@ Headers:
   - Content-Type: application/json
 Body (JSON):
 {
-  "discountValue": 60,
-  "maxUses": 150,
-  "isActive": true
+  "value": 60,
+  "max_utilisation": 150,
+  "actif": true
 }
 
 14.5 Delete Coupon (Admin Only)
@@ -803,8 +782,9 @@ Body (JSON):
 {
   "code": "SAVE50",
   "userId": "{{user_id}}",
-  "purchaseAmount": 300
+  "amount": 300
 }
+Note: Ensure coupon dates (date_debut/date_fin) include current date. Create with future dates for testing.
 
 14.7 Apply Coupon
 POST {{base_url}}/api/coupons/apply

@@ -31,6 +31,7 @@ import {
     deleteInsurance,
     getInsuranceStatistics
 } from '../controllers/adminInsuranceController.js';
+import { getPendingKyc, getKycDetails, reviewKyc, getKycStats } from '../controllers/kycController.js';
 import { exportStatisticsPDF } from '../utils/pdfExport.js';
 import { authMiddleware } from '../middlewares/auth.js';
 import { adminMiddleware } from '../middlewares/admin.js';
@@ -40,6 +41,12 @@ const router = express.Router();
 // Apply authentication and admin middleware to all routes
 router.use(authMiddleware);
 router.use(adminMiddleware);
+
+// KYC management routes
+router.get('/kyc', getPendingKyc);
+router.get('/kyc/stats', getKycStats);
+router.get('/kyc/:userId', getKycDetails);
+router.put('/kyc/:userId/review', reviewKyc);
 
 // User management routes
 router.get('/users', getAllUsers);

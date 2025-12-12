@@ -10,8 +10,8 @@ export const createCarSchema = Joi.object({
   modele: Joi.string().required(),
   marque: Joi.string().required(),
   disponibilite: Joi.boolean().optional(),
-  dernierMaintenance: Joi.date().required(),
-});
+  dernierMaintenance: Joi.date().optional(),
+}).unknown(false);
 
 export const updateCarSchema = Joi.object({
   nom: Joi.string().optional(),

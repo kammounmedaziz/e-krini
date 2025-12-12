@@ -8,7 +8,7 @@ const feedbackSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ['client', 'agency', 'insurance'],
+    enum: ['client', 'agency', 'insurance', 'admin'],
     required: true
   },
   type: {

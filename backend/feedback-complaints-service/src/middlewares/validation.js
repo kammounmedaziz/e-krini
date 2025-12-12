@@ -51,8 +51,8 @@ export const createFeedbackValidation = [
     .withMessage('Invalid email address'),
   body('contactInfo.phone')
     .optional()
-    .isMobilePhone()
-    .withMessage('Invalid phone number')
+    .matches(/^\+216[0-9]{8}$/)
+    .withMessage('Invalid phone number (format: +216XXXXXXXX)')
 ];
 
 export const updateFeedbackValidation = [

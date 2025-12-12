@@ -59,6 +59,14 @@ router.get(
   getMyFeedback
 );
 
+router.get(
+  '/user/me',
+  authenticateToken,
+  getFeedbackQueryValidation,
+  validate,
+  getMyFeedback
+);
+
 // Create feedback
 router.post(
   '/',
@@ -103,6 +111,15 @@ router.delete(
 
 // Admin: Update feedback
 router.patch(
+  '/:id',
+  authenticateToken,
+  authorizeRoles('admin'),
+  updateFeedbackValidation,
+  validate,
+  updateFeedback
+);
+
+router.put(
   '/:id',
   authenticateToken,
   authorizeRoles('admin'),
