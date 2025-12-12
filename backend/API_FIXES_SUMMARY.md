@@ -145,3 +145,35 @@ All endpoints verified working:
 - promotion-coupon-service
 
 All services restarted and tested successfully on December 12, 2025.
+
+## Maintenance & Materiel Endpoints Update
+
+### 14. ✅ Maintenance Endpoints - Field Names
+**Problem**: Documentation used English field names (carId, type, scheduledDate, etc.)  
+**Solution**: Updated to French field names matching Mongoose model  
+**Changes**:
+- `carId` → `idVehicule`
+- `type` → `typeMaintenance` 
+- `scheduledDate` → `dateMaintenance`
+- `estimatedCost` → `coutMainOeuvre`
+- `status` → `etat`
+- Endpoints now use `/add`, `/update/:id`, `/delete/:id` paths
+- `/car/:id` → `/vehicule/:id`
+
+### 15. ✅ Materiel Endpoints - Field Names  
+**Problem**: Documentation used English field names (name, category, quantity, etc.)  
+**Solution**: Updated to French field names matching Mongoose model  
+**Changes**:
+- `name` → `nom`
+- `category` → `categorie`
+- `quantity` → `quantiteDisponible`
+- `unitPrice` → `prixUnitaire`
+- `reorderLevel` → `seuilAlerte`
+- Endpoints now use `/add`, `/update/:id`, `/delete/:id` paths
+- `/low-stock` → `/alertes`
+
+**Testing Results**:
+✅ GET /api/maintenance - Returns maintenance records array
+✅ GET /api/maintenance/vehicule/:id - Returns maintenance for vehicle
+✅ GET /api/materiel - Returns materials array  
+✅ POST /api/materiel/add - Creates material successfully

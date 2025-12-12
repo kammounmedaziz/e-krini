@@ -811,39 +811,39 @@ GET {{base_url}}/api/maintenance/{{maintenance_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
 15.3 Create Maintenance Record
-POST {{base_url}}/api/maintenance
+POST {{base_url}}/api/maintenance/add
 Headers: 
   - Authorization: Bearer {{admin_token}}
   - Content-Type: application/json
 Body (JSON):
 {
-  "carId": "{{car_id}}",
-  "type": "scheduled",
+  "idVehicule": "{{vehicule_id}}",
+  "typeMaintenance": "Vidange",
+  "dateMaintenance": "2025-12-10T09:00:00.000Z",
+  "coutMainOeuvre": 150,
   "description": "Regular oil change and tire rotation",
-  "scheduledDate": "2024-12-20T09:00:00.000Z",
-  "estimatedCost": 150,
-  "notes": "Check brake pads as well"
+  "etat": "planifiée"
 }
+Note: typeMaintenance values: Preventive, Corrective, Révision, Réparation, Vidange, Contrôle technique. Date must be in the past or today.
 
 15.4 Update Maintenance Record
-PUT {{base_url}}/api/maintenance/{{maintenance_id}}
+PUT {{base_url}}/api/maintenance/update/{{maintenance_id}}
 Headers: 
   - Authorization: Bearer {{admin_token}}
   - Content-Type: application/json
 Body (JSON):
 {
-  "status": "completed",
-  "completedDate": "2024-12-20T11:30:00.000Z",
-  "actualCost": 175,
-  "notes": "All work completed successfully"
+  "coutMainOeuvre": 175,
+  "description": "All work completed successfully"
 }
+Note: To update etat, use only: {"etat": "terminée"}. Avoid changing etat with other fields to prevent vehicule validation errors.
 
 15.5 Delete Maintenance Record
-DELETE {{base_url}}/api/maintenance/{{maintenance_id}}
+DELETE {{base_url}}/api/maintenance/delete/{{maintenance_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
-15.6 Get Maintenance by Car
-GET {{base_url}}/api/maintenance/car/{{car_id}}
+15.6 Get Maintenance by Vehicle
+GET {{base_url}}/api/maintenance/vehicule/{{vehicule_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
 ================================================================================
@@ -859,38 +859,38 @@ GET {{base_url}}/api/materiel/{{material_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
 16.3 Create Material
-POST {{base_url}}/api/materiel
+POST {{base_url}}/api/materiel/add
 Headers: 
   - Authorization: Bearer {{admin_token}}
   - Content-Type: application/json
 Body (JSON):
 {
-  "name": "Engine Oil 5W-30",
-  "category": "fluids",
-  "quantity": 50,
-  "unit": "liters",
-  "unitPrice": 15,
-  "supplier": "Auto Parts Inc",
-  "reorderLevel": 10
+  "nom": "Engine Oil 5W-30",
+  "categorie": "Fluide",
+  "quantiteDisponible": 50,
+  "prixUnitaire": 15,
+  "seuilAlerte": 10,
+  "description": "High-quality synthetic engine oil"
 }
+Note: categorie values: Pièce mécanique, Électrique, Carrosserie, Pneumatique, Fluide, Accessoire, Autre
 
 16.4 Update Material
-PUT {{base_url}}/api/materiel/{{material_id}}
+PUT {{base_url}}/api/materiel/update/{{material_id}}
 Headers: 
   - Authorization: Bearer {{admin_token}}
   - Content-Type: application/json
 Body (JSON):
 {
-  "quantity": 45,
-  "unitPrice": 16
+  "quantiteDisponible": 45,
+  "prixUnitaire": 16
 }
 
 16.5 Delete Material
-DELETE {{base_url}}/api/materiel/{{material_id}}
+DELETE {{base_url}}/api/materiel/delete/{{material_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
 16.6 Get Low Stock Materials
-GET {{base_url}}/api/materiel/low-stock
+GET {{base_url}}/api/materiel/alertes
 Headers: Authorization: Bearer {{admin_token}}
 
 ================================================================================
