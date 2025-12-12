@@ -881,15 +881,29 @@ Headers:
   - Content-Type: application/json
 Body (JSON):
 {
+  "nom": "Engine Oil 5W-30",
   "quantiteDisponible": 45,
-  "prixUnitaire": 16
+  "prixUnitaire": 16,
+  "categorie": "Fluide",
+  "seuilAlerte": 10
+}
+Note: All required fields (nom, quantiteDisponible, prixUnitaire) must be included. For stock-only updates, use PUT /api/materiel/reapprovisionner/:id with {"quantite": 10}
+
+16.5 Restock Material (Add Quantity)
+PUT {{base_url}}/api/materiel/reapprovisionner/{{material_id}}
+Headers: 
+  - Authorization: Bearer {{admin_token}}
+  - Content-Type: application/json
+Body (JSON):
+{
+  "quantite": 20
 }
 
-16.5 Delete Material
+16.6 Delete Material
 DELETE {{base_url}}/api/materiel/delete/{{material_id}}
 Headers: Authorization: Bearer {{admin_token}}
 
-16.6 Get Low Stock Materials
+16.7 Get Low Stock Materials
 GET {{base_url}}/api/materiel/alertes
 Headers: Authorization: Bearer {{admin_token}}
 
