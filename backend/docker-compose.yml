@@ -98,6 +98,7 @@ services:
     volumes:
       - ./reservation-service:/app
       - /app/node_modules
+      - ./reservation-service/uploads:/uploads
     depends_on:
       - mongo
       - redis
