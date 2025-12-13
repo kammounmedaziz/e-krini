@@ -66,6 +66,10 @@ app.use("/auth", (req, res) => proxyRequest(req, res, "auth"));
 app.use("/fleet", (req, res) => proxyRequest(req, res, "fleet"));
 app.use("/reservation", (req, res) => proxyRequest(req, res, "reservation"));
 app.use("/promotion", (req, res) => proxyRequest(req, res, "promotion"));
+app.use("/assurance", (req, res) => proxyRequest(req, res, "assurance"));
+
+// ⭐ Nouveau service : maintenance-service
+app.use("/maintenance", (req, res) => proxyRequest(req, res, "maintenance"));
 
 // Health check du gateway
 app.get("/health", (req, res) => {

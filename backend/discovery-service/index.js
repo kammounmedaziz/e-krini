@@ -8,7 +8,9 @@ const services = {
   auth: "http://localhost:3001",            // auth-user-service
   fleet: "http://localhost:3002",           // fleet-service
   reservation: "http://localhost:3004",     // reservation-service
-  promotion: "http://localhost:3008"        // promotion-coupon-service
+  promotion: "http://localhost:3008",       // promotion-coupon-service
+  assurance: "http://localhost:3012",       // ⭐ service assurance
+  maintenance: "http://localhost:3007"      // ⭐ service maintenance
 };
 
 // Endpoint pour renvoyer toutes les adresses
